@@ -1,0 +1,60 @@
+
+
+
+/* 전체 로그인 박스 스타일 */
+.login-box {
+  background-color: #f2f2f2;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* 로그인 제목 */
+.login-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-align: center;
+  color: #333;
+}
+
+/* 입력 필드 영역 */
+.login-input {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-input label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.login-input input {
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.login-submit {
+  padding: 0.75rem 1.5rem;
+  background-color: #444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.login-submit:hover {
+  background-color: #333;
+}
+
+.login-submit:active {
+  background-color: #222;
+}

@@ -14,7 +14,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/user/login" element={<LoginPage />} />
+        <Route path="/" element={<LoginPage />} />
         <Route path="/user/quiz" element={<QuizPage />} />
         <Route path="/user/aiDiscussion" element={<AIDiscussionPage />} />
         <Route path="/user/discussionResult" element={<DiscussionResultPage />} />

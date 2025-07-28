@@ -8,6 +8,8 @@ import DiscussionResultPage from './pages/UserPage/DiscussionResultPage';
 import SelectAvatarPage from './pages/UserPage/SelectAvatarPage';
 import SlidePage from './pages/UserPage/SildePage';
 import VideoPage from './pages/UserPage/VideoPage';
+import EndPage from './pages/UserPage/EndPage';
+
 import AdminSessionPage from './pages/AdminPage/SessionPage';
 
 
@@ -23,6 +25,7 @@ function App() {
         <Route path="/user/selectAvatar" element={<SelectAvatarPage />} />
         <Route path="/user/slide" element={<SlidePage />} />
         <Route path="/user/video" element={<VideoPage />} />
+        <Route path="/user/end" element={<EndPage/>}/>
         <Route path="/admin/session" element={<AdminSessionPage/>} />
         {/* 추가 페이지 경로들 */}
       </Routes>

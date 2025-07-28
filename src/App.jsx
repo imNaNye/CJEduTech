@@ -2,6 +2,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/UserPage/LoginPage';
 import QuizPage from './pages/UserPage/QuizPage';
+import QuizResultPage from './pages/UserPage/QuizResultPage';
 import AIDiscussionPage from './pages/UserPage/AIDiscussionPage';
 import DiscussionResultPage from './pages/UserPage/DiscussionResultPage';
 import SelectAvatarPage from './pages/UserPage/SelectAvatarPage';
@@ -16,6 +17,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/user/quiz" element={<QuizPage />} />
+        <Route path="/user/quizResult" element={<QuizResultPage/>}/>
         <Route path="/user/aiDiscussion" element={<AIDiscussionPage />} />
         <Route path="/user/discussionResult" element={<DiscussionResultPage />} />
         <Route path="/user/selectAvatar" element={<SelectAvatarPage />} />

@@ -1,0 +1,90 @@
+/* 페이지 전체 정렬 */
+.select-avatar-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+  height: 100vh;
+  max-width: 100vw;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* 로그인 박스 + 아바타 선택 박스 나란히 배치 */
+.select-avatar-layout {
+  display: flex;
+  gap: 3rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* 오른쪽 아바타 선택 박스 */
+.avatar-selector {
+  background-color: #f1f1f1;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 캐러셀(좌우 화살표 + 이미지) */
+.avatar-carousel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+  gap: 1rem;
+}
+
+/* 아바타 이미지 */
+.avatar-image {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #ccc;
+}
+
+/* 좌우 화살표 버튼 */
+.arrow-button {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: black;
+}
+
+/* 이미지 아래 점 ● ● ● */
+.avatar-indicator {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+  color: #888;
+}
+
+/* 시작 버튼 */
+.start-button {
+  margin-top: 2rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #0070f3;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.start-button:hover {
+  background-color: #005ac1;
+}
+.avatar-selector h3 {
+  color: black;
+}

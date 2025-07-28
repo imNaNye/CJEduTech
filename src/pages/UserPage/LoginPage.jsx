@@ -1,6 +1,6 @@
 // src/pages/LoginPage.jsx
 import LogoHeader from "../../components/LogoHeader";
-import { LoginBox } from "../../components/login";
+import { LoginBox } from "../../components/user/login";
 
 export default function LoginPage() {
   return (

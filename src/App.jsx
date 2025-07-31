@@ -1,5 +1,6 @@
-// src/App.jsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { UserProvider } from './contexts/UserContext';  
+
 import LoginPage from './pages/UserPage/LoginPage';
 import QuizPage from './pages/UserPage/QuizPage';
 import QuizResultPage from './pages/UserPage/QuizResultPage';
@@ -12,24 +13,24 @@ import EndPage from './pages/UserPage/EndPage';
 
 import AdminSessionPage from './pages/AdminPage/SessionPage';
 
-
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/user/quiz" element={<QuizPage />} />
-        <Route path="/user/quizResult" element={<QuizResultPage/>}/>
-        <Route path="/user/aiDiscussion" element={<AIDiscussionPage />} />
-        <Route path="/user/discussionResult" element={<DiscussionResultPage />} />
-        <Route path="/user/selectAvatar" element={<SelectAvatarPage />} />
-        <Route path="/user/slide" element={<SlidePage />} />
-        <Route path="/user/video" element={<VideoPage />} />
-        <Route path="/user/end" element={<EndPage/>}/>
-        <Route path="/admin/session" element={<AdminSessionPage/>} />
-        {/* 추가 페이지 경로들 */}
-      </Routes>
-    </BrowserRouter>
+    <UserProvider> {/* 전역 사용자 상태 적용 */}
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/user/quiz" element={<QuizPage />} />
+          <Route path="/user/quizResult" element={<QuizResultPage />} />
+          <Route path="/user/aiDiscussion" element={<AIDiscussionPage />} />
+          <Route path="/user/discussionResult" element={<DiscussionResultPage />} />
+          <Route path="/user/selectAvatar" element={<SelectAvatarPage />} />
+          <Route path="/user/slide" element={<SlidePage />} />
+          <Route path="/user/video" element={<VideoPage />} />
+          <Route path="/user/end" element={<EndPage />} />
+          <Route path="/admin/session" element={<AdminSessionPage />} />
+        </Routes>
+      </BrowserRouter>
+    </UserProvider>
   );
 }
 

@@ -1,17 +1,17 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';  
 
-import LoginPage from './pages/UserPage/LoginPage';
-import QuizPage from './pages/UserPage/QuizPage';
-import QuizResultPage from './pages/UserPage/QuizResultPage';
-import AIDiscussionPage from './pages/UserPage/AIDiscussionPage';
-import DiscussionResultPage from './pages/UserPage/DiscussionResultPage';
-import SelectAvatarPage from './pages/UserPage/SelectAvatarPage';
-import SlidePage from './pages/UserPage/SildePage';
-import VideoPage from './pages/UserPage/VideoPage';
-import EndPage from './pages/UserPage/EndPage';
+import LoginPage from './pages/UserPage/LoginPage.jsx';
+import QuizPage from './pages/UserPage/QuizPage.jsx';
+import QuizResultPage from './pages/UserPage/QuizResultPage.jsx';
+import AIDiscussionPage from './pages/UserPage/AIDiscussionPage.jsx';
+import DiscussionResultPage from './pages/UserPage/DiscussionResultPage.jsx';
+import SelectAvatarPage from './pages/UserPage/SelectAvatarPage.jsx';
+import SlidePage from './pages/UserPage/SildePage.jsx';
+import VideoPage from './pages/UserPage/VideoPage.jsx';
+import EndPage from './pages/UserPage/EndPage.jsx';
 
-import AdminSessionPage from './pages/AdminPage/SessionPage';
+import AdminSessionPage from './pages/AdminPage/SessionPage.jsx';
 
 function App() {
   return (

@@ -1,0 +1,37 @@
+/* src/components/common/PageHeader.css */
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: white;
+  border-bottom: 1px solid #ccc;
+}
+
+.logo {
+  font-weight: bold;
+}
+
+.title {
+  font-size: 1.5rem;
+  color:palevioletred;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.avatar-small {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #aaa;
+}
+
+.nickname {
+  font-weight: 500;
+}

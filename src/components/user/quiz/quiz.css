@@ -1,0 +1,40 @@
+/* src/components/user/quiz/quiz.css */
+.quiz-question-card {
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.question-number {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.question-text {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.quiz-option-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.quiz-option-button {
+  padding: 0.75rem 1.5rem;
+  width: 100%;
+  max-width: 500px;
+  background-color: #d3d3d3;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.quiz-option-button:hover {
+  background-color: #bbb;
+}

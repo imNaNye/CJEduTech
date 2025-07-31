@@ -1,3 +1,10 @@
+.slide-page {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .slide-intro-layout {
   flex: 1;
   display: flex;

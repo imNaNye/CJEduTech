@@ -1,5 +1,10 @@
 
-
+.login-page {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
 /* 전체 로그인 박스 스타일 */
 .login-box {

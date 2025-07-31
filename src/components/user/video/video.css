@@ -1,0 +1,48 @@
+.video-page {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.video-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2rem;
+}
+
+.video-player {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.video-element {
+  width: 100%;
+  max-width: 800px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.15);
+}
+
+.video-footer {
+  text-align: center;
+}
+
+.video-guide {
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.skip-button {
+  padding: 0.5rem 1.5rem;
+  font-size: 1rem;
+  background-color: #444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}

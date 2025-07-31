@@ -4,7 +4,8 @@ import PageHeader from '../../components/common/PageHeader.jsx';
 import QuizQuestionCard from '../../components/user/quiz/QuizQuestionCard.jsx';
 import QuizTimer from '../../components/user/quiz/QuizTimer.jsx';
 import ProgressBar from '../../components/user/quiz/ProgressBar.jsx';
-import NextButton from '../../components/user/quiz/NextButtion.jsx';
+import NextButton from '../../components/user/quiz/NextButton.jsx';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const sampleQuiz = {
   questionNumber: 1,
@@ -18,6 +19,8 @@ const sampleQuiz = {
 };
 
 export default function QuizPage() {
+    const navigate = useNavigate();
+    
   return (
     <div className="quiz-page">
       <PageHeader title="CJ 인재상 퀴즈" />
@@ -33,6 +36,9 @@ export default function QuizPage() {
             }}
         />
         <NextButton />
+        <button className="skip-button" onClick={() => navigate('/user/quizResult')}>
+        SKIP
+        </button>
       </div>
     </div>
   );

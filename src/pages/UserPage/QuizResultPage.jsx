@@ -1,3 +1,13 @@
+import { useNavigate } from "react-router-dom";
+
 export default function QuizResultPage(){
-    return <div>퀴즈결과페이지</div>;
+    const navigate = useNavigate();
+
+    return (
+        <div>
+            <button className="skip-button" onClick={() => navigate('/user/video')}>
+        SKIP
+        </button>
+        </div>
+    );
 }

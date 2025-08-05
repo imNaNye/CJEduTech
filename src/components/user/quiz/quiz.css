@@ -1,4 +1,12 @@
 /* src/components/user/quiz/quiz.css */
+
+.quiz-page{
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
 .quiz-question-card {
   text-align: center;
   margin: 2rem 0;

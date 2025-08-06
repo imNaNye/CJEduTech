@@ -1,9 +1,19 @@
 import AiDiscussionMain from "../../components/user/aiDiscussion/AiDiscussionMain";
 import PageHeader from '../../components/common/PageHeader.jsx';
 import '../../components/user/aiDiscussion/aiDiscussion.css'
+import { useNavigate } from "react-router-dom";
+
 export default function AIDiscussionPage(){
-    return (<div className="ai-discussion-page">
+    const navigate = useNavigate();
+    return (
+        <div className="ai-discussion-page">
             <PageHeader title="토론 진행"/>
             <AiDiscussionMain/>
-        </div>);
+            <div style={{ display: "flex", justifyContent: "flex-end", padding: "20px" }}>
+                <button className="skip-button" onClick={() => navigate('/user/discussionResultPage')}>
+                    스킵
+                </button>
+            </div>
+        </div>
+    );
 }

@@ -10,7 +10,7 @@ export default function AIDiscussionPage(){
             <PageHeader title="토론 진행"/>
             <AiDiscussionMain/>
             <div style={{ display: "flex", justifyContent: "flex-end", padding: "20px" }}>
-                <button className="skip-button" onClick={() => navigate('/user/discussionResultPage')}>
+                <button className="skip-button" onClick={() => navigate('/user/discussionResult')}>
                     스킵
                 </button>
             </div>

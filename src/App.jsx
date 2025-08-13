@@ -10,6 +10,7 @@ import SelectAvatarPage from './pages/UserPage/SelectAvatarPage.jsx';
 import SlidePage from './pages/UserPage/SildePage.jsx';
 import VideoPage from './pages/UserPage/VideoPage.jsx';
 import EndPage from './pages/UserPage/EndPage.jsx';
+import TestApi from "./pages/TestApi.jsx";
 
 import AdminSessionPage from './pages/AdminPage/SessionPage.jsx';
 
@@ -28,6 +29,7 @@ function App() {
           <Route path="/user/video" element={<VideoPage />} />
           <Route path="/user/end" element={<EndPage />} />
           <Route path="/admin/session" element={<AdminSessionPage />} />
+          <Route path="/test" element={<TestApi />} />
         </Routes>
       </BrowserRouter>
     </UserProvider>

@@ -1,12 +1,10 @@
 // src/pages/LoginPage.jsx
-import LogoHeader from "../../components/LogoHeader";
-import { LoginBox } from "../../components/user/login";
+import LoginMain from "../../components/user/login/LoginMain.jsx";
 
 export default function LoginPage() {
   return (
     <div className="login-page">
-      <LogoHeader />
-      <LoginBox />
+      <LoginMain/>
     </div>
   );
 }

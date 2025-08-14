@@ -8,9 +8,8 @@ export default function LoginBox() {
   return (
     <div className="login-box">
       <LoginTitle />
-      <LoginInput label="닉네임" />
-      <LoginInput label="아이디" />
-      <LoginInput label="비밀번호" type="password" />
+      <LoginInput label="닉네임을 입력하세요" icon = 'src/assets/images/login/nickIcon.svg'/>
+      <LoginInput label="비밀번호를 입력하세요" type="password" icon = 'src/assets/images/login/psIcon.svg'/>
       <SubmitButton />
     </div>
   );

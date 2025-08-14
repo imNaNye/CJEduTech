@@ -1,35 +1,70 @@
 
 .login-page {
-  width: 100vw;
+  min-height: 100vh; /* 화면 전체 높이 */
   height: 100vh;
-  display: flex;
+  width: 100vw;
+  display: flex; 
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  box-sizing: border-box;
+  /* 디자인 시안 기준 여백 (상 217.5 / 우 133 / 하 216.5 / 좌 132) */
+  padding: 217.5px 133px 216.5px 132px;
+
+  background-image: url('../../../assets/images/login/loginBackground.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
-/* 전체 로그인 박스 스타일 */
-.login-box {
-  background-color: #f2f2f2;
-  padding: 2rem;
-  border-radius: 12px;
-  max-width: 400px;
-  margin: 0 auto;
+.login-main{
   display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  flex-direction: row;
+}
+
+.login-logo{
+  height: 560px;
+  width: 426px;
+}
+
+
+
+.login-container {
+  display: flex;
+  width: 922px;
+  padding: 217.5px 133px 216.5px 132px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 26px;
+  border: 1px solid var(--grey04, #D9D9D9);
+  background: var(--white, #FFF);
 }
 
 /* 로그인 제목 */
 .login-title {
-  font-size: 1.8rem;
-  font-weight: bold;
-  text-align: center;
-  color: #333;
+  color: var(--grey01, #555);
+text-align: center;
+font-family: "CJ ONLYONE NEW title";
+font-size: 1.8125rem;
+font-style: normal;
+font-weight: 700;
+line-height: normal;
 }
 
 /* 입력 필드 영역 */
 .login-input {
   display: flex;
-  flex-direction: column;
+height: 78px;
+padding: var(--sds-size-space-300) 28px;
+padding-left: 18px;
+align-items: center;
+gap: var(--sds-size-space-300);
+align-self: stretch;
+border-radius: 60px;
+border: 3px solid var(--grey05, #EDEDED);
+background: var(--white, #FFF);
+margin-bottom: 42px;
 }
 
 .login-input label {
@@ -39,21 +74,33 @@
 
 .login-input input {
   padding: 0.6rem;
-  border: 1px solid #ccc;
+  border: 0px solid #ccc;
   border-radius: 6px;
   font-size: 1rem;
+  background: var(--white, #FFF);
+  width: 70%;
+  outline: none;
+  color : grey;
+}
+
+.login-input input::placeholder {
+  color: #D9D9D9;
 }
 
 .login-submit {
-  padding: 0.75rem 1.5rem;
-  background-color: #444;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+  display: flex;
+height: 75px;
+width: 657px;
+padding: var(--sds-size-space-300) 28px;
+justify-content: center;
+align-items: center;
+gap: var(--sds-size-space-200);
+align-self: stretch;
+
+border-radius: 3.75rem;
+background: linear-gradient(315deg, #FFAF2F 0%, #FF6620 100%);
+
+font-size : 1.75rem;
 }
 
 .login-submit:hover {
@@ -62,4 +109,15 @@
 
 .login-submit:active {
   background-color: #222;
+}
+
+@media (max-width: 1024px) {
+  .login-page {
+    padding: 48px 24px; /* 모바일/태블릿에서는 여백 축소 */
+  }
+  .login-box {
+    width: 100%;
+    max-width: 922px;
+    padding: 24px; /* 내부 여백도 축소 */
+  }
 }

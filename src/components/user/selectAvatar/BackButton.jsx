@@ -1,15 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 
-export default function StartButton() {
+export default function BackButton() {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate('/user/slide');
+    navigate('/');
   };
 
   return (
-    <button className="start-button" onClick={handleClick}>
-      시작하기
+    <button className="back-button" onClick={handleClick}>
+      뒤로가기
     </button>
   );
 }

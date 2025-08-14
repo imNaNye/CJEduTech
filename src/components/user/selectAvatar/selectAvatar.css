@@ -1,84 +1,131 @@
 /* 페이지 전체 정렬 */
 .select-avatar-page {
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
+  width: 2000px;
+  height: 1200px;
+  flex-shrink: 0;
+  aspect-ratio: 5/3;
+  justify-content: center;
+  align-items: center;
+  padding-top: 171px;
+  padding-bottom: 170px;
+  padding-left: 295px;
+  padding-right: 295px;
+  background-image: url('../../../src/assets/images/login/loginBackground.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
-/* 로그인 박스 + 아바타 선택 박스 나란히 배치 */
-.select-avatar-layout {
-  display: flex;
-  gap: 3rem;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
+.avatar-button {
+  width: 159px;
+  height: 159px;
+  border-radius: 50%;
+  border: 2px solid orange;
+  padding: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  cursor: pointer;
 }
+
+.avatar-button:hover {
+  transform: scale(1.2);
+  box-shadow:  0 4px 8px rgba(0,0,0,0.2);
+  border: 5px solid orange;
+}
+
+.avatar-button.selected {
+  border: 5px solid #FF7A00; /* 더 두껍고 진한 테두리 */
+  transform: scale(1.2); /* 살짝 확대 */
+}
+
+.avatar-button.selected::before {
+  content: "";
+  position: absolute;
+  top: -10px; /* 버튼 기준 위치 조정 */
+  left: -10px;
+  width: 55px;
+  height: 55px;
+  background-image: url('../../../src/assets/images/avatar/avatarSelect.png'); /* 선택 상태 아이콘 */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 
 /* 오른쪽 아바타 선택 박스 */
 .avatar-selector {
-  background-color: #f1f1f1;
-  padding: 2rem;
-  border-radius: 12px;
-  max-width: 400px;
-  width: 100%;
   display: flex;
+  width: 1410px;
+  height: 859px;
+  padding: 102px 143px;
   flex-direction: column;
-  align-items: center;
-}
-
-/* 캐러셀(좌우 화살표 + 이미지) */
-.avatar-carousel {
-  display: flex;
-  align-items: center;
   justify-content: center;
-  margin-top: 1rem;
-  gap: 1rem;
+  align-items: center;
+  gap: 32px;
+  flex-shrink: 0;
+
+  border-radius: 26px;
+  border: 1px solid var(--grey04, #D9D9D9);
+  background: var(--white, #FFF);
 }
 
-/* 아바타 이미지 */
-.avatar-image {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 3px solid #ccc;
+.avatar-buttons {
+  display: grid;
+  grid-template-columns: repeat(6,159px);
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+  margin-top: 90px;
+  margin-bottom: 76px;
 }
 
-/* 좌우 화살표 버튼 */
-.arrow-button {
-  background: none;
-  border: none;
-  font-size: 2rem;
-  cursor: pointer;
-  color: black;
-}
-
-/* 이미지 아래 점 ● ● ● */
-.avatar-indicator {
-  margin-top: 1rem;
-  font-size: 1.2rem;
-  color: #888;
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px; /* 버튼 사이 간격 */
+  width: 100%;
+  margin-top: 16px;
 }
 
 /* 시작 버튼 */
 .start-button {
-  margin-top: 2rem;
-  padding: 0.75rem 1.5rem;
-  background-color: #0070f3;
-  color: white;
+  display: flex;
+  width: 549px;
+  height: 75px;
+  padding: var(--sds-size-space-300) 28px;
+  justify-content: center;
+  align-items: center;
+  gap: var(--sds-size-space-200);
+
+  border-radius: 60px;
+  background: linear-gradient(315deg, #FFAF2F 0%, #FF6620 100%);
   font-weight: bold;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
 }
 
-.start-button:hover {
-  background-color: #005ac1;
+.back-button {
+  display: flex;
+  width: 549px;
+  height: 75px;
+  padding: var(--sds-size-space-300) 28px;
+  justify-content: center;
+  align-items: center;
+  gap: var(--sds-size-space-200);
+
+  border-radius: 60px;
+  background: rgba(255, 227, 179, 0.60);
+
+  color : #FF6237;
+  font-weight: bold;
 }
+
 .avatar-selector h3 {
-  color: black;
+  color: var(--grey01, #555);
+  text-align: center;
+  font-family: "CJ ONLYONE NEW title";
+  font-size: 29px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
 }

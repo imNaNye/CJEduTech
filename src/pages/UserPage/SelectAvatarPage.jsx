@@ -6,10 +6,7 @@ import '../../components/user/selectAvatar/selectAvatar.css';
 export default function SelectAvatarPage() {
   return (
     <div className="select-avatar-page">
-      <div className="select-avatar-layout">
-        <LoginBox />
         <AvatarSelector />
-      </div>
     </div>
   );
 }

@@ -4,7 +4,7 @@ export default function StartButton() {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate('/user/slide');
+    navigate('/user/onboarding');
   };
 
   return (

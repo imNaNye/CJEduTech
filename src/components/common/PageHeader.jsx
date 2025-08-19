@@ -7,13 +7,9 @@ export default function PageHeader({ title }) {
 
   return (
     <header className="page-header">
-      <div className="logo">서비스 로고</div>
       <h2 className="title">{title}</h2>  {/* title은 props에서 가져옴 */}
 
       <div className="user-info">
-        {avatarUrl && (
-          <img className="avatar-small" src={avatarUrl} alt="avatar" />
-        )}
         {nickname && <span className="nickname">{nickname}</span>}
       </div>
     </header>

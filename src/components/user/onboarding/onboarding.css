@@ -1,0 +1,93 @@
+.onboarding-page {
+    width: 2000px;
+    height: 1200px;
+    flex-shrink: 0;
+    aspect-ratio: 5/3;
+    display: flex; 
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.onboarding-text p {
+    white-space: pre-line;
+    width: 849px;
+    color: var(--grey01, #555);
+    font-family: "CJ ONLYONE NEW body";
+    font-size: 33.56px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 160%; /* 53.696px */
+    letter-spacing: 0.769px;
+}
+
+.onboarding-main {
+    width: 2000px;
+    padding-top: 67px;
+    padding-bottom: 71px;
+    flex-direction: column;
+    align-items: center;
+    gap: 67px;
+    background-color: #F7F7F7;
+}
+
+.onboarding-container {
+    width: 1877px;
+    height: 978px;
+    border-radius: 24px;
+    border: 1px solid var(--grey04, #D9D9D9);
+    background: var(--white, #FFF);
+    padding-top: 276px;
+    padding-left: 246px;
+    position: relative;
+}
+
+.logo-robot {
+    width: 426px;
+    height: 426px;
+    aspect-ratio: 1/1;
+}
+
+.onboarding-text h3 {
+    color: var(--grey01, #555);
+    font-family: "CJ ONLYONE NEW title";
+    font-size: 54px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 160%; /* 86.4px */
+    letter-spacing: 0.769px;
+}
+
+.next-button {
+    display: inline-flex;
+    height: 67px;
+    width: 178px;
+    padding: 12px 24px;
+    justify-content: center;
+    align-items: center;
+    gap: 20.278px;
+    flex-shrink: 0;
+    border-radius: 13px;
+    background: var(--orange02, #FF6E37);
+    position: absolute;
+    bottom: 44px; /* 원하는 여백 값 */
+    right: 57px;  /* 원하는 여백 값 */
+    color: var(--grey07, #FAFAFA);
+    text-align: center;
+    font-family: "CJ ONLYONE NEW body";
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: 0.769px;
+}
+
+.onboarding-img-text {
+    display: flex;
+    flex-direction: row;
+    justify-content: center; /* or space-between depending on desired spacing */
+    align-items: center;
+    gap: 121px; /* optional space between items */
+    
+}

@@ -11,6 +11,7 @@ import SlidePage from './pages/UserPage/SildePage.jsx';
 import VideoPage from './pages/UserPage/VideoPage.jsx';
 import EndPage from './pages/UserPage/EndPage.jsx';
 import TestApi from "./pages/TestApi.jsx";
+import OnBoardingPage from './pages/UserPage/OnBoardingPage.jsx';
 
 import AdminSessionPage from './pages/AdminPage/SessionPage.jsx';
 
@@ -20,6 +21,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LoginPage />} />
+          <Route path="/user/onboarding" element={<OnBoardingPage/>} />
           <Route path="/user/quiz" element={<QuizPage />} />
           <Route path="/user/quizResult" element={<QuizResultPage />} />
           <Route path="/user/aiDiscussion" element={<AIDiscussionPage />} />

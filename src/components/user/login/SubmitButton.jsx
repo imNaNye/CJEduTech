@@ -1,16 +1,14 @@
-// src/components/login/SubmitButton.jsx
-import { useNavigate } from 'react-router-dom';
+// src/components/user/login/SubmitButton.jsx
 import './login.css';
-export default function SubmitButton() {
-  const navigate = useNavigate();
 
-  const handleClick = () => {
-    navigate('/user/selectAvatar');
-  };
-
+export default function SubmitButton({ text = '로그인', disabled = false }) {
   return (
-    <button className="login-submit" onClick={handleClick}>
-      로그인
+    <button
+      type="submit"
+      className="login-submit"
+      disabled={disabled}
+    >
+      {text}
     </button>
   );
 }

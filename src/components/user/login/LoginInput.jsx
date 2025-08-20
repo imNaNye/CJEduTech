@@ -1,10 +1,17 @@
 // src/components/login/LoginInput.jsx
 import './login.css';
-export default function LoginInput({ label, type = "text", icon }) {
+
+export default function LoginInput({ label, type = "text", icon, value, onChange }) {
   return (
     <div className="login-input">
-      <img src = {icon}></img>
-      <input type={type} placeholder={label} />
+      {icon && <img src={icon} alt="icon" />}
+      <input
+        type={type}
+        placeholder={label}
+        value={value}
+        onChange={onChange}
+        required
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import mysql from "mysql2/promise";
 import cookieParser from "cookie-parser";
 import authRoutes from './routes/auth.routes.js';
+import userRoutes from './routes/user.routes.js';
 import { errorHandler } from './middlewares/error.js';
 
 dotenv.config();
@@ -33,8 +34,10 @@ app.get('/health', (req, res) => res.json({ ok: true }));
 //로그인 api
 app.use('/api/auth', authRoutes);
 
+//유저 관련 api
+app.use('/api/user', userRoutes);
+
 //에러 핸들러 (마지막에))
 app.use(errorHandler);
 
 app.listen(process.env.PORT || 3000, () => console.log('API UP'));
-

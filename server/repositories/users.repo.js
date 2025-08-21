@@ -18,3 +18,21 @@ export async function createUser({ user_id, nickname, password_hash }) {
   // INSERT 후 호출처에서 바로 쓰기 좋게 최소 정보 반환
   return { user_id, nickname };
 }
+
+/** 사용자 ID로 찾기 */
+export async function findUserById(user_id) {
+  const [rows] = await pool.query(
+    'SELECT user_id, nickname, password_hash, avatar FROM users WHERE user_id = ? LIMIT 1',
+    [user_id]
+  );
+  return rows[0] || null;
+}
+
+/** 아바타 번호 업데이트 */
+export async function updateUserAvatar({ user_id, avatar }) {
+  const [result] = await pool.query(
+    'UPDATE users SET avatar = ? WHERE user_id = ?',
+    [avatar, user_id]
+  );
+  return result.affectedRows === 1;
+}

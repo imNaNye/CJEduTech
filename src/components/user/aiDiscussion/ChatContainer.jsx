@@ -10,7 +10,6 @@ export default function ChatContainer(){
             <ChatHistory/>
             <div className="chat-input-area">
                 <ChatInput/>
-                <ChatSubmitButton/>
             </div>
         </div>
     )

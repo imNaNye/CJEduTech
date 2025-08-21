@@ -14,7 +14,15 @@ export default function LoginBox() {
   const [password, setPassword] = useState('');
   const [msg, setMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null);
   const navigate = useNavigate();
+
+  const showToast = (message, type) => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 2500);
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -23,12 +31,17 @@ export default function LoginBox() {
     try {
       const { user } = await authApi.login({ nickname, password });
       setMsg(`${user.nickname}님 환영합니다!`);
+      showToast(`${user.nickname}님 환영합니다!`, 'success');
       navigate('/user/selectAvatar');
       
     } catch (err) {
-      if (err.status === 401) setMsg('닉네임 또는 비밀번호가 올바르지 않습니다.');
-      else if (err.status === 409) setMsg('이미 사용 중인 닉네임입니다.');
-      else setMsg(err.message || '로그인 실패');
+      const status = err?.status ?? err?.response?.status;
+      const serverMsg = err?.payload?.message || err?.message;
+
+      if (status === 401) showToast('닉네임 또는 비밀번호가 올바르지 않습니다.', 'error');
+      else if (status === 409) showToast('이미 사용 중인 닉네임입니다.', 'error');
+      else if (status === 400) showToast(serverMsg || '입력값을 확인해주세요.', 'error');
+      else showToast(serverMsg || '로그인 실패', 'error');
     } finally {
       setLoading(false);
     }
@@ -55,6 +68,11 @@ export default function LoginBox() {
         text={loading ? '처리중...' : '시작하기'}
       />
       {msg && <p className="login-msg">{msg}</p>}
+      {toast && (
+        <div className={`toast toast-${toast.type}`} role="alert">
+          {toast.message}
+        </div>
+      )}
     </form>
   );
 }

@@ -110,3 +110,73 @@
 .chat-submit-button:hover {
   background-color: #444;
 }
+
+/* 내 메시지 오른쪽 정렬 */
+.chat.mine {
+  justify-content: flex-end;
+}
+.chat.others {
+  justify-content: flex-start;
+}
+.chat-bubble.mine {
+  background-color: #d1e7ff;
+  color: #003a75;
+  align-self: flex-end;
+}
+.chat-bubble.others {
+  background-color: #f0f0f0;
+  color: #000;
+}
+.chat-bubble {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.chat-nickname {
+  font-weight: 600;
+  font-size: 12px;
+  color: #555;
+}
+.chat-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.chat-time {
+  align-self: flex-end;
+  font-size: 11px;
+  color: #777;
+  margin-top: 2px;
+}
+
+.chat-reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #888;
+  user-select: none;
+}
+.chat-reaction .heart {
+  line-height: 1;
+  transform: translateY(-0.5px);
+  opacity: 0.8;
+}
+.chat-reaction.active {
+  color: #e25555;
+  font-weight: 600;
+}
+
+.chat-ai {
+  margin-top: 4px;
+}
+.chat-ai-badge {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f5f7ff;
+  color: #3146a7;
+  border: 1px solid #d9e1ff;
+}

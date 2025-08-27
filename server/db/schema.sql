@@ -5,8 +5,8 @@ SET time_zone = '+09:00';
 START TRANSACTION;
 
 CREATE TABLE IF NOT EXISTS users (
-    user_id VARCHAR(36) NOT NULL,
-    nickname VARCHAR(255) NOT NULL,
+    user_id VARCHAR(36) NOT NULL AUTO_INCREMENT,
+    nickname VARCHAR(255) NOT NULL unique,
     password_hash VARCHAR(255) NOT NULL,
     avatar VARCHAR(255),
     session_id VARCHAR(255),

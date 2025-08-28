@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { socket } from "@/api/chat";
 import Chat from "./Chat";
 
@@ -20,17 +20,63 @@ export default function ChatHistory() {
     return storedNick;
   });
   const [messages, setMessages] = useState([]);
+  const [autoScroll, setAutoScroll] = useState(false);
   const roomId = "general";
+
+  const bottomRef = useRef(null);
+  const historyRef = useRef(null);
+  const prevScrollHeightRef = useRef(0);
+
+  const isNearBottom = () => {
+    if (!historyRef.current) return false;
+    const { scrollTop, scrollHeight, clientHeight } = historyRef.current;
+    return scrollHeight - (scrollTop + clientHeight) < 50; // within 50px
+  };
+
+  useLayoutEffect(() => {
+    const el = historyRef.current;
+    if (!el) return;
+
+    const wasNearBottom = isNearBottom();
+    const prevH = prevScrollHeightRef.current || 0;
+    const newH = el.scrollHeight;
+
+    // Case A: 내가 보냈거나(autoscroll), 이미 하단을 보고 있다면 자동 하단 스크롤
+    if ((autoScroll || wasNearBottom) && bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: autoScroll ? "smooth" : "auto" });
+      setAutoScroll(false);
+    } else {
+      // Case B: 위쪽을 읽는 중인데 메시지/라벨 업데이트로 높이가 늘어났다면, 상대 위치 보존
+      const delta = newH - prevH;
+      if (delta > 0) {
+        el.scrollTop += delta; // 보정: 새로 증가한 만큼 위로 올려서 현재 뷰 유지
+      }
+    }
+
+    // 다음 사이클 대비 현재 높이 저장
+    prevScrollHeightRef.current = el.scrollHeight;
+  }, [messages, autoScroll]);
 
   useEffect(() => {
     socket.emit("room:join", { roomId });
 
     socket.on("room:recent", (payload) => {
       setMessages(payload.messages || []);
+      // 초기 렌더 후 기준 높이 기록
+      requestAnimationFrame(() => {
+        if (historyRef.current) {
+          prevScrollHeightRef.current = historyRef.current.scrollHeight;
+        }
+      });
     });
 
     socket.on("message:new", (newMessage) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
+      if (newMessage.nickname === myNick || isNearBottom()) {
+        setAutoScroll(true);
+      } else {
+        setAutoScroll(false);
+      }
     });
 
     socket.on("reaction:update", ({ messageId, reactedUsers, reactionsCount }) => {
@@ -52,7 +98,7 @@ export default function ChatHistory() {
   }, []);
 
   return (
-    <div className="chat-history">
+    <div className="chat-history" ref={historyRef}>
       {messages.map((msg) => (
         <div
           key={msg.id}
@@ -75,6 +121,7 @@ export default function ChatHistory() {
           />
         </div>
       ))}
+      <div ref={bottomRef} />
     </div>
   );
 }

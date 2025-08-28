@@ -92,7 +92,7 @@ background: var(--grey06, #F7F7F7);
 /* principle hex buttons */
 .principle-icons { display:flex; justify-content: space-between; align-items: flex-end; padding: 0 6px 2px; }
 .principle-icon {
-  width: 84px;
+  width: 137px;
   display: grid;
   grid-template-rows: 1fr auto; /* cake area / badge image */
   align-items: end; justify-items: center;
@@ -100,39 +100,54 @@ background: var(--grey06, #F7F7F7);
   position: relative;
 }
 /* image-based cake */
-.principle-icon .cake-img { width: 74px; height: 74px; object-fit: contain; margin-bottom: 6px; filter: drop-shadow(0 4px 10px rgba(0,0,0,.12)); }
+.principle-icon .cake-img { width: 118px; height: 178px; object-fit: contain; margin-bottom: 6px; filter: drop-shadow(0 4px 10px rgba(0,0,0,.12)); }
 /* bottom badge image (with caption baked in the PNG) */
-.principle-icon .badge-img { width: 80px; height: 88px; object-fit: contain; }
+.principle-icon .badge-img { width: 137px; height: 137px; object-fit: contain; }
 
 /* 오른쪽 채팅 영역 */
 .chat-container {
-  flex: 1;
-  padding: 20px;
+  width: 1318px;
+  height: 1200px; /* match canvas height so inner area can scroll */
+  flex-shrink: 0;
+  box-shadow: 0 0 26px 0 rgba(0, 0, 0, 0.02) inset;
   display: flex;
   flex-direction: column;
-  background-color: #ffffff;
-  gap: 16px;
-  background: #fff;
-  border-left: 1px solid #eee;
-}
-
-/* sticky page header inside chat (if present) */
-.chat-header {
-  position: sticky; top: 0; z-index: 2;
-  background: #fff; border-bottom: 1px solid #eee;
-  padding: 14px 16px; font-weight: 700; font-size: 18px;
+  min-height: 0; /* allow children to shrink and enable overflow */
 }
 
 /* AI tip callout (orange card on the right) */
 .ai-chat {
-  background: #ff8f5a; color:#fff; border:1px solid #ffb28d;
-  font-weight: 700; border-radius: 10px; box-shadow: 0 4px 12px rgba(255,143,90,.25);
+
+  display: flex;
+width: 441px;
+padding: 24px 22px;
+align-items: flex-start;
+gap: 14px;
+border-radius: 0 0 12px 12px;
+background: var(--orange02, #FF6E37);
+
+/* shadow */
+box-shadow: 0 0 6px 1px rgba(142, 142, 142, 0.10);
+
+margin-left: auto;
+}
+.ai-chat-text{
+  flex: 1 0 0;
+  color: var(--white, #FFF);
+  font-family: "CJ ONLYONE NEW body";
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%; /* 36px */
+  letter-spacing: 0.354px;
 }
 
 /* chat list & bubbles */
 .chat-history {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;            /* critical for flex overflow */
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   margin-bottom: 12px;
   display: flex;
   flex-direction: column;
@@ -283,3 +298,5 @@ background: var(--grey06, #F7F7F7);
 @media (max-width: 640px) {
   .summary-box { grid-template-columns: repeat(2, max-content); }
 }
+.chat-header { flex: 0 0 auto; }
+.chat-input-area { flex: 0 0 auto; }

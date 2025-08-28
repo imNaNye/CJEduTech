@@ -27,7 +27,7 @@ export default function AIChat() {
       setMents([payload]);
       setTimeout(() => {
         setMents([]);
-      }, 15000);
+      }, 55000);//15000);
     };
 
     socket.on("ai:ment", onMent);
@@ -39,10 +39,9 @@ export default function AIChat() {
   if (ments.length === 0) return null;
   const m = ments[0];
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
       <div key={m.id} className="ai-chat">
-        <div>{m.text}</div>
-      </div>
+        <img className="badge-img" src={`/src/assets/images/discussion/AI_icon.png`} alt="aiIcon"/>
+        <div className="ai-chat-text">{m.text}</div>
     </div>
   );
 }

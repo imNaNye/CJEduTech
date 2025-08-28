@@ -2,12 +2,17 @@
 import { useSlides } from './SlideProvider.jsx'
 import { useSlideProgress } from './useSlideProgress'
 import { pageComponentMap } from './pageComponentMap'
-import { useNavigate } from 'react-router-dom'   // 👈 추가
+import { useNavigate } from 'react-router-dom'
+import { RoundStepProvider, useRoundStep } from '../../../contexts/RoundStepContext.jsx'
 
 export default function SlideRenderer() {
   const { page, pageIndex, setPageIndex, config } = useSlides()
   const { clickedCount, requiredCount, remainingIds, allDone } = useSlideProgress()
   const navigate = useNavigate()   // 👈 추가
+  const { round, setRound, step, setStep } = useRoundStep()
+
+  setStep(1)
+  setRound(1)
 
   if (!page) return <div>끝</div>
 
@@ -16,7 +21,7 @@ export default function SlideRenderer() {
   const handleNext = () => {
     if (pageIndex === config.length - 1 && allDone) {
       // 모든 슬라이드 끝났으면 원하는 경로로 이동
-      navigate('/user/quiz') 
+      navigate('/user/roundIndicator') 
     } else {
       // 아직 마지막이 아니면 다음 슬라이드로
       setPageIndex(i => Math.min(config.length - 1, i + 1))

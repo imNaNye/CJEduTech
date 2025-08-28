@@ -16,6 +16,25 @@ const MIN_AI_SCORE = Number(process.env.AI_MIN_SCORE || 0.6);
 const AI_ENDPOINT = process.env.AI_ENDPOINT;
 const AI_API_KEY = process.env.AI_API_KEY;
 
+// ===== Room state for AI mentor (silence tracking, topic, cooldown) =====
+const COOLDOWN_SEC = Number(process.env.AI_MENT_COOLDOWN_SEC || 60);
+const SILENCE_THRESHOLD_SEC = Number(process.env.AI_MENT_SILENCE_SEC || 45);       // room-level silence
+const USER_SILENCE_THRESHOLD_SEC = Number(process.env.AI_USER_SILENCE_SEC || 60);  // per-user silence
+/**
+ * @typedef {{ topic?: string, lastMessageAt?: number, cooldownUntil?: number, userLastAt: Map<string, number>, rollingSummary?: string }} RoomState
+ */
+/** @type {Map<string, RoomState>} */
+const roomStates = new Map();
+
+function getRoomState(roomId) {
+  let st = roomStates.get(roomId);
+  if (!st) {
+    st = { userLastAt: new Map(), lastMessageAt: Date.now() };
+    roomStates.set(roomId, st);
+  }
+  return st;
+}
+
 // ===== Helpers =====
 function pushRecent(roomId, msg) {
   const arr = recentByRoom.get(roomId) ?? [];
@@ -49,6 +68,161 @@ function simulateAiClassification() {
       resolve({ label, score });
     }, delay);
   });
+}
+
+// ---- Build prompt context from recent messages & room state ----
+function buildMentContext(roomId) {
+  const now = Date.now();
+  const state = getRoomState(roomId);
+  const base = recentByRoom.get(roomId) ?? [];
+  // 최근 20개만 사용
+  const recent = base.slice(Math.max(0, base.length - 20));
+
+  // 침묵 사용자 계산
+  const silentUsers = [];
+  for (const [nick, ts] of state.userLastAt.entries()) {
+    const sec = Math.floor((now - ts) / 1000);
+    if (sec >= USER_SILENCE_THRESHOLD_SEC) {
+      silentUsers.push({ nickname: nick, silenceSec: sec });
+    }
+  }
+  // 침묵 긴 순 정렬
+  silentUsers.sort((a, b) => b.silenceSec - a.silenceSec);
+
+  return {
+    roomId,
+    topic: state.topic || "",
+    recent,
+    silentUsers,
+    lastMessageGapSec: Math.floor((now - (state.lastMessageAt || now)) / 1000)
+  };
+}
+
+// ---- AI mentor simulators (topic + per-user encourage) ----
+function simulateTopicMent(context) {
+  const { topic } = context;
+  const delay = 120 + Math.floor(Math.random() * 380);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const prompts = [
+        `${topic ? `“${topic}” 맥락에서 ` : ""}지금까지 의견을 종합하면 어떤 선택지가 있나요?`,
+        `방금 논의한 내용을 근거/예시와 함께 한 단계 더 구체화해 볼까요?`,
+        `${topic ? `“${topic}”와 관련해 ` : ""}반대 관점에서 보면 어떤 리스크가 있을까요?`
+      ];
+      const text = prompts[Math.floor(Math.random() * prompts.length)];
+      resolve({ id: randomUUID(), type: "topic_comment", text, targets: [], createdAt: new Date().toISOString() });
+    }, delay);
+  });
+}
+
+function simulateEncourageMent(context, targetNick) {
+  const { topic } = context;
+  const delay = 120 + Math.floor(Math.random() * 380);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const text = `@${targetNick} 님, ${topic ? `주제 “${topic}”에 대해 ` : ""}생각을 공유해 주실 수 있을까요? 한 줄 의견도 좋아요!`;
+      resolve({ id: randomUUID(), type: "encourage", text, targets: [targetNick], createdAt: new Date().toISOString() });
+    }, delay);
+  });
+}
+
+async function generateMentAndBroadcast(io, roomId) {
+  const state = getRoomState(roomId);
+  const now = Date.now();
+  // 쿨다운 체크
+  if (state.cooldownUntil && state.cooldownUntil > now) return false;
+
+  // 컨텍스트 생성
+  const context = buildMentContext(roomId);
+
+  const ments = [];
+
+  // 1) 토론 관련 멘트(항상 생성)
+  let topicMent;
+  if (AI_ENDPOINT) {
+    try {
+      const res = await fetch(AI_ENDPOINT + "/mentor", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(AI_API_KEY ? { "Authorization": `Bearer ${AI_API_KEY}` } : {})
+        },
+        body: JSON.stringify({
+          intent: "ai_mentor_topic",
+          roomId: context.roomId,
+          topic: context.topic,
+          recentMessages: context.recent.map(m => ({ nickname: m.nickname, text: m.text, aiLabel: (aiByMsg.get(m.id) || {}).label })),
+          lastMessageGapSec: context.lastMessageGapSec,
+          maxTokens: 120,
+          style: "encouraging"
+        })
+      });
+      if (!res.ok) throw new Error(`AI mentor(topic) http ${res.status}`);
+      const data = await res.json();
+      topicMent = {
+        id: randomUUID(),
+        type: data?.type || "topic_comment",
+        text: data?.text || "논의를 이어가기 위한 질문을 제안합니다.",
+        targets: Array.isArray(data?.targets) ? data.targets : [],
+        createdAt: new Date().toISOString()
+      };
+    } catch (e) {
+      topicMent = await simulateTopicMent(context);
+    }
+  } else {
+    topicMent = await simulateTopicMent(context);
+  }
+  if (topicMent) ments.push(topicMent);
+
+  // 2) 침묵자별 멘트(각 침묵 사용자마다 생성)
+  const silentUsers = context.silentUsers || [];
+  for (const su of silentUsers) {
+    let enc;
+    if (AI_ENDPOINT) {
+      try {
+        const res = await fetch(AI_ENDPOINT + "/mentor", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(AI_API_KEY ? { "Authorization": `Bearer ${AI_API_KEY}` } : {})
+          },
+          body: JSON.stringify({
+            intent: "ai_mentor_encourage",
+            roomId: context.roomId,
+            topic: context.topic,
+            target: su.nickname,
+            silenceSec: su.silenceSec,
+            recentMessages: context.recent.map(m => ({ nickname: m.nickname, text: m.text, aiLabel: (aiByMsg.get(m.id) || {}).label })),
+            maxTokens: 80,
+            style: "encouraging"
+          })
+        });
+        if (!res.ok) throw new Error(`AI mentor(encourage) http ${res.status}`);
+        const data = await res.json();
+        enc = {
+          id: randomUUID(),
+          type: data?.type || "encourage",
+          text: data?.text || `@${su.nickname} 님, 의견을 들려주실 수 있을까요?`,
+          targets: Array.isArray(data?.targets) && data.targets.length ? data.targets : [su.nickname],
+          createdAt: new Date().toISOString()
+        };
+      } catch (e) {
+        enc = await simulateEncourageMent(context, su.nickname);
+      }
+    } else {
+      enc = await simulateEncourageMent(context, su.nickname);
+    }
+    if (enc) ments.push(enc);
+  }
+
+  // 쿨다운 설정(한 번에 생성한 멘트 묶음에 대해 공통 쿨다운)
+  state.cooldownUntil = now + COOLDOWN_SEC * 1000;
+
+  // 브로드캐스트 (각 멘트를 개별 이벤트로 전송)
+  for (const m of ments) {
+    io.of("/chat").to(`room:${roomId}`).emit("ai:ment", { roomId, ...m });
+  }
+  return ments.length > 0;
 }
 
 async function classifyAndBroadcast(io, msg) {
@@ -108,6 +282,8 @@ async function classifyAndBroadcast(io, msg) {
 
 // ===== Public API =====
 export function initChatSocket(io) {
+  startMentorScheduler(io);
+
   io.of("/chat").on("connection", (socket) => {
     let joinedRoomId = null;
 
@@ -116,6 +292,9 @@ export function initChatSocket(io) {
       if (joinedRoomId) socket.leave(`room:${joinedRoomId}`);
       joinedRoomId = roomId;
       socket.join(`room:${roomId}`);
+
+      // ensure room state exists
+      getRoomState(roomId);
 
       // recent with reactions + ai
       const base = recentByRoom.get(roomId) ?? [];
@@ -148,6 +327,10 @@ export function initChatSocket(io) {
           text: trimmed,
           createdAt: new Date().toISOString()
         };
+        const st = getRoomState(roomId);
+        const now = Date.now();
+        st.lastMessageAt = now;
+        st.userLastAt.set(msg.nickname, now);
         pushRecent(roomId, msg);
         cb?.({ ok: true, serverId: msg.id, createdAt: msg.createdAt });
         io.of("/chat").to(`room:${roomId}`).emit("message:new", { ...msg, reactedUsers: [], reactionsCount: 0 });
@@ -170,7 +353,30 @@ export function initChatSocket(io) {
         reactionsCount: set.size
       });
     });
+
+    // 수동 트리거: 클라이언트가 AI 멘트 요청
+    socket.on("ai:ment:request", async ({ roomId: reqRoomId }) => {
+      const targetRoom = reqRoomId || joinedRoomId;
+      if (!targetRoom) return;
+      await generateMentAndBroadcast(io, targetRoom);
+    });
   });
+}
+
+let mentorSchedulerStarted = false;
+function startMentorScheduler(io) {
+  if (mentorSchedulerStarted) return;
+  mentorSchedulerStarted = true;
+  setInterval(() => {
+    const now = Date.now();
+    for (const [roomId, st] of roomStates.entries()) {
+      const gap = Math.floor((now - (st.lastMessageAt || now)) / 1000);
+      if (gap >= SILENCE_THRESHOLD_SEC && (!st.cooldownUntil || st.cooldownUntil <= now)) {
+        // 자동 트리거 (침묵)
+        generateMentAndBroadcast(io, roomId);
+      }
+    }
+  }, 5000); // 5초마다 스캔
 }
 
 export function getOverview() {

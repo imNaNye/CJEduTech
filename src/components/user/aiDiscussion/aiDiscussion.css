@@ -1,39 +1,108 @@
 .ai-discussion-page{
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
+width: 2000px;
+height: 1200px;
+background: var(--grey06, #F7F7F7);
 }
 
-
-
+:root{
+  --brand-orange: #ff8f5a;
+  --brand-orange-weak: #ffe6d9;
+  --pill-bg: #fff7ed;
+  --pill-border: #ffd8b5;
+  --pill-text: #9a4a00;
+}
 
 .ai-discussion-main {
   display: flex;
-  height: 100vh;
-  background-color: #f7f7f7;
+  flex-direction: row;
 }
 
 /* 왼쪽 개요 영역 */
 .chat-overview {
-  width: 35%;
-  padding: 20px;
-  background-color: #eaeaea;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  width: 682px;
+  height: 1200px;
+  flex-shrink: 0;
+  background: linear-gradient(343deg, rgba(246, 242, 222, 0.50) 0.63%, rgba(251, 238, 214, 0.50) 100%);
+  padding: 24px 28px 20px 28px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: auto 1fr auto; /* timer+summary / free / bottom icons */
+  row-gap: 24px;
 }
 
-.chat-timer {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
+/* ---- Overview top (timer + stat pills) ---- */
+.overview-top { display: grid; grid-template-columns: 88px 1fr; align-items: start; column-gap: 20px; }
+.timer-card { display: contents; }
+
+.timer-wrap { position: relative; }
+.timer-caption { position: absolute; top: -8px; left: -6px; font-size: 12px; color:#8c8c8c; }
+
+.timer-face { position: relative; width: 88px; height: 88px; border-radius: 50%; --p: 0.0; background: radial-gradient(circle at 50% 50%, #fff 58%, transparent 60%), conic-gradient(var(--brand-orange) calc(var(--p)*360deg), var(--brand-orange-weak) 0); display: grid; place-items: center; outline: 6px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.timer-remaining { font-weight: 800; font-size: 18px; line-height: 1; color: var(--brand-orange); letter-spacing: .2px; }
+.timer-total-inside { position:absolute; top: 8px; font-size: 11px; color:#777; }
+
+/* summary box (single soft-orange container, items inside) */
+.summary-box {
+  display: grid;
+  grid-template-columns: repeat(3, max-content); /* 3 items per row */
+  grid-auto-rows: max-content;
+  column-gap: 12px;
+  row-gap: 8px;
+  align-items: center;
+  align-content: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #FFE8CC; /* closer to mock */
+  border: 1px solid #FFD7B0;
+  box-shadow: 0 2px 8px rgba(0,0,0,.04);
 }
 
-.subject-overview {
-  font-size: 16px;
-  color: #555;
+/* each small rounded item inside the box */
+.summary-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: #FFF2DF;
+  border: 1px solid #FFDAB8;
+  box-shadow: 0 1px 0 rgba(0,0,0,.03);
+  color: #9a4a00;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1;
 }
+
+.summary-item .icon {
+  width: 18px;
+  height: 18px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* icon images (use provided assets) */
+.summary-item.j .icon  { background-image: url('../../../assets/images/discussion/badge_1.png'); }
+.summary-item.p .icon  { background-image: url('../../../assets/images/discussion/badge_2.png'); }
+.summary-item.c .icon  { background-image: url('../../../assets/images/discussion/badge_3.png'); }
+.summary-item.r .icon  { background-image: url('../../../assets/images/discussion/badge_4.png'); }
+.summary-item.lk .icon { background-image: url('../../../assets/images/discussion/like.svg'); }
+.summary-item.ch .icon { background-image: url('../../../assets/images/discussion/Send.svg'); }
+
+/* principle hex buttons */
+.principle-icons { display:flex; justify-content: space-between; align-items: flex-end; padding: 0 6px 2px; }
+.principle-icon {
+  width: 84px;
+  display: grid;
+  grid-template-rows: 1fr auto; /* cake area / badge image */
+  align-items: end; justify-items: center;
+  min-height: 180px;
+  position: relative;
+}
+/* image-based cake */
+.principle-icon .cake-img { width: 74px; height: 74px; object-fit: contain; margin-bottom: 6px; filter: drop-shadow(0 4px 10px rgba(0,0,0,.12)); }
+/* bottom badge image (with caption baked in the PNG) */
+.principle-icon .badge-img { width: 80px; height: 88px; object-fit: contain; }
 
 /* 오른쪽 채팅 영역 */
 .chat-container {
@@ -42,17 +111,25 @@
   display: flex;
   flex-direction: column;
   background-color: #ffffff;
+  gap: 16px;
+  background: #fff;
+  border-left: 1px solid #eee;
 }
 
+/* sticky page header inside chat (if present) */
+.chat-header {
+  position: sticky; top: 0; z-index: 2;
+  background: #fff; border-bottom: 1px solid #eee;
+  padding: 14px 16px; font-weight: 700; font-size: 18px;
+}
+
+/* AI tip callout (orange card on the right) */
 .ai-chat {
-  background-color: #e1f5fe;
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 12px;
-  font-weight: bold;
-  color: #0277bd;
+  background: #ff8f5a; color:#fff; border:1px solid #ffb28d;
+  font-weight: 700; border-radius: 10px; box-shadow: 0 4px 12px rgba(255,143,90,.25);
 }
 
+/* chat list & bubbles */
 .chat-history {
   flex: 1;
   overflow-y: auto;
@@ -60,7 +137,10 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding-right: 6px;
 }
+.chat-history::-webkit-scrollbar { width: 8px; }
+.chat-history::-webkit-scrollbar-thumb { background:#e0e0e0; border-radius: 6px; }
 
 .chat {
   display: flex;
@@ -76,31 +156,39 @@
 }
 
 .chat-bubble {
-  background-color: #f0f0f0;
+  max-width: 68%;
+  border:1px solid #eee;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
   padding: 10px 14px;
   border-radius: 12px;
-  max-width: 70%;
   color: #000;
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
 }
+.chat-bubble.others { background:#fff; }
+.chat-bubble.mine { background:#fde6c8; border-color:#f9d5a8; }
 
 /* 입력창 영역 */
 .chat-input-area {
   display: flex;
   gap: 8px;
+  position: sticky; bottom: 0; background:#fff; padding-top: 8px; border-top: 1px solid #eee;
 }
 
 .chat-input {
   flex: 1;
   padding: 10px;
   font-size: 15px;
-  border: 1px solid #ccc;
+  border: 1px solid #e1e1e1;
   border-radius: 6px;
 }
 
 .chat-submit-button {
   padding: 10px 16px;
   font-size: 15px;
-  background-color: #666;
+  background-color: #ff8f5a;
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -108,7 +196,7 @@
 }
 
 .chat-submit-button:hover {
-  background-color: #444;
+  background-color: #e27947;
 }
 
 /* 내 메시지 오른쪽 정렬 */
@@ -119,19 +207,10 @@
   justify-content: flex-start;
 }
 .chat-bubble.mine {
-  background-color: #d1e7ff;
   color: #003a75;
-  align-self: flex-end;
 }
 .chat-bubble.others {
-  background-color: #f0f0f0;
   color: #000;
-}
-.chat-bubble {
-  position: relative;
-  display: inline-flex;
-  flex-direction: column;
-  gap: 4px;
 }
 .chat-nickname {
   font-weight: 600;
@@ -145,7 +224,7 @@
 .chat-time {
   align-self: flex-end;
   font-size: 11px;
-  color: #777;
+  color: #9aa0a6;
   margin-top: 2px;
 }
 
@@ -179,4 +258,28 @@
   background: #f5f7ff;
   color: #3146a7;
   border: 1px solid #d9e1ff;
+}
+
+@media (max-width: 992px) {
+  .cake { width: 96px; }
+  .hex-btn { width: 62px; height: 72px; font-size:13px; }
+  .timer-face { width:64px; height:64px; }
+  .timer-card { grid-template-columns: 64px auto; }
+  .principle-icon { min-height: 160px; width: 72px; }
+  .principle-icon .cake { width: 60px; border-radius: 12px; }
+  .principle-icon .hex { width: 66px; height: 74px; }
+}
+@media (max-width: 576px) {
+  .timer-card { grid-template-columns: 48px auto; }
+  .timer-ring { width:48px; height:48px; }
+  .stat-pill { font-size:12px; padding:6px 8px; }
+  .chat-bubble { max-width: 86%; }
+  .timer-face { width:48px; height:48px; }
+  .stat-pills.compact .stat-pill { padding:5px 7px; font-size:11px; }
+  .principle-icon { min-height: 140px; width: 64px; }
+  .principle-icon .cake { width: 54px; }
+}
+
+@media (max-width: 640px) {
+  .summary-box { grid-template-columns: repeat(2, max-content); }
 }

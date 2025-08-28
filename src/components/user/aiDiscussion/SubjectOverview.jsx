@@ -102,18 +102,13 @@ export default function SubjectOverview() {
   }, []);
 
   return (
-    <div className="subject-overview">
-      <p style={{ margin: 0, fontWeight: 600 }}>토론 전체 분류 결과</p>
-      <ul style={{ margin: "8px 0 12px", paddingLeft: 18, lineHeight: 1.7 }}>
-        <li>정직: {totals.정직}</li>
-        <li>창의: {totals.창의}</li>
-        <li>존중: {totals.존중}</li>
-        <li>열정: {totals.열정}</li>
-      </ul>
-      <div style={{ display: "flex", gap: 16, fontSize: 14 }}>
-        <span>총 채팅: <b>{totals.totalMessages}</b></span>
-        <span>총 반응: <b>{totals.totalReactions}</b></span>
-      </div>
+    <div className="summary-box">
+      <span className="summary-item j"><i className="icon"/>+{totals['정직']}건</span>
+      <span className="summary-item p"><i className="icon"/>+{totals['열정']}건</span>
+      <span className="summary-item c"><i className="icon"/>+{totals['창의']}건</span>
+      <span className="summary-item r"><i className="icon"/>+{totals['존중']}건</span>
+      <span className="summary-item lk"><i className="icon"/>+{totals.totalReactions}건</span>
+      <span className="summary-item ch"><i className="icon"/>+{totals.totalMessages}건</span>
     </div>
   );
 }

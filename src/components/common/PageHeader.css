@@ -1,32 +1,79 @@
 /* src/components/common/PageHeader.css */
 
 .page-header {
-  display: flex;
-  width: 2000px;
-  padding: 24px 64px;
-  align-items: flex-start;
-  gap: 10px;
-  padding-left: 150px;
-  border-bottom: 1px solid var(--grey04, #D9D9D9);
-  background: var(--grey07, #FAFAFA);
+display: flex;
+width: 125rem;
+padding: 1.5rem 4rem;
+align-items: flex-start;
+gap: 0.625rem;
+border-bottom: 1px solid var(--grey04, #D9D9D9);
+background: var(--grey07, #FAFAFA);
+}
+
+.page-header-short {
+display: flex;
+width: 1318px;
+padding: 24px 64px 24px 38px;
+align-items: flex-start;
+gap: 10px;
+border-bottom: 1px solid var(--grey04, #D9D9D9);
+background: var(--grey07, #FAFAFA);
 }
 
 .title {
-  color: var(--grey01, #555);
-  font-family: "Pretendard Variable";
-  font-size: 32px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: normal;
-  text-align: left;
+width: 97.38425rem;
+color: var(--grey01, #555);
+font-family: "CJ ONLYONE NEW title";
+font-size: 2rem;
+font-style: normal;
+font-weight: 700;
+line-height: normal;
+}
+.page-header-short.title {
+width: 926px;
+color: var(--grey01, #555);
+font-family: "CJ ONLYONE NEW title";
+font-size: 32px;
+font-style: normal;
+font-weight: 700;
+line-height: normal;
 }
 
 .user-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+display: flex;
+width: 17.19831rem;
+height: 2.25rem;
+justify-content: flex-end;
+align-items: flex-start;
+gap: 0.75rem;
+flex-shrink: 0;
 }
 
 .nickname {
-  font-weight: 500;
+color: var(--grey01, #555);
+text-align: right;
+font-family: "CJ ONLYONE NEW body";
+font-size: 1.5rem;
+font-style: normal;
+font-weight: 300;
+line-height: normal;
+}
+
+.page-header-short.user-info {
+display: flex;
+width: 273.011px;
+height: 36px;
+align-items: center;
+gap: 12px;
+flex-shrink: 0;
+}
+
+.page-header-short.nickname {
+color: var(--grey01, #555);
+text-align: right;
+font-family: "CJ ONLYONE NEW body";
+font-size: 24px;
+font-style: normal;
+font-weight: 300;
+line-height: normal;
 }

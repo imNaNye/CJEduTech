@@ -42,7 +42,7 @@ export default function ChatHistory() {
     const newH = el.scrollHeight;
 
     // Case A: 내가 보냈거나(autoscroll), 이미 하단을 보고 있다면 자동 하단 스크롤
-    if ((autoScroll || wasNearBottom) && bottomRef.current) {
+    if (autoScroll && bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: autoScroll ? "smooth" : "auto" });
       setAutoScroll(false);
     } else {
@@ -85,8 +85,14 @@ export default function ChatHistory() {
       );
     });
 
-    socket.on("message:ai", ({ messageId, aiLabel, aiScore }) => {
-      setMessages(prev => prev.map(m => m.id === messageId ? { ...m, aiLabel, aiScore } : m));
+    socket.on("message:ai", ({ messageId, aiLabels, aiScores, aiLabel, aiScore }) => {
+      setMessages(prev => prev.map(m => m.id === messageId ? {
+        ...m,
+        aiLabels: Array.isArray(aiLabels) ? aiLabels : (aiLabel ? [aiLabel] : m.aiLabels),
+        aiScores: aiScores || m.aiScores,
+        aiLabel: aiLabel ?? m.aiLabel,
+        aiScore: (typeof aiScore === 'number' ? aiScore : m.aiScore)
+      } : m));
     });
 
     return () => {
@@ -116,6 +122,8 @@ export default function ChatHistory() {
             createdAt={msg.createdAt}
             reactionsCount={msg.reactionsCount || (msg.reactedUsers ? msg.reactedUsers.length : 0)}
             didReact={Array.isArray(msg.reactedUsers) ? msg.reactedUsers.includes(myNick) : false}
+            aiLabels={msg.aiLabels}
+            aiScores={msg.aiScores}
             aiLabel={msg.aiLabel}
             aiScore={msg.aiScore}
           />

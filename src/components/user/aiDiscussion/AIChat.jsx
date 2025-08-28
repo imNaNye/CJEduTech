@@ -19,6 +19,7 @@ export default function AIChat() {
   useEffect(() => {
     const onMent = (payload) => {
       // payload: { id, roomId, type: "topic_comment"|"encourage", text, targets?: string[], createdAt }
+      console.log(payload)
       if (!payload) return;
       if (payload.type === "encourage") {
         const targets = Array.isArray(payload.targets) ? payload.targets : [];
@@ -27,7 +28,7 @@ export default function AIChat() {
       setMents([payload]);
       setTimeout(() => {
         setMents([]);
-      }, 55000);//15000);
+      }, 15000);//15000);
     };
 
     socket.on("ai:ment", onMent);

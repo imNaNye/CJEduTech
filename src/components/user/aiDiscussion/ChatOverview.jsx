@@ -5,6 +5,11 @@ import SubjectOverview from "./SubjectOverview";
 
 const LABELS = ["정직", "창의", "존중", "열정"];
 
+const getMyNick = () => {
+  const n = localStorage.getItem("nickname");
+  return n || "익명";
+};
+
 export default function ChatOverView(){
   const [totals, setTotals] = useState({
     정직: 0,
@@ -15,8 +20,22 @@ export default function ChatOverView(){
     totalReactions: 0,
   });
 
+  const [myTotals, setMyTotals] = useState({
+    정직: 0,
+    창의: 0,
+    존중: 0,
+    열정: 0,
+    totalMessages: 0,
+    totalReactions: 0,
+  });
+
   const reactionsMapRef = useRef(new Map()); // messageId -> reactionsCount
-  const aiLabelMapRef = useRef(new Map());   // messageId -> aiLabel
+  const aiLabelMapRef = useRef(new Map());   // messageId -> Set<label>
+
+  const myReactionsMapRef = useRef(new Map()); // mine only
+  const myAiLabelMapRef = useRef(new Map());   // mine only
+  const myMessageIdsRef = useRef(new Set());   // mine only
+  const myNickRef = useRef(getMyNick());
 
   useEffect(() => {
     const handleRecent = (payload) => {
@@ -33,6 +52,18 @@ export default function ChatOverView(){
         totalReactions: 0,
       };
 
+      const nextMyReactionsMap = new Map();
+      const nextMyAiLabelMap = new Map();
+      const nextMyTotals = {
+        정직: 0,
+        창의: 0,
+        존중: 0,
+        열정: 0,
+        totalMessages: 0,
+        totalReactions: 0,
+      };
+      const nextMyIds = new Set();
+
       for (const m of messages) {
         const rc = Number(
           m.reactionsCount || (Array.isArray(m.reactedUsers) ? m.reactedUsers.length : 0)
@@ -40,21 +71,47 @@ export default function ChatOverView(){
         nextTotals.totalReactions += rc;
         nextReactionsMap.set(m.id, rc);
 
-        const label = m.aiLabel;
-        if (LABELS.includes(label)) {
-          nextTotals[label] += 1;
-          nextAiLabelMap.set(m.id, label);
+        const labelsArr = Array.isArray(m.aiLabels) && m.aiLabels.length
+          ? m.aiLabels
+          : (m.aiLabel ? [m.aiLabel] : []);
+        const valid = labelsArr.filter(l => LABELS.includes(l));
+        if (valid.length) {
+          for (const l of valid) nextTotals[l] = (nextTotals[l] || 0) + 1;
+          nextAiLabelMap.set(m.id, new Set(valid));
+        }
+
+        // mine only
+        if (m.nickname === myNickRef.current) {
+          nextMyTotals.totalMessages += 1;
+          nextMyTotals.totalReactions += rc;
+          nextMyReactionsMap.set(m.id, rc);
+          if (valid.length) {
+            for (const l of valid) nextMyTotals[l] = (nextMyTotals[l] || 0) + 1;
+            nextMyAiLabelMap.set(m.id, new Set(valid));
+          }
+          nextMyIds.add(m.id);
         }
       }
 
       reactionsMapRef.current = nextReactionsMap;
       aiLabelMapRef.current = nextAiLabelMap;
       setTotals(nextTotals);
+
+      myReactionsMapRef.current = nextMyReactionsMap;
+      myAiLabelMapRef.current = nextMyAiLabelMap;
+      myMessageIdsRef.current = nextMyIds;
+      setMyTotals(nextMyTotals);
     };
 
     const handleNew = (msg) => {
       setTotals((t) => ({ ...t, totalMessages: t.totalMessages + 1 }));
       reactionsMapRef.current.set(msg.id, 0);
+
+      if (msg.nickname === myNickRef.current) {
+        setMyTotals((t) => ({ ...t, totalMessages: t.totalMessages + 1 }));
+        myReactionsMapRef.current.set(msg.id, 0);
+        myMessageIdsRef.current.add(msg.id);
+      }
     };
 
     const handleReactionUpdate = ({ messageId, reactionsCount }) => {
@@ -65,22 +122,64 @@ export default function ChatOverView(){
       if (delta !== 0) {
         setTotals((t) => ({ ...t, totalReactions: t.totalReactions + delta }));
       }
+
+      if (myMessageIdsRef.current.has(messageId)) {
+        const prevMy = myReactionsMapRef.current.get(messageId) || 0;
+        myReactionsMapRef.current.set(messageId, next);
+        const deltaMy = next - prevMy;
+        if (deltaMy !== 0) {
+          setMyTotals((t) => ({ ...t, totalReactions: t.totalReactions + deltaMy }));
+        }
+      }
     };
 
-    const handleAi = ({ messageId, aiLabel }) => {
-      if (!LABELS.includes(aiLabel)) return;
-      const prevLabel = aiLabelMapRef.current.get(messageId);
-      if (prevLabel === aiLabel) return;
+    const handleAi = ({ messageId, aiLabels, aiLabel }) => {
+      const nextLabels = Array.isArray(aiLabels) && aiLabels.length
+        ? aiLabels
+        : (aiLabel ? [aiLabel] : []);
+      const validNext = nextLabels.filter(l => LABELS.includes(l));
 
-      setTotals((t) => {
-        const next = { ...t };
-        if (prevLabel && LABELS.includes(prevLabel)) {
-          next[prevLabel] = Math.max(0, next[prevLabel] - 1);
+      const prevSet = aiLabelMapRef.current.get(messageId) || new Set();
+      const nextSet = new Set(validNext);
+
+      // Compute diffs
+      const removed = [...prevSet].filter(l => !nextSet.has(l));
+      const added = [...nextSet].filter(l => !prevSet.has(l));
+
+      if (removed.length === 0 && added.length === 0) return;
+
+      setTotals(t => {
+        const n = { ...t };
+        for (const l of removed) {
+          if (LABELS.includes(l)) n[l] = Math.max(0, (n[l] || 0) - 1);
         }
-        next[aiLabel] = (next[aiLabel] || 0) + 1;
-        return next;
+        for (const l of added) {
+          if (LABELS.includes(l)) n[l] = (n[l] || 0) + 1;
+        }
+        return n;
       });
-      aiLabelMapRef.current.set(messageId, aiLabel);
+
+      aiLabelMapRef.current.set(messageId, nextSet);
+
+      if (myMessageIdsRef.current.has(messageId)) {
+        const prevMySet = myAiLabelMapRef.current.get(messageId) || new Set();
+        const removedMy = [...prevMySet].filter(l => !nextSet.has(l));
+        const addedMy = [...nextSet].filter(l => !prevMySet.has(l));
+
+        if (removedMy.length || addedMy.length) {
+          setMyTotals(t => {
+            const n = { ...t };
+            for (const l of removedMy) {
+              if (LABELS.includes(l)) n[l] = Math.max(0, (n[l] || 0) - 1);
+            }
+            for (const l of addedMy) {
+              if (LABELS.includes(l)) n[l] = (n[l] || 0) + 1;
+            }
+            return n;
+          });
+          myAiLabelMapRef.current.set(messageId, nextSet);
+        }
+      }
     };
 
     socket.on("room:recent", handleRecent);
@@ -131,7 +230,7 @@ export default function ChatOverView(){
     <div className="chat-overview">
       <div className="overview-top">
         <ChatTimer/>
-        <SubjectOverview totals={totals}/>
+        <SubjectOverview totals={myTotals}/>
       </div>
 
       <section className="principle-icons">

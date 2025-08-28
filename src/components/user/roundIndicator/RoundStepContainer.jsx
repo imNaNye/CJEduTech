@@ -1,7 +1,8 @@
 import { useRoundStep } from "../../../contexts/RoundStepContext";
+import './RoundIndicator.css';
 
-export default function RoundStepContainer({whichStep = 1}){
-    const {step} = useRoundStep
+export default function RoundStepContainer(){
+    const { step } = useRoundStep();
 
     return(
         <div className = "round-step-container">

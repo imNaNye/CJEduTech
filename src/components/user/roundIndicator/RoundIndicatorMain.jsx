@@ -1,5 +1,6 @@
 import RoundIndicator from "./RoundIndicator";
 import RoundStepContainer from "./RoundStepContainer";
+import './roundIndicator.css'
 
 export default function RoundIndicatorMain(){
     return(

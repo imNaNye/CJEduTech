@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRoundStep } from '../../contexts/RoundStepContext';
 import { quizQuestions } from '../../components/user/quiz/quizQuestions';
+import { useNavigate } from 'react-router-dom';
 
 const QUESTIONS_PER_ROUND = 3;
 const SECONDS_PER_QUESTION = 20;
@@ -8,6 +9,7 @@ const FEEDBACK_MS = 1500; // 정답/오답 피드백 유지 시간 (ms)
 
 export default function QuizPage() {
   const { round, step, setStep } = useRoundStep();
+  const navigate = useNavigate();
   const questions = quizQuestions[round] ?? [];
 
   const [idx, setIdx] = useState(0);                   // 현재 문제 인덱스
@@ -108,9 +110,10 @@ export default function QuizPage() {
       setIdx(i => i + 1);
       resetAndStart();
     } else {
-      // 퀴즈(스텝1) 종료 → 스텝2(영상)로 이동
+      // 퀴즈(스텝1) 종료 → 스텝2(영상)로 전환하고 인디케이터로 이동
       stopTimer();
       setStep(2);
+      navigate('/user/roundIndicator', { replace: true });
     }
   };
 

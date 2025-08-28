@@ -1,15 +1,28 @@
-// src/routes/SlideRenderer.jsx
+// src/components/user/slide/SlideRenderer.jsx
 import { useSlides } from './SlideProvider.jsx'
 import { useSlideProgress } from './useSlideProgress'
-import { pageComponentMap } from './pageComponentMap' // page.id -> 컴포넌트 매핑
+import { pageComponentMap } from './pageComponentMap'
+import { useNavigate } from 'react-router-dom'   // 👈 추가
 
 export default function SlideRenderer() {
   const { page, pageIndex, setPageIndex, config } = useSlides()
   const { clickedCount, requiredCount, remainingIds, allDone } = useSlideProgress()
+  const navigate = useNavigate()   // 👈 추가
 
   if (!page) return <div>끝</div>
 
   const PageComponent = pageComponentMap[page.id]
+
+  const handleNext = () => {
+    if (pageIndex === config.length - 1 && allDone) {
+      // 모든 슬라이드 끝났으면 원하는 경로로 이동
+      navigate('/user/quiz') 
+    } else {
+      // 아직 마지막이 아니면 다음 슬라이드로
+      setPageIndex(i => Math.min(config.length - 1, i + 1))
+    }
+  }
+
   return (
     <div>
       <header>
@@ -23,14 +36,13 @@ export default function SlideRenderer() {
         ) : null}
       </header>
 
-      {/* 실제 화면 */}
       {PageComponent ? <PageComponent /> : <div>구현되지 않은 페이지: {page.id}</div>}
 
       <nav>
         <button onClick={() => setPageIndex(i => Math.max(0, i - 1))} disabled={pageIndex === 0}>
           이전
         </button>
-        <button onClick={() => setPageIndex(i => Math.min(config.length - 1, i + 1))} disabled={!allDone}>
+        <button onClick={handleNext} disabled={!allDone}>
           다음
         </button>
       </nav>

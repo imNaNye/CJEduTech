@@ -5,7 +5,7 @@ SET time_zone = '+09:00';
 START TRANSACTION;
 
 CREATE TABLE IF NOT EXISTS users (
-    user_id VARCHAR(36) NOT NULL AUTO_INCREMENT,
+    user_id CHAR(36) NOT NULL,
     nickname VARCHAR(255) NOT NULL unique,
     password_hash VARCHAR(255) NOT NULL,
     avatar VARCHAR(255),
@@ -15,43 +15,6 @@ CREATE TABLE IF NOT EXISTS users (
     PRIMARY KEY (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE IF NOT EXISTS slides (
-    slide_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    session_id VARCHAR(255),
-    slide_sequence INT,
-    slide_text VARCHAR(255),
-    audio_url VARCHAR(255),
-    display_time INT,
-    PRIMARY KEY (slide_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-CREATE TABLE IF NOT EXISTS quizzes (
-    quiz_id VARCHAR(36) NOT NULL,
-    round_id VARCHAR(36) NOT NULL,
-    question TEXT NOT NULL,
-    options JSON NOT NULL,
-    correct_option VARCHAR(8) NOT NULL,
-    explanation TEXT NULL,
-    game_type VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (quiz_id),
-    KEY ix_quizzes_round_id (round_id)
-    -- 외래키를 사용할 경우, rounds 테이블이 먼저 생성되어 있어야 합니다.
-    -- CONSTRAINT fk_quizzes_round
-    --   FOREIGN KEY (round_id) REFERENCES rounds(round_id)
-    --   ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-CREATE TABLE IF NOT EXISTS videos (
-    video_id VARCHAR(36) NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    video_url VARCHAR(2083) NOT NULL,
-    duration INT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (video_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 CREATE TABLE IF NOT EXISTS discussions (
     discussion_id VARCHAR(36) NOT NULL,
     video_id VARCHAR(36) NOT NULL,
@@ -59,10 +22,7 @@ CREATE TABLE IF NOT EXISTS discussions (
     started_at TIMESTAMP NULL,
     ended_at TIMESTAMP NULL,
     PRIMARY KEY (discussion_id),
-    KEY ix_discussions_video_id (video_id),
-    CONSTRAINT fk_discussions_video
-        FOREIGN KEY (video_id) REFERENCES videos(video_id)
-        ON DELETE CASCADE ON UPDATE RESTRICT
+    KEY ix_discussions_video_id (video_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS chat_messages (
@@ -121,17 +81,6 @@ CREATE TABLE IF NOT EXISTS badges (
     --     ON DELETE CASCADE ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE IF NOT EXISTS rounds (
-    round_id VARCHAR(36) NOT NULL,
-    session_id VARCHAR(36) NOT NULL,
-    round_number INT NOT NULL,
-    status ENUM('진행중','완료') NOT NULL DEFAULT '진행중',
-    started_at TIMESTAMP NULL,
-    ended_at TIMESTAMP NULL,
-    PRIMARY KEY (round_id)
-    -- session_id 외래키는 sessions 테이블 생성 후 추가 가능
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 CREATE TABLE IF NOT EXISTS dashboard_summaries (
     summary_id VARCHAR(36) NOT NULL,
     round_id VARCHAR(36) NOT NULL,
@@ -162,10 +111,6 @@ CREATE TABLE IF NOT EXISTS overall_summaries (
 
 -- ===== Add Foreign Keys after table creation =====
 -- quizzes.round_id -> rounds.round_id
-ALTER TABLE quizzes
-  ADD CONSTRAINT fk_quizzes_round
-    FOREIGN KEY (round_id) REFERENCES rounds(round_id)
-    ON DELETE CASCADE ON UPDATE RESTRICT;
 
 -- chat_messages.user_id -> users.user_id
 ALTER TABLE chat_messages
@@ -185,12 +130,6 @@ ALTER TABLE badges
     FOREIGN KEY (user_id) REFERENCES users(user_id)
     ON DELETE CASCADE ON UPDATE RESTRICT;
 
--- dashboard_summaries.round_id -> rounds.round_id
-ALTER TABLE dashboard_summaries
-  ADD CONSTRAINT fk_dashboard_summaries_round
-    FOREIGN KEY (round_id) REFERENCES rounds(round_id)
-    ON DELETE CASCADE ON UPDATE RESTRICT;
-
 -- dashboard_summaries.user_id -> users.user_id
 ALTER TABLE dashboard_summaries
   ADD CONSTRAINT fk_dashboard_summaries_user
@@ -203,9 +142,19 @@ ALTER TABLE overall_summaries
     FOREIGN KEY (user_id) REFERENCES users(user_id)
     ON DELETE CASCADE ON UPDATE RESTRICT;
 
-ALTER TABLE rounds
-  ADD CONSTRAINT fk_rounds_session
-    FOREIGN KEY (session_id) REFERENCES sessions(session_id)
-    ON DELETE CASCADE ON UPDATE RESTRICT;
+
+-- 유저별 3라운드 점수를 한 행에 저장 (세션 미사용)
+CREATE TABLE IF NOT EXISTS user_round_scores (
+    user_id       VARCHAR(36) NOT NULL,
+    round1_score  DECIMAL(6,3) NULL,
+    round2_score  DECIMAL(6,3) NULL,
+    round3_score  DECIMAL(6,3) NULL,
+    updated_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+                                 ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id),
+    CONSTRAINT fk_user_round_scores_user
+      FOREIGN KEY (user_id) REFERENCES users(user_id)
+      ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 COMMIT;

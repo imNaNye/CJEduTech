@@ -1,5 +1,5 @@
 import OnboardingText from "./OnboardingText"
-import logoRobot from '../../../assets/images/common/logoRobot.png';
+import logoRobot from '@/assets/images/common/logoRobot.png';
 
 export default function OnboardingImgText(){
     return(

@@ -7,7 +7,11 @@ import { quizApi } from '@/api/quiz';
 const QUESTIONS_PER_ROUND = 3;
 const SECONDS_PER_QUESTION = 20;
 const FEEDBACK_MS = 1500; // 정답/오답 피드백 유지 시간 (ms)
+const REVEAL_MS = 600;    // 선택 → 공개 대기
+const RESULT_MS = 700;    // 공개 → 결과 대기
+const PREVIEW_MS = 3000;  // 최초 3초간 카드 앞면 미리보기(선택 불가)
 
+// phase: 'preview' | 'select' | 'choices' | 'result'
 export default function QuizPage() {
   const { round, step, setStep } = useRoundStep();
   const navigate = useNavigate();
@@ -19,23 +23,39 @@ export default function QuizPage() {
   const [answered, setAnswered] = useState(false);
   const [isCorrect, setIsCorrect] = useState(null);    // null | boolean
   const [correctCount, setCorrectCount] = useState(0);
+  const [phase, setPhase] = useState('preview');
+  const [picked, setPicked] = useState(null);
+
   const tickRef = useRef(null);
   const optionRefs = useRef([]);
   const feedbackTimeoutRef = useRef(null);
+  const previewTimeoutRef = useRef(null);
   const feedbackRef = useRef(null);
 
   // 라운드/스텝 진입 시 초기화 (step===1에서만 이 페이지가 렌더된다고 가정)
   useEffect(() => {
     setIdx(0);
     setCorrectCount(0);
-    resetAndStart();
-    // cleanup on unmount
+    setPicked(null);
+    setPhase('preview');
+    setSecondsLeft(SECONDS_PER_QUESTION);
+    setAnswered(false);
+    setIsCorrect(null);
+    setRunning(false);
+
+    // 최초 미리보기 → 선택 단계로 전환 후 타이머 시작
+    if (previewTimeoutRef.current) clearTimeout(previewTimeoutRef.current);
+    previewTimeoutRef.current = setTimeout(() => {
+      setPhase('select');
+      resetAndStart();
+    }, PREVIEW_MS);
+
     return () => {
       clearInterval(tickRef.current);
-      if (feedbackTimeoutRef.current) {
-        clearTimeout(feedbackTimeoutRef.current);
-        feedbackTimeoutRef.current = null;
-      }
+      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+      if (previewTimeoutRef.current) clearTimeout(previewTimeoutRef.current);
+      feedbackTimeoutRef.current = null;
+      previewTimeoutRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round, step]);
@@ -46,6 +66,8 @@ export default function QuizPage() {
     setAnswered(false);
     setIsCorrect(null);
     setRunning(true);
+    setPicked(null);
+
     tickRef.current = setInterval(() => {
       setSecondsLeft(prev => {
         if (prev <= 1) {
@@ -54,20 +76,21 @@ export default function QuizPage() {
           setRunning(false);
           setAnswered(true);
           setIsCorrect(false);
-          // 피드백을 잠시 보여주고 자동 다음 문제
-          setTimeout(() => {
-            if (feedbackRef.current) feedbackRef.current.focus();
-            if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
-            feedbackTimeoutRef.current = setTimeout(() => {
-              goNextQuestion();
-            }, FEEDBACK_MS);
-          }, 0);
+          // 공개 단계를 잠깐 스킵하고 결과로 바로 이동(디자인에 맞게 조절 가능)
+          setPhase('result');
+          if (feedbackRef.current) feedbackRef.current.focus();
+          if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+          const delay = (questions[idx]?.delayMs ?? FEEDBACK_MS);
+          feedbackTimeoutRef.current = setTimeout(() => {
+            goNextQuestion();
+          }, delay);
           return SECONDS_PER_QUESTION;
         }
         return prev - 1;
       });
     }, 1000);
-    // 첫 보기로 포커스 이동 (접근성)
+
+    // 첫 카드에 포커스(선택 단계일 때만 의미)
     setTimeout(() => {
       if (optionRefs.current && optionRefs.current[0]) {
         optionRefs.current[0].focus();
@@ -91,18 +114,27 @@ export default function QuizPage() {
     };
   }, [questions, idx]);
 
-  const submitAnswer = (selectedIdx) => {
-    if (answered) return;
+  // 카드 클릭: 선택 → 공개 → 결과 → 자동 다음
+  const onPickCard = (selectedIdx) => {
+    if (phase !== 'select' || answered) return;
     stopTimer();
-    const ok = judge(selectedIdx);
-    setIsCorrect(ok);
-    if (ok) setCorrectCount((c) => c + 1);
-    setAnswered(true);
-    if (feedbackRef.current) feedbackRef.current.focus();
-    if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
-    feedbackTimeoutRef.current = setTimeout(() => {
-      goNextQuestion();
-    }, FEEDBACK_MS);
+    setPicked(selectedIdx);
+    setPhase('choices');
+
+    setTimeout(() => {
+      const ok = judge(selectedIdx);
+      setIsCorrect(ok);
+      if (ok) setCorrectCount((c) => c + 1);
+      setAnswered(true);
+      setPhase('result');
+
+      if (feedbackRef.current) feedbackRef.current.focus();
+      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+      const delay = (questions[idx]?.delayMs ?? FEEDBACK_MS);
+      feedbackTimeoutRef.current = setTimeout(() => {
+        goNextQuestion();
+      }, delay);
+    }, REVEAL_MS + RESULT_MS);
   };
 
   const goNextQuestion = async () => {
@@ -112,7 +144,17 @@ export default function QuizPage() {
     }
     if (idx < QUESTIONS_PER_ROUND - 1) {
       setIdx(i => i + 1);
-      resetAndStart();
+      // 다음 문제: 다시 미리보기 → 선택 → 타이머 시작
+      setPhase('preview');
+      setPicked(null);
+      setAnswered(false);
+      setIsCorrect(null);
+      setRunning(false);
+      if (previewTimeoutRef.current) clearTimeout(previewTimeoutRef.current);
+      previewTimeoutRef.current = setTimeout(() => {
+        setPhase('select');
+        resetAndStart();
+      }, PREVIEW_MS);
     } else {
       // 퀴즈(스텝1) 종료 → 서버에 점수 저장 후 스텝2로 전환
       stopTimer();
@@ -143,35 +185,75 @@ export default function QuizPage() {
 
       <div>
         <h3>{current.q}</h3>
-        <ul>
-          {current.options.map((opt, i) => (
-            <li key={i}>
-              <button
-                ref={(el) => (optionRefs.current[i] = el)}
-                disabled={answered || !running}
-                aria-disabled={answered || !running}
-                onClick={() => submitAnswer(i)}
-              >
-                {opt}
-              </button>
-            </li>
-          ))}
-        </ul>
+
+        {/* PREVIEW: 앞면 3초 공개 (선택 불가) */}
+        {phase === 'preview' && (
+          <ul className="quiz-cards open" aria-label="카드 미리보기">
+            {current.options.map((opt, i) => (
+              <li key={i}>
+                <div className="card-front preview" aria-hidden>
+                  {opt}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* SELECT: 등뒤 카드 3개, 선택 가능 */}
+        {phase === 'select' && (
+          <ul className="quiz-cards" aria-label="선택할 카드">
+            {[0,1,2].map((i) => (
+              <li key={i}>
+                <button
+                  ref={(el) => (optionRefs.current[i] = el)}
+                  className="card-back"
+                  disabled={!running}
+                  aria-disabled={!running}
+                  onClick={() => onPickCard(i)}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* CHOICES: 앞면 모두 공개, 선택한 카드 강조 */}
+        {phase === 'choices' && (
+          <ul className="quiz-cards open" aria-label="선택 결과 공개">
+            {current.options.map((opt, i) => (
+              <li key={i}>
+                <div className={`card-front ${picked === i ? 'picked' : ''}`}>
+                  {opt}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
-      {answered && (
+      {/* RESULT: 큰 O/X + 해설 */}
+      {phase === 'result' && (
         <div
           ref={feedbackRef}
           role="status"
           aria-live="polite"
           tabIndex={-1}
+          className="quiz-result"
         >
-          {isCorrect ? '정답!' : '오답!'}
+          <div className={`big-mark ${isCorrect ? 'ok' : 'no'}`}>
+            {isCorrect ? 'O' : 'X'}
+          </div>
+          {(() => {
+            const q = current;
+            const text = isCorrect
+              ? (q?.explainCorrect ?? q?.explanation)
+              : (q?.explainWrong ?? q?.explanation);
+            return text ? <p className="quiz-explain">{text}</p> : null;
+          })()}
         </div>
       )}
 
       <div>
-        <button onClick={goNextQuestion} disabled={!answered}>다음 문제</button>
+        <button onClick={goNextQuestion} disabled={phase !== 'result'}>다음 문제</button>
       </div>
     </section>
   );

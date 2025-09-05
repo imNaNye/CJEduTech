@@ -16,8 +16,11 @@ import { initChatSocket } from './services/socket.service.js';
 
 dotenv.config();
 
+const allowed = ["https://aigora-beige.vercel.app",
+"https://lat-cluster-crafts-thursday.trycloudflare.com","http://localhost:8080","http://localhost:5173" ];
+
 const app = express();
-app.use(cors({ origin: ["http://localhost:5173"], credentials: true }));
+app.use(cors({ origin: allowed, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -25,7 +28,7 @@ app.use(cookieParser());
 const httpServer = http.createServer(app);
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: ["http://localhost:5173"],
+    origin: allowed,
     methods: ["GET", "POST"],
     credentials: true
   }

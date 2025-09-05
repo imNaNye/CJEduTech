@@ -1,8 +1,8 @@
 //mock 데이터 전달하여 미리보기 가능하도록 구성
 
 import { useNavigate } from "react-router-dom";
-import QuizScoreBox from "../../components/user/quizResult/QuizScoreBox";
-import QuizAnswerScroll from "../../components/user/quizResult/QuizAnswerScroll";
+import QuizScoreBox from "../../components/user/quizResult/quizScoreBox";
+import QuizAnswerScroll from "../../components/user/quizResult/quizAnswerScroll";
 import PageHeader from "../../components/common/PageHeader";
 import '../../components/user/quizResult/quizResult.css'
 

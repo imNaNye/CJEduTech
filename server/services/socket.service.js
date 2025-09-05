@@ -712,9 +712,9 @@ function startMentorScheduler(io) {
         expireRoom(io, roomId);
         continue;
       }
-      // 1) 3분 주기 토론 멘트: 방 생성 시 즉시 한 번, 이후 3분마다
+      // 1) 3분 주기 토론 멘트: 방 생성 시 즉시 한 번, 이후 5분마다
       if (!st.topicNextAt) st.topicNextAt = now; // 안전장치
-      if (!st.topicIntervalMs) st.topicIntervalMs = 180000; // 3분
+      if (!st.topicIntervalMs) st.topicIntervalMs = 305000; // 5분
       if (now >= st.topicNextAt) {
         generateTopicMentAndBroadcast(io, roomId);
         st.topicNextAt = now + st.topicIntervalMs;

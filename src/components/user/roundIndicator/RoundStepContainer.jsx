@@ -1,5 +1,5 @@
 import { useRoundStep } from "../../../contexts/RoundStepContext";
-import './RoundIndicator.css';
+import './roundIndicator.css';
 
 export default function RoundStepContainer(){
     const { step } = useRoundStep();

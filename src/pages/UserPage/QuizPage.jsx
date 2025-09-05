@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRoundStep } from '../../contexts/RoundStepContext';
 import { quizQuestions } from '../../components/user/quiz/quizQuestions';
 import { useNavigate } from 'react-router-dom';
+import { quizApi } from '@/api/quiz';
 
 const QUESTIONS_PER_ROUND = 3;
 const SECONDS_PER_QUESTION = 20;
@@ -17,6 +18,7 @@ export default function QuizPage() {
   const [running, setRunning] = useState(false);
   const [answered, setAnswered] = useState(false);
   const [isCorrect, setIsCorrect] = useState(null);    // null | boolean
+  const [correctCount, setCorrectCount] = useState(0);
   const tickRef = useRef(null);
   const optionRefs = useRef([]);
   const feedbackTimeoutRef = useRef(null);
@@ -25,6 +27,7 @@ export default function QuizPage() {
   // 라운드/스텝 진입 시 초기화 (step===1에서만 이 페이지가 렌더된다고 가정)
   useEffect(() => {
     setIdx(0);
+    setCorrectCount(0);
     resetAndStart();
     // cleanup on unmount
     return () => {
@@ -93,6 +96,7 @@ export default function QuizPage() {
     stopTimer();
     const ok = judge(selectedIdx);
     setIsCorrect(ok);
+    if (ok) setCorrectCount((c) => c + 1);
     setAnswered(true);
     if (feedbackRef.current) feedbackRef.current.focus();
     if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
@@ -101,7 +105,7 @@ export default function QuizPage() {
     }, FEEDBACK_MS);
   };
 
-  const goNextQuestion = () => {
+  const goNextQuestion = async () => {
     if (feedbackTimeoutRef.current) {
       clearTimeout(feedbackTimeoutRef.current);
       feedbackTimeoutRef.current = null;
@@ -110,8 +114,17 @@ export default function QuizPage() {
       setIdx(i => i + 1);
       resetAndStart();
     } else {
-      // 퀴즈(스텝1) 종료 → 스텝2(영상)로 전환하고 인디케이터로 이동
+      // 퀴즈(스텝1) 종료 → 서버에 점수 저장 후 스텝2로 전환
       stopTimer();
+      try {
+        await quizApi.submitRoundScore({
+          round,
+          correct: correctCount,
+          total: QUESTIONS_PER_ROUND,
+        });
+      } catch (e) {
+        console.error('점수 저장 실패:', e);
+      }
       setStep(2);
       navigate('/user/roundIndicator', { replace: true });
     }

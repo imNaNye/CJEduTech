@@ -1,5 +1,5 @@
 import NextButton from "./NextButton";
-import OnboardingImgText from "./OnboardingimgText";
+import OnboardingImgText from "./OnboardingImgText";
 
 export default function OnboardingContainer(){
     return(

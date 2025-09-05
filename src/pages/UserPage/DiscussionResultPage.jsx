@@ -6,7 +6,7 @@ import PageHeader from '../../components/common/PageHeader';
 export default function DiscussionResultPage(){
     return (
         <div className = "discussion-result-page">
-            <PageHeader/>
+            <PageHeader title={"1st round 토론 결과"} />
             <DiscussionResultMain/>
         </div>
     );

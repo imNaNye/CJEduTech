@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { socket } from "@/api/chat";
 import ChatTimer from "./ChatTimer";
 import SubjectOverview from "./SubjectOverview";
+import { useNavigate } from "react-router-dom";
 
 const LABELS = ["정직", "창의", "존중", "열정"];
 
@@ -36,6 +37,7 @@ export default function ChatOverView(){
   const myAiLabelMapRef = useRef(new Map());   // mine only
   const myMessageIdsRef = useRef(new Set());   // mine only
   const myNickRef = useRef(getMyNick());
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleRecent = (payload) => {
@@ -186,7 +188,14 @@ export default function ChatOverView(){
     socket.on("message:new", handleNew);
     socket.on("reaction:update", handleReactionUpdate);
     socket.on("message:ai", handleAi);
-
+    socket.on('room:expired', ({ roomId }) => {
+      try {
+        sessionStorage.setItem('lastRoomId', roomId || '');
+        sessionStorage.setItem('myNickname', myNickRef.current || '');
+      } finally {
+        navigate('/user/discussionResult');
+      }
+    });
     return () => {
       socket.off("room:recent", handleRecent);
       socket.off("message:new", handleNew);

@@ -1,53 +1,47 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { socket } from "@/api/chat";
 
-const TOTAL_SECONDS = 24 * 60; // 24분
-const GENERATE_RESULT_API = "/api/discussions/generate-result"; // 서버 토론 결과 생성 API
-const LOADING_ROUTE = "/user/discussionLoading"; // 로딩 페이지 라우트 (필요시 수정)
+const TOTAL_SECONDS_FALLBACK = 24 * 60; // 24분 (서버 미응답시 초기 표기)
 
 export default function ChatTimer(){
-  const [remaining, setRemaining] = useState(TOTAL_SECONDS);
-  const timerRef = useRef(null);
-  const navigate = useNavigate();
-  const firedRef = useRef(false); // 중복 호출 방지
+  const [remaining, setRemaining] = useState(TOTAL_SECONDS_FALLBACK);
+  const tickRef = useRef(null);
+  const syncRef = useRef(null);
 
-  async function triggerGenerateAndGo() {
-    if (firedRef.current) return;
-    firedRef.current = true;
-    try {
-      await fetch(GENERATE_RESULT_API, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reason: "timeout" })
-      });
-    } catch (e) {
-      // 실패해도 로딩 페이지로 이동 (서버 측 처리 진행 가정)
-      // 콘솔에만 남김
-      console.error("Failed to request discussion result:", e);
-    } finally {
-      navigate(LOADING_ROUTE);
-    }
-  }
+  // 서버에서 남은 시간 수신
+  useEffect(() => {
+    const handleTime = ({ remainingMs }) => {
+      const sec = Math.max(0, Math.floor((remainingMs || 0) / 1000));
+      setRemaining(sec);
+    };
+    socket.on('room:time', handleTime);
+    // 초기 요청 (방 id는 상황에 맞게 교체)
+    socket.emit('room:time:request', { roomId: 'general' });
 
-  useEffect(() => {//TODO : 타이머 서버 동기화 
-    // 1초 간격 카운트다운
-    timerRef.current = setInterval(() => {
-      setRemaining((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(timerRef.current);
+    return () => {
+      socket.off('room:time', handleTime);
+    };
   }, []);
 
-  // 남은 시간이 0이 되면 서버 요청 후 로딩 페이지로 이동
+  // 1초 틱 (로컬 카운트다운)
   useEffect(() => {
-    if (remaining === 0) {
-      clearInterval(timerRef.current);
-      triggerGenerateAndGo();
-    }
-  }, [remaining]);
+    tickRef.current = setInterval(() => {
+      setRemaining((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(tickRef.current);
+  }, []);
+
+  // 5초마다 서버 동기화 요청
+  useEffect(() => {
+    syncRef.current = setInterval(() => {
+      socket.emit('room:time:request', { roomId: 'general' });
+    }, 5000);
+    return () => clearInterval(syncRef.current);
+  }, []);
 
   const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
   const ss = String(remaining % 60).padStart(2, '0');
-  const progress = 1 - remaining / TOTAL_SECONDS; // 0 → 1
+  const progress = 1 - remaining / (TOTAL_SECONDS_FALLBACK || 1);
 
   return (
     <div className="overview-top">
@@ -57,7 +51,6 @@ export default function ChatTimer(){
           <div className="timer-remaining">{mm}:{ss}</div>
         </div>
       </div>
-
     </div>
   );
 }

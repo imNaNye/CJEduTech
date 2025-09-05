@@ -1,24 +1,18 @@
-
 .discussion-result-page{
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
+width: 2000px;
+height: 1200px;
+background: var(--grey06, #F7F7F7);
 }
 
 .discussion-result-main {
-  padding: 20px;
-  background-color: #ffffff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
+  padding-top: 100px;
+  padding-left: 100px;
 }
 
 /* 메인 레이아웃: 왼쪽 FoodView, 오른쪽 Summary */
 .result-body {
   display: flex;
-  justify-content: center;
+  justify-content: left;
   align-items: flex-start;
   gap: 48px;
   width: 100%;
@@ -30,15 +24,21 @@
   max-width: 300px;
 }
 
-.food-view h2 {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 12px;
+.food-view-title {
+color: var(--grey01, #555);
+font-family: "CJ ONLYONE NEW title";
+font-size: 35px;
+font-style: normal;
+font-weight: 700;
+line-height: 150%; /* 52.5px */
 }
 
 .food-image {
-  width: 100%;
-  height: auto;
+  width: 521px;
+height: 521px;
+flex-shrink: 0;
+aspect-ratio: 1/1;
+
 }
 
 /* 오른쪽: Summary 박스 */
@@ -115,3 +115,184 @@
 .next-session-button:hover {
   background-color: #444;
 }
+
+/* =============================
+   Discussion Result – New Layout
+   ============================= */
+
+/* Root container already padded; keep hero fixed on the left */
+.discussion-result-main {
+  /* layout is defined inline in JSX; here we normalize spacing */
+  gap: 24px;
+}
+
+/* --- Hero (left, non-scroll) --- */
+.dr-hero {
+  flex: 0 0 auto;
+  min-width: 540px; /* adjust hero min-width */
+  max-width: 560px;
+}
+.dr-hero-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.dr-hero-visual { /* image box */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.dr-hero-img {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  display: block;
+}
+.dr-hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.dr-hero-headline {
+  margin: 0;
+  color: #111;
+  font-family: "CJ ONLYONE NEW title", sans-serif;
+  font-size: 28px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+.dr-hero-summary {
+  color: #666;
+  font-size: 14px;
+}
+.dr-hero-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* --- Scroll area (right) : my report + ranking --- */
+.dr-scroll-area {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  gap: 24px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px; /* avoid scrollbar overlay */
+}
+.dr-scroll-area::-webkit-scrollbar {
+  height: 10px;
+}
+.dr-scroll-area::-webkit-scrollbar-thumb {
+  background: #c7c7c7;
+  border-radius: 6px;
+}
+
+/* --- Card base --- */
+.card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  padding: 20px 22px;
+}
+.dr-card-header h2,
+.dr-card-header h3 {
+  margin: 0 0 12px 0;
+  font-family: "CJ ONLYONE NEW title", sans-serif;
+  font-weight: 800;
+  color: #222;
+}
+
+/* --- My Report (center) --- */
+.dr-my-report {
+  flex: 0 0 auto;
+  min-width: 720px; /* wider card */
+}
+.dr-card-body {
+  display: grid;
+  grid-template-columns: 260px 1fr; /* left profile / right distribution */
+  gap: 24px;
+}
+/* Left profile column */
+.dr-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.dr-rank-badge {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(180deg,#FFE9A6 0%,#FFC542 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3A2C00;
+  position: relative;
+  font-weight: 900;
+}
+.dr-rank-badge .rank-num { font-size: 38px; }
+.dr-rank-badge .rank-suffix { font-size: 16px; margin-left: 4px; }
+
+.dr-avatar img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #eee;
+}
+.dr-metrics-inline .metric { 
+  display: flex; 
+  align-items: center; 
+  gap: 6px; 
+  font-weight: 700; 
+}
+.dr-metrics-inline .sep { color:#bbb; margin: 0 6px; }
+
+/* Right distribution column */
+.dr-distribution {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 20px;
+  align-items: center;
+}
+.dr-donut { width: 100%; height: auto; }
+.dr-traits { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.dr-traits .trait { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid #eee; border-radius: 10px; background: #fafafa; }
+.dr-traits .trait img { width: 28px; height: 28px; }
+.dr-traits .name { flex: 1; font-weight: 700; color: #333; }
+.dr-traits .pct { font-weight: 800; color: #3A6FE7; }
+
+/* Footer stats + Best quote */
+.dr-card-footer {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 18px;
+}
+.dr-participation { display:flex; gap:10px; flex-wrap: wrap; }
+.dr-participation .pill { display:flex; align-items:center; gap:8px; padding:8px 12px; background:#f5f5f5; border-radius:999px; font-weight:700; }
+
+.dr-top-quote { border:1px solid #eee; border-radius:12px; padding:12px 14px; background:#fff; }
+.dr-top-quote-head { display:flex; align-items:center; justify-content:space-between; font-weight:800; color:#333; margin-bottom:6px; }
+.dr-quote { margin:0; color:#555; line-height:1.6; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; }
+
+/* --- Ranking (right) --- */
+.dr-ranking {
+  flex: 0 0 auto;
+  min-width: 320px; /* adjust sidebar */
+  max-width: 420px;
+}
+.dr-ranking-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px; }
+.dr-ranking-item { display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid #eee; border-radius:10px; background:#fafafa; }
+.dr-ranking-item .badge { width:54px; text-align:center; font-weight:900; color:#2b2b2b; }
+.dr-ranking-item .avatar { width:48px; height:48px; border-radius:50%; object-fit:cover; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,0.06); }
+.dr-ranking-item .meta .name { font-weight:800; color:#333; }
+.dr-ranking-item .meta .sub { color:#777; font-size:13px; }
+
+/* Emphasis for top 3 */
+.dr-ranking-item.first { border-color:#FFD166; background:linear-gradient(180deg,#FFF7DD 0%, #FFF2C1 100%); }
+.dr-ranking-item.second { border-color:#B0C4FF; background:linear-gradient(180deg,#F3F7FF 0%, #E8F0FF 100%); }
+.dr-ranking-item.third { border-color:#C9F0D6; background:linear-gradient(180deg,#F3FFF6 0%, #E8FFEF 100%); }

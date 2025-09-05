@@ -10,6 +10,11 @@ const reactionsByMsg = new Map();
 /** @type {Map<string, { label?: "열정"|"정직"|"창의"|"존중", labels?: string[], scores?: Record<string, number>, summary?: string, method?: string, confidence?: number, score?: number, state: "PENDING"|"DONE"|"ERROR" }>} */
 const aiByMsg = new Map();
 
+/** @type {Map<string, { createdAt:number, roomId:string, perUser: Record<string, { nickname:string, totalMessages:number, totalReactions:number, labels: Record<string, number>, topReacted?: { messageId:string, text:string, reactionsCount:number, createdAt:string } }>, ranking: Array<{ nickname:string, rank:number, score:number, totalMessages:number, totalReactions:number, labels: Record<string, number> }> }>} */
+const resultsByRoom = new Map();
+/** @type {Map<string, { roomId:string, rank:number, score:number, totalMessages:number, totalReactions:number, labels: Record<string, number>, createdAt:number, topReacted?: { messageId:string, text:string, reactionsCount:number, createdAt:string } }>} */
+const lastResultByUser = new Map();
+
 // ===== Config / constants =====
 const ALLOWED_LABELS = new Set(["열정","정직","창의","존중"]);
 const MIN_AI_SCORE = Number(process.env.AI_MIN_SCORE || 0.6);
@@ -17,6 +22,9 @@ const MIN_AI_SCORE = Number(process.env.AI_MIN_SCORE || 0.6);
 // const AI_ENDPOINT = process.env.AI_ENDPOINT;
 const AI_ENDPOINT = "http://localhost:8000";
 const AI_API_KEY = process.env.AI_API_KEY;
+
+// ===== Room lifetime =====
+const ROOM_MAX_AGE_MS = Number(process.env.ROOM_MAX_AGE_MS || 25 * 60 * 1000); // 기본 25분
 
 // ===== Test Bot (per-room, optional) =====
 const BOT_ENABLED = process.env.CHAT_TEST_BOT !== '0';
@@ -45,7 +53,8 @@ const SILENCE_THRESHOLD_SEC = Number(process.env.AI_MENT_SILENCE_SEC || 45);    
 const USER_SILENCE_THRESHOLD_SEC = Number(process.env.AI_USER_SILENCE_SEC || 60);  // per-user silence
 /**
  * @typedef {{ topic?: string, lastMessageAt?: number, cooldownUntil?: number, userLastAt: Map<string, number>, rollingSummary?: string,
- *            topicNextAt?: number, topicIntervalMs?: number, encourageCooldownByUser?: Map<string, number>, botTimer?: any, botNickname?: string }} RoomState
+ *            topicNextAt?: number, topicIntervalMs?: number, encourageCooldownByUser?: Map<string, number>, botTimer?: any, botNickname?: string,
+ *            createdAt?: number, expireAt?: number, expireTimer?: any }} RoomState
  */
 /** @type {Map<string, RoomState>} */
 const roomStates = new Map();
@@ -53,7 +62,18 @@ const roomStates = new Map();
 function getRoomState(roomId) {
   let st = roomStates.get(roomId);
   if (!st) {
-    st = { userLastAt: new Map(), lastMessageAt: Date.now(), topicNextAt: Date.now(), topicIntervalMs: 180000, encourageCooldownByUser: new Map(), botTimer: null, botNickname: makeBotNickname(roomId) };
+    st = {
+      userLastAt: new Map(),
+      lastMessageAt: Date.now(),
+      topicNextAt: Date.now(),
+      topicIntervalMs: 180000,
+      encourageCooldownByUser: new Map(),
+      botTimer: null,
+      botNickname: makeBotNickname(roomId),
+      createdAt: Date.now(),
+      expireAt: Date.now() + ROOM_MAX_AGE_MS,
+      expireTimer: null,
+    };
     roomStates.set(roomId, st);
   }
   return st;
@@ -79,6 +99,137 @@ function findRoomIdByMessageId(messageId) {
     if (arr.some(m => m.id === messageId)) return roomId;
   }
   return null;
+}
+
+function calcUserScore(u) {
+  // 가중치: 반응 3, 라벨합 1, 메시지 0.5
+  const labelSum = Object.values(u.labels || {}).reduce((a,b)=>a+(b||0),0);
+  return (u.totalReactions||0)*3 + labelSum*1 + (u.totalMessages||0)*0.5;
+}
+
+// ---- Room cleanup: when room has no connected clients (only AI/bot would remain) ----
+function cleanupRoomIfEmpty(io, roomId) {
+  const ns = io.of('/chat');
+  const roomKey = `room:${roomId}`;
+  const room = ns.adapter.rooms.get(roomKey);
+  // if room exists and has clients, do nothing
+  if (room && room.size > 0) return false;
+
+  // stop test bot if running
+  const st = roomStates.get(roomId);
+  if (st?.botTimer) {
+    clearInterval(st.botTimer);
+    st.botTimer = null;
+  }
+  if (st?.expireTimer) {
+    clearTimeout(st.expireTimer);
+  }
+
+  // remove per-user cooldown map etc.
+  roomStates.delete(roomId);
+
+  // purge in-memory messages and per-message maps
+  const msgs = recentByRoom.get(roomId) || [];
+  for (const m of msgs) {
+    reactionsByMsg.delete(m.id);
+    aiByMsg.delete(m.id);
+  }
+  recentByRoom.delete(roomId);
+
+  return true;
+}
+
+// ---- Room expiry helpers ----
+function expireRoom(io, roomId) {
+  const ns = io.of('/chat');
+  const roomKey = `room:${roomId}`;
+  // 알림 브로드캐스트
+  ns.to(roomKey).emit('room:expired', { roomId, reason: 'max_age', maxAgeMs: ROOM_MAX_AGE_MS });
+
+  // 방의 모든 소켓을 방에서 제거 (글로벌 연결은 유지)
+  const room = ns.adapter.rooms.get(roomKey);
+  if (room) {
+    for (const socketId of room) {
+      const s = ns.sockets.get(socketId);
+      if (s) s.leave(roomKey);
+    }
+  }
+
+  // 결과 집계 (per user)
+  const msgs = recentByRoom.get(roomId) || [];
+  const perUser = {};
+  for (const m of msgs) {
+    const nick = m.nickname || '익명';
+    if (!perUser[nick]) perUser[nick] = {
+      nickname: nick,
+      totalMessages: 0,
+      totalReactions: 0,
+      labels: { 정직:0, 창의:0, 존중:0, 열정:0 },
+      topReacted: undefined,
+    };
+    perUser[nick].totalMessages += 1;
+    const set = reactionsByMsg.get(m.id);
+    const rc = set ? set.size : 0;
+    perUser[nick].totalReactions += rc;
+    // update most-reacted message per user
+    if (!perUser[nick].topReacted || rc > perUser[nick].topReacted.reactionsCount) {
+      perUser[nick].topReacted = {
+        messageId: m.id,
+        text: m.text,
+        reactionsCount: rc,
+        createdAt: m.createdAt,
+      };
+    }
+    const ai = aiByMsg.get(m.id);
+    if (ai?.labels && Array.isArray(ai.labels)) {
+      for (const l of ai.labels) if (ALLOWED_LABELS.has(l)) perUser[nick].labels[l] = (perUser[nick].labels[l]||0) + 1;
+    } else if (ai?.label && ALLOWED_LABELS.has(ai.label)) {
+      perUser[nick].labels[ai.label] = (perUser[nick].labels[ai.label]||0) + 1;
+    }
+  }
+  // 랭킹 계산
+  const rankingArr = Object.values(perUser).map(u => ({
+    nickname: u.nickname,
+    totalMessages: u.totalMessages,
+    totalReactions: u.totalReactions,
+    labels: u.labels,
+    score: calcUserScore(u)
+  })).sort((a,b)=> b.score - a.score);
+  let rank = 1; let lastScore = null; let sameCount = 0;
+  for (let i=0;i<rankingArr.length;i++) {
+    const s = rankingArr[i].score;
+    if (lastScore === null) { rank = 1; sameCount = 1; lastScore = s; }
+    else if (s === lastScore) { sameCount++; }
+    else { rank += sameCount; sameCount = 1; lastScore = s; }
+    rankingArr[i].rank = rank;
+  }
+  const createdAt = Date.now();
+  resultsByRoom.set(roomId, { createdAt, roomId, perUser, ranking: rankingArr });
+  for (const r of rankingArr) {
+    lastResultByUser.set(r.nickname, {
+      roomId,
+      rank: r.rank,
+      score: r.score,
+      totalMessages: r.totalMessages,
+      totalReactions: r.totalReactions,
+      labels: r.labels,
+      createdAt,
+      topReacted: perUser[r.nickname]?.topReacted,
+    });
+  }
+
+  // 데이터 정리 및 봇 중지
+  cleanupRoomIfEmpty(io, roomId);
+}
+
+function ensureRoomExpiry(io, roomId) {
+  const st = getRoomState(roomId);
+  if (st.expireTimer) return;
+  const now = Date.now();
+  const delay = Math.max(0, (st.expireAt ?? (now + ROOM_MAX_AGE_MS)) - now);
+  st.expireTimer = setTimeout(() => {
+    expireRoom(io, roomId);
+  }, delay);
 }
 
 // ---- Per-room test bot ----
@@ -231,20 +382,15 @@ async function generateEncouragesAndBroadcast(io, roomId) {
   const ENCOURAGE_COOLDOWN_MS = 30000; // per-user cooldown
   const byUser = state.encourageCooldownByUser || new Map();
 
-      console.log("침묵자1",byUser)
   if (!state.encourageCooldownByUser) state.encourageCooldownByUser = byUser;
 
-      console.log("침묵자2",)
   const context = buildMentContext(roomId);
 
-      console.log("침묵자3",context)
   const silentUsers = context.silentUsers || [];
 
-      console.log("침묵자4",silentUsers)
   let count = 0;
   for (const su of silentUsers) {
 
-      console.log("침묵자5",su)
     const until = byUser.get(su.nickname) || 0;
     if (until > now) {
       continue; // still in cooldown for this user
@@ -423,15 +569,21 @@ export function initChatSocket(io) {
 
     socket.on("room:join", ({ roomId }) => {
       if (!roomId) return;
-      if (joinedRoomId) socket.leave(`room:${joinedRoomId}`);
+      let prevRoom = joinedRoomId;
+      if (prevRoom) socket.leave(`room:${prevRoom}`);
       joinedRoomId = roomId;
       socket.join(`room:${roomId}`);
+      // after leaving previous room, cleanup if empty
+      if (prevRoom) setTimeout(() => cleanupRoomIfEmpty(io, prevRoom), 0);
 
       // ensure room state exists
       getRoomState(roomId);
 
       // start per-room test bot (posts every 10s)
       ensureRoomBot(io, roomId);
+
+      // start/ensure room expiry timer (max 25분)
+      ensureRoomExpiry(io, roomId);
 
       // recent with reactions + ai
       const base = recentByRoom.get(roomId) ?? [];
@@ -454,6 +606,14 @@ export function initChatSocket(io) {
         };
       });
       socket.emit("room:recent", { messages: recent });
+      // Send initial remaining time info
+      const st0 = getRoomState(roomId);
+      socket.emit('room:time', {
+        roomId,
+        expireAt: st0.expireAt,
+        now: Date.now(),
+        remainingMs: Math.max(0, (st0.expireAt || Date.now()) - Date.now()),
+      });
     });
 
     socket.on("message:send", (payload, cb) => {
@@ -462,6 +622,12 @@ export function initChatSocket(io) {
         const trimmed = (text || "").trim();
         if (!roomId || !trimmed) {
           cb?.({ ok: false });
+          return;
+        }
+        // guard if room is expired
+        const stGuard = roomStates.get(roomId);
+        if (stGuard && stGuard.expireAt && Date.now() >= stGuard.expireAt) {
+          cb?.({ ok: false, reason: 'room_expired' });
           return;
         }
         const msg = {
@@ -486,11 +652,13 @@ export function initChatSocket(io) {
 
     socket.on("reaction:toggle", ({ messageId, nickname }) => {
       if (!messageId || !nickname) return;
+      const roomId = findRoomIdByMessageId(messageId);
+      if (!roomId) return;
+      const stGuard = roomStates.get(roomId);
+      if (stGuard && stGuard.expireAt && Date.now() >= stGuard.expireAt) return; // ignore when expired
       const set = getReactionSet(messageId);
       if (set.has(nickname)) set.delete(nickname);
       else set.add(nickname);
-      const roomId = findRoomIdByMessageId(messageId);
-      if (!roomId) return;
       io.of("/chat").to(`room:${roomId}`).emit("reaction:update", {
         messageId,
         reactedUsers: Array.from(set),
@@ -504,6 +672,30 @@ export function initChatSocket(io) {
       if (!targetRoom) return;
       await generateMentAndBroadcast(io, targetRoom);
     });
+
+    // 사용자가 토론 종료 요청
+    socket.on('room:end', ({ roomId: reqRoomId }) => {
+      const targetRoom = reqRoomId || joinedRoomId;
+      if (!targetRoom) return;
+      expireRoom(io, targetRoom);
+    });
+
+    // 남은 시간 질의(클라이언트 요청)
+    socket.on('room:time:request', ({ roomId: reqRoomId }) => {
+      const targetRoom = reqRoomId || joinedRoomId;
+      if (!targetRoom) return;
+      const st = getRoomState(targetRoom);
+      socket.emit('room:time', {
+        roomId: targetRoom,
+        expireAt: st.expireAt,
+        now: Date.now(),
+        remainingMs: Math.max(0, (st.expireAt || Date.now()) - Date.now()),
+      });
+    });
+
+    socket.on('disconnect', () => {
+      if (joinedRoomId) setTimeout(() => cleanupRoomIfEmpty(io, joinedRoomId), 0);
+    });
   });
 }
 
@@ -515,6 +707,11 @@ function startMentorScheduler(io) {
   setInterval(() => {
     const now = Date.now();
     for (const [roomId, st] of roomStates.entries()) {
+      // 만료된 방은 즉시 만료 처리 후 continue
+      if (st.expireAt && now >= st.expireAt) {
+        expireRoom(io, roomId);
+        continue;
+      }
       // 1) 3분 주기 토론 멘트: 방 생성 시 즉시 한 번, 이후 3분마다
       if (!st.topicNextAt) st.topicNextAt = now; // 안전장치
       if (!st.topicIntervalMs) st.topicIntervalMs = 180000; // 3분
@@ -559,3 +756,6 @@ export function getOverview() {
   }
   return totals;
 }
+
+export function getRoomResult(roomId){ return resultsByRoom.get(roomId) || null; }
+export function getUserLastResult(nickname){ return lastResultByUser.get(nickname) || null; }

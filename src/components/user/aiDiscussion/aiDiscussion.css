@@ -22,7 +22,7 @@ background: var(--grey06, #F7F7F7);
   width: 682px;
   height: 1200px;
   flex-shrink: 0;
-  background: linear-gradient(343deg, rgba(246, 242, 222, 0.50) 0.63%, rgba(251, 238, 214, 0.50) 100%);
+  background: linear-gradient(343deg, rgba(246, 242, 222, 1) 0.63%, rgba(251, 238, 214, 1) 100%);
   padding: 24px 28px 20px 28px;
   box-sizing: border-box;
   display: grid;
@@ -156,6 +156,7 @@ background: var(--grey06, #F7F7F7);
   flex-direction: column;
   gap: 12px;
   padding-right: 6px;
+  padding-left: 6px;
   padding-top: 10px;
   height: 962px;
 }

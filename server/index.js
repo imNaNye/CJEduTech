@@ -62,6 +62,10 @@ app.use('/api/chat', chatRouter);
 // Initialize chat socket namespace/handlers from service
 initChatSocket(io);
 
+//퀴즈 api
+import quizRoutes from './routes/quiz.routes.js';
+app.use('/api/quiz', quizRoutes);
+
 //에러 핸들러 (마지막에))
 app.use(errorHandler);
 

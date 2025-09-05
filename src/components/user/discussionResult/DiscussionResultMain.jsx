@@ -11,7 +11,7 @@ export default function DiscussionResultMain() {
   const [myResult, setMyResult] = useState(null);     // { rank, score, totalMessages, totalReactions, labels, topReacted }
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const [overallSummary, setOverallSummary] = useState("");
   useEffect(() => {
     const rid = sessionStorage.getItem("lastRoomId") || "";
     const nick = sessionStorage.getItem("myNickname") || localStorage.getItem("nickname") || "";
@@ -31,6 +31,21 @@ export default function DiscussionResultMain() {
         if (roomOutcome.status !== 'fulfilled') throw roomOutcome.reason || new Error('room_result_error');
         const roomData = roomOutcome.value;
         setRoomResult(roomData);
+
+                // --- Overall summary (once per room) ---
+        try {
+          // 1) 조회
+          const getRes = await http.get(`/api/review/${encodeURIComponent(rid)}/overall-summary`);
+          setOverallSummary(getRes?.summaryText || "");
+        } catch (e1) {
+          // 2) 없으면 생성(1회)
+          try {
+            const postRes = await http.post(`/api/review/${encodeURIComponent(rid)}/overall-summary`, {});
+            setOverallSummary(postRes?.summaryText || "");
+          } catch (e2) {
+            setOverallSummary("");
+          }
+        }
 
         if (myOutcome.status === 'fulfilled' && myOutcome.value) {
           setMyResult(myOutcome.value);
@@ -118,7 +133,13 @@ export default function DiscussionResultMain() {
               총 <b>{heroTotals.messages}</b>개의 의견과 <b>{heroTotals.reactions}</b>개의 공감이 모였어요.
             </p>
             <div className="dr-hero-summary">
-              참여자: <b>{heroTotals.users}</b>명 · 라벨 부여: <b>{heroTotals.labels}</b>회
+              <div className="dr-hero-summary-text">
+                {overallSummary ? (
+                  <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{overallSummary}</pre>
+                ) : (
+                  <span style={{ color: '#888' }}>총평을 준비하고 있습니다…</span>
+                )}
+              </div>
             </div>
             <div className="dr-hero-actions">
               <SavePDFButton/>

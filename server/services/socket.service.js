@@ -218,8 +218,15 @@ function expireRoom(io, roomId) {
     });
   }
 
-  // 데이터 정리 및 봇 중지
-  cleanupRoomIfEmpty(io, roomId);
+  // 전체 총평을 한 번 생성(성공/실패와 무관하게 이후 정리 진행)
+  const genPromise = import('./review.service.js')
+    .then(mod => mod.generateOverallSummary?.(roomId, { force: false }).catch(() => {}))
+    .catch(() => {});
+
+  genPromise.finally(() => {
+    // 데이터 정리 및 봇 중지
+    cleanupRoomIfEmpty(io, roomId);
+  });
 }
 
 function ensureRoomExpiry(io, roomId) {
@@ -561,6 +568,22 @@ async function classifyAndBroadcast(io, msg) {
 }
 
 // ===== Public API =====
+// === Snapshot helper for AI overall summary ===
+export function getRoomSnapshot(roomId) {
+  const messages = Array.isArray(recentByRoom.get(roomId)) ? recentByRoom.get(roomId) : [];
+  const st = roomStates.get(roomId) || {};
+  const topic = st.topic || "";
+  // duration 분 단위 추정
+  let duration;
+  if (st.createdAt && st.expireAt) {
+    duration = Math.round((st.expireAt - st.createdAt) / 60000);
+  } else if (st.createdAt) {
+    duration = Math.round((Date.now() - st.createdAt) / 60000);
+  }
+  const round_number = st.roundNumber || (st.context && st.context.round_number) || undefined;
+  return { messages, context: { topic, duration, round_number } };
+}
+
 export function initChatSocket(io) {
   startMentorScheduler(io);
 

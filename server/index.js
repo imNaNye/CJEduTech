@@ -1,5 +1,3 @@
-// server/index.js
-// (Node 18+에서는 글로벌 fetch 존재. 필요한 경우 node-fetch를 설치해 import 하세요.)
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -13,6 +11,8 @@ import chatRouter from './routes/socket.routes.js';
 import { errorHandler } from './middlewares/error.js';
 import { randomUUID } from "crypto";
 import { initChatSocket } from './services/socket.service.js';
+
+// ENV: AI_SERVER_BASE (e.g., http://localhost:8000) used by services/review.service.js
 
 dotenv.config();
 
@@ -58,6 +58,9 @@ app.use('/api/user', userRoutes);
 
 // chat overview route
 app.use('/api/chat', chatRouter);
+
+import reviewRoutes from './routes/review.routes.js';
+app.use('/api/review', reviewRoutes);
 
 // Initialize chat socket namespace/handlers from service
 initChatSocket(io);

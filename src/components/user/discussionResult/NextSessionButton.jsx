@@ -5,7 +5,7 @@ export default function NextSessionButton() {
 
   return (
     <button className="next-session-button" onClick={() => navigate("/user/end")}>
-      종료하기\(다음세션\)
+      다음으로
     </button>
   );
 }

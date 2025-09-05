@@ -36,7 +36,6 @@ export async function generateOverallSummary(roomId, opts = {}) {
   const payload = { user_id: 'system', all_user_messages, discussion_context };
 
   const url = `${AI_BASE.replace(/\/$/, '')}/discussion-overall`;
-  console.log(payload)
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

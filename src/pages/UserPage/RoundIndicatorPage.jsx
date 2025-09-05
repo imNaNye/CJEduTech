@@ -15,7 +15,7 @@ export default function RoundIndicatorPage(){
             } else if(step === 2){
                 navigate('/user/video');
             } else if(step === 3){
-                navigate('/user/aiDiscussionPage');
+                navigate('/user/aiDiscussion');
             }
         }, 5000);
 

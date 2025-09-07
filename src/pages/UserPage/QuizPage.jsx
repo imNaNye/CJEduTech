@@ -3,12 +3,13 @@ import { useRoundStep } from '../../contexts/RoundStepContext';
 import { quizQuestions } from '../../components/user/quiz/quizQuestions';
 import { useNavigate } from 'react-router-dom';
 import { quizApi } from '@/api/quiz';
+import '@/components/user/quiz/quiz.css'
 
 const QUESTIONS_PER_ROUND = 3;
 const SECONDS_PER_QUESTION = 20;
-const FEEDBACK_MS = 1500; // 정답/오답 피드백 유지 시간 (ms)
+const FEEDBACK_MS = 8000; // 정답/오답 피드백 유지 시간 (ms)
 const REVEAL_MS = 600;    // 선택 → 공개 대기
-const RESULT_MS = 700;    // 공개 → 결과 대기
+const RESULT_MS = 600;    // 공개 → 결과 대기
 const PREVIEW_MS = 3000;  // 최초 3초간 카드 앞면 미리보기(선택 불가)
 
 // phase: 'preview' | 'select' | 'choices' | 'result'
@@ -31,6 +32,9 @@ export default function QuizPage() {
   const feedbackTimeoutRef = useRef(null);
   const previewTimeoutRef = useRef(null);
   const feedbackRef = useRef(null);
+
+  // helper: option을 객체 형태로 통일 (문자열 -> { label })
+  const toOpt = (opt) => (typeof opt === 'string' ? { label: opt } : opt || {});
 
   // 라운드/스텝 진입 시 초기화 (step===1에서만 이 페이지가 렌더된다고 가정)
   useEffect(() => {
@@ -185,17 +189,26 @@ export default function QuizPage() {
 
       <div>
         <h3>{current.q}</h3>
+        {current.desc && (
+          <p className="quiz-desc">{current.desc}</p>
+        )}
 
         {/* PREVIEW: 앞면 3초 공개 (선택 불가) */}
         {phase === 'preview' && (
           <ul className="quiz-cards open" aria-label="카드 미리보기">
-            {current.options.map((opt, i) => (
-              <li key={i}>
-                <div className="card-front preview" aria-hidden>
-                  {opt}
-                </div>
-              </li>
-            ))}
+            {current.options.map((opt, i) => {
+              const item = toOpt(opt);
+              return (
+                <li key={i}>
+                  <div className="card-front preview" aria-hidden>
+                    {item.img && (
+                      <img className="opt-img" src={item.img} alt={item.alt || item.label || `옵션 ${i+1}`} />
+                    )}
+                    {item.label && <div className="opt-label">{item.label}</div>}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
 
@@ -210,7 +223,15 @@ export default function QuizPage() {
                   disabled={!running}
                   aria-disabled={!running}
                   onClick={() => onPickCard(i)}
-                />
+                >
+                  {(() => {
+                    const item = toOpt(current.options[i]);
+                    if (item.backImg) {
+                      return <img className="opt-back-img" src={item.backImg} alt={item.alt || `옵션 ${i+1} 뒷면`} />;
+                    }
+                    return null;
+                  })()}
+                </button>
               </li>
             ))}
           </ul>
@@ -219,13 +240,19 @@ export default function QuizPage() {
         {/* CHOICES: 앞면 모두 공개, 선택한 카드 강조 */}
         {phase === 'choices' && (
           <ul className="quiz-cards open" aria-label="선택 결과 공개">
-            {current.options.map((opt, i) => (
-              <li key={i}>
-                <div className={`card-front ${picked === i ? 'picked' : ''}`}>
-                  {opt}
-                </div>
-              </li>
-            ))}
+            {current.options.map((opt, i) => {
+              const item = toOpt(opt);
+              return (
+                <li key={i}>
+                  <div className={`card-front ${picked === i ? 'picked' : ''}`}>
+                    {item.img && (
+                      <img className="opt-img" src={item.img} alt={item.alt || item.label || `옵션 ${i+1}`} />
+                    )}
+                    {item.label && <div className="opt-label">{item.label}</div>}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

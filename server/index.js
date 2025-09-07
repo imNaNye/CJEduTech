@@ -17,7 +17,7 @@ import { initChatSocket } from './services/socket.service.js';
 dotenv.config();
 
 const allowed = ["https://aigora-beige.vercel.app",
-"https://lat-cluster-crafts-thursday.trycloudflare.com","http://localhost:8080","http://localhost:5173" ];
+"https://distinction-prizes-gross-graphs.trycloudflare.com","http://localhost:8080","http://localhost:5173" ];
 
 const app = express();
 app.use(cors({ origin: allowed, credentials: true }));

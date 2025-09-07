@@ -1,10 +1,36 @@
 // server/routes/review.routes.js
 import { Router } from 'express';
-import { generateOverallSummary, getOverallSummary } from '../services/review.service.js';
+import { generateOverallSummary, getOverallSummary, generateFinalResult, getFinalResult } from '../services/review.service.js';
 
 const router = Router();
 
-// POST /api/chat/:roomId/overall-summary  (generate once; returns cached if exists)
+// POST /api/review/:roomId/final-result   body: { nickname }
+router.post('/:roomId/final-result', async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const nickname = req.body?.nickname || req.query?.nickname || '';
+    const force = String(req.query?.force || '').toLowerCase() === 'true';
+    const result = await generateFinalResult(roomId, nickname, { force });
+    return res.json(result);
+  } catch (e) {
+    return res.status(500).json({ error: 'final_result_failed', message: e?.message });
+  }
+});
+
+// GET /api/review/:roomId/final-result?nickname=...  (return cached)
+router.get('/:roomId/final-result', (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const nickname = req.query?.nickname || '';
+    const v = getFinalResult(roomId, nickname);
+    if (!v) return res.status(404).json({ error: 'not_found' });
+    return res.json(v);
+  } catch (e) {
+    return res.status(500).json({ error: 'final_result_failed', message: e?.message });
+  }
+});
+
+// POST /api/review/:roomId/overall-summary  (generate once; returns cached if exists)
 router.post('/:roomId/overall-summary', async (req, res) => {
   try {
     const { roomId } = req.params;
@@ -16,7 +42,7 @@ router.post('/:roomId/overall-summary', async (req, res) => {
   }
 });
 
-// GET /api/chat/:roomId/overall-summary  (return if generated)
+// GET /api/review/:roomId/overall-summary  (return if generated)
 router.get('/:roomId/overall-summary', (req, res) => {
   try {
     const { roomId } = req.params;

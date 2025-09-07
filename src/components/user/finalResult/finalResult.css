@@ -1,0 +1,193 @@
+:root{
+  --frp-bg:#faf7f5;
+  --frp-card:#ffffff;
+  --frp-text:#333;
+  --frp-muted:#8a8a8a;
+  --frp-accent:#ff8a57; /* 메인 포인트 */
+  --frp-gold:#ffb648;
+  --frp-ring:#ffe6db;
+  --sw-justice:#f39c12;   /* 정직 */
+  --sw-passion:#e74c3c;   /* 열정 */
+  --sw-respect:#ff7f50;   /* 존중 */
+  --sw-creativity:#f1c40f; /* 창의 */
+  --sw-round1:#3a7bd5;
+  --sw-round2:#ff6b6b;
+  --sw-round3:#f4a261;
+}
+
+.final-result-page{background:#fff; min-height:100vh;}
+
+.frp-dashboard{
+  background:#fff;
+  max-width:1785px;
+  margin:0 auto;
+  padding:16px 20px 40px;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.05);
+}
+.final-result-page .frp-section{display:grid; gap:80px; margin:12px auto 28px; max-width:1785px;}
+.final-result-page .frp-section{
+  padding-bottom:32px;
+  margin-bottom:32px;
+  border-bottom:1px solid #e3e3e3;
+}
+.final-result-page .frp-section:last-of-type{
+  border-bottom:none;
+  margin-bottom:0;
+  padding-bottom:0;
+}
+/* SECTION GRIDS */
+.frp-section--1{grid-template-columns: 235px 1fr 515px;}
+.frp-section--2{grid-template-columns: 763px 1fr;}
+.frp-section--3{grid-template-columns: 1fr 0.9fr; align-items:start;}
+
+/* Card */
+.frp-card{
+  background:transparent;
+  border-radius:0;
+  box-shadow:none;
+  overflow:visible; /* 배지/연결선 잘림 방지 */
+}
+.frp-card__header{
+  padding:0 0 8px;
+  border:none;
+}
+.frp-card__header h3{margin:0; font-size:16px; color:var(--frp-text); font-weight:700;}
+.frp-card__footer{
+  padding:8px 0 0;
+  border:none;
+  font-size:12px;
+  color:var(--frp-muted);
+}
+.frp-muted{color:var(--frp-muted)}
+
+/* Rank card */
+.frp-rank__body{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:22px; text-align:center;}
+.frp-avatar{width:176px; height:176px; border-radius:50%; background:linear-gradient(135deg,#ffd6bf,#fff1e7); border:6px solid var(--frp-ring); box-shadow: inset 0 0 0 0 rgba(0,0,0,0);} 
+.frp-avatar--gold{ border-color:#f1c40f; box-shadow: inset 0 0 0 3px rgba(241,196,15,.25); }
+.frp-avatar--silver{ border-color:#bdc3c7; box-shadow: inset 0 0 0 3px rgba(189,195,199,.25); }
+.frp-avatar--bronze{ border-color:#cd7f32; box-shadow: inset 0 0 0 3px rgba(205,127,50,.25); }
+
+.frp-avatar__footer{}
+.frp-avatar__score{margin-top:6px; display:flex; align-items:center; gap:8px; padding:8px 10px; background:#fff; border:1px solid #f3eee7; border-radius:10px; width:max-content;}
+.frp-avatar__score strong{font-size:16px;}
+.frp-avatar__percent{font-size:12px; color:var(--frp-accent); font-weight:800}
+.frp-pill{display:inline-flex; align-items:center; height:28px; padding:0 10px; border-radius:999px; font-weight:800; font-size:14px; margin-top:6px;}
+.frp-pill--gold{background:var(--frp-gold); color:#fff;}
+/* Right meta and avatar grid placement */
+
+/* Avatar wrapper and rank badge */
+.frp-avatarWrap{position:relative; width:176px; height:176px;}
+.frp-rank-badge{position:absolute; top:-6px; left:-6px; width:38px; height:38px; border-radius:50%; display:grid; place-items:center; font-weight:800; color:#fff; border:3px solid #fff; box-shadow:0 4px 10px rgba(0,0,0,.08);}
+.frp-rank-badge--gold{background:#f1c40f;}
+.frp-rank-badge--silver{background:#bdc3c7;}
+.frp-rank-badge--bronze{background:#cd7f32;}
+.frp-rank-badge--normal{background:#c9c9c9;}
+.frp-score strong{font-size:20px; margin-right:6px;}
+.frp-score span{font-size:12px; color:var(--frp-muted)}
+
+.frp-score{margin-top:2px;}
+
+/* AI summary */
+.frp-ai-summary__body{padding:16px; background:#ffe6db; color:#7a3e23; height: 240px;}
+
+/* Completion */
+.frp-completion__body{padding:16px;}
+
+/* Completion layout split */
+.frp-completion__overall{background:#f5f5f5; border:1px solid #eee; border-radius:12px; padding:12px 14px;}
+.frp-completion__title{font-weight:700; margin:0 0 8px; color:#444; font-size:14px;}
+.frp-completion__details{background:#f5f5f5; border:1px solid #eee; border-radius:12px; padding:14px; margin-top:12px;}
+.frp-progress{position:relative; height:12px; background:#f1f1f1; border-radius:999px; overflow:hidden;}
+.frp-progress--lg{height:14px;}
+.frp-progress__bar{position:absolute; inset:0 auto 0 0; background:linear-gradient(90deg, var(--frp-accent), #ffb394);} 
+.frp-progress__label{display:block; text-align:right; font-size:12px; margin-top:8px; color:var(--frp-muted)}
+.frp-completion__chips{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:14px 0 0; padding:0; list-style:none;}
+.frp-chip{display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px 8px; background:#fff; border:1px solid #f3eee7; border-radius:10px;}
+.frp-chip__label{font-size:12px; color:var(--frp-muted)}
+.frp-chip__value{font-weight:800}
+
+/* Donut */
+.frp-donut__wrap{display:flex; align-items:center; gap:20px; padding:18px;}
+.frp-donut__chart{
+  width:360px; /* was 720px */
+  height:360px; /* was 720px */
+  display:block; /* remove inline-canvas baseline gap */
+  background:none; /* IMPORTANT: no placeholder background over canvas */
+}
+
+.frp-donut__legend{list-style:none; margin:0; padding:0; display:grid; gap:8px; font-size:14px;}
+.swatch{display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px;}
+.swatch--justice{background:var(--sw-justice)}
+.swatch--passion{background:var(--sw-passion)}
+.swatch--respect{background:var(--sw-respect)}
+.swatch--creativity{background:var(--sw-creativity)}
+
+/* Line chart placeholder */
+.frp-line__chart{position:relative; height:260px; margin:8px 12px 16px; background:linear-gradient(#fff,#fff) padding-box, repeating-linear-gradient(0deg, #f3efe9 0 1px, transparent 1px 40px) border-box; border:1px solid #f3efe9; border-radius:12px;}
+.frp-line__grid::before, .frp-line__grid::after{content:""; position:absolute; inset:0;}
+/* 3 대각선 꺾은선 (단순 장식) */
+.frp-line__grid::before{background:linear-gradient(135deg, transparent 40%, var(--sw-round1) 40% 41%, transparent 41%), linear-gradient(160deg, transparent 45%, var(--sw-round2) 45% 46%, transparent 46%), linear-gradient(200deg, transparent 50%, var(--sw-round3) 50% 51%, transparent 51%);} 
+
+/* Bars placeholder */
+.frp-bars__chart{
+  position:relative;
+  height:260px;
+  margin:12px;
+  padding:12px;
+  overflow:hidden;
+  background:linear-gradient(#fff,#fff) padding-box, repeating-linear-gradient(0deg, #f3efe9 0 1px, transparent 1px 40px) border-box;
+  border:1px solid #f3efe9;
+  border-radius:12px;
+}
+.bar{border-radius:6px;}
+.bar--a{background:var(--sw-round1)}
+.bar--b{background:var(--sw-round2)}
+
+/* Legends */
+.frp-legend--inline{display:flex; gap:14px; align-items:center;}
+.dot{display:inline-block; width:10px; height:10px; border-radius:50%; margin:0 4px 0 10px;}
+.dot--r1{background:var(--sw-round1)}
+.dot--r2{background:var(--sw-round2)}
+.dot--r3{background:var(--sw-round3)}
+.dot--quiz{background:var(--sw-round1)}
+.dot--participation{background:var(--sw-round2)}
+
+/* TOP3 */
+.frp-top3__list{list-style:none; margin:0; padding:14px; display:grid; gap:12px;}
+.frp-top3__list li{display:grid; grid-template-columns:auto 1fr; gap:10px; align-items:start; background:#fff7f2; border:1px solid #ffe6d6; border-radius:12px; padding:12px;}
+.frp-top3__list .badge{width:26px; height:26px; display:inline-grid; place-items:center; border-radius:999px; background:var(--frp-gold); color:#fff; font-weight:800;}
+
+.frp-top3__content{display: flex;
+padding: 24px;
+flex-direction: column;
+align-items: flex-start;
+gap: 10px;
+color: var(--grey01, #555);
+font-family: "CJ ONLYONE NEW body";
+font-size: 19px;
+font-style: normal;
+font-weight: 300;
+line-height: 155%; /* 29.45px */
+letter-spacing: 0.354px;}
+.frp-top3__meta{display:flex; align-items:center; justify-content:flex-end; gap:8px; font-size:12px; color:var(--frp-muted);} 
+.frp-top3__nick{max-width:60%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.frp-top3__count{font-weight:800; color:var(--frp-accent);} 
+
+/* Responsive */
+@media (max-width: 1100px){
+  .frp-section--1{grid-template-columns:1fr;}
+  .frp-section--2{grid-template-columns:1fr;}
+  .frp-section--3{grid-template-columns:1fr;}
+}
+
+/* Completion - circular detail */
+.frp-circle-list{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin:16px 0 0; padding:0; list-style:none;}
+.frp-circle{display:flex; flex-direction:column; align-items:center; gap:8px;}
+.frp-circle__ring{width:72px; height:72px; border-radius:50%; display:grid; place-items:center; background:linear-gradient(#fff,#fff) padding-box, conic-gradient(var(--frp-accent) 0 360deg) border-box; border:6px solid transparent;}
+.frp-circle__value{font-weight:800; font-size:14px; color:var(--frp-text);} 
+.frp-circle__label{font-size:12px; color:var(--frp-muted);}
+@media (max-width: 1100px){ .frp-circle-list{grid-template-columns:repeat(2,1fr);} }
+.frp-topbar{position:relative; display:flex; justify-content:center; align-items:flex-start; margin:8px auto 24px; max-width:1785px;}
+.frp-topbar__title{margin:0; font-size:24px; font-weight:800; color:#222; font-family:"CJ ONLYONE NEW title", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;}
+.frp-topbar__date{position:absolute; right:0; top:0; font-size:12px; color:#777;}

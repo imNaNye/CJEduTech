@@ -10,7 +10,7 @@ export default function NextSessionButton() {
       className="next-session-button"
       onClick={() => {
         if (round === 3) {
-          navigate("/user/end");
+          navigate("/user/loadResult");
         } else {
           setRound(round + 1);
           setStep(1);

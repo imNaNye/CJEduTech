@@ -14,6 +14,8 @@ import RoundIndicatorPage from './pages/UserPage/RoundIndicatorPage.jsx';
 import TestApi from "./pages/TestApi.jsx";
 import OnBoardingPage from './pages/UserPage/OnBoardingPage.jsx';
 import SlideRoute from './routes/SlideRoute.jsx';
+import FinalResultPage from './pages/UserPage/FinalResultPage.jsx';
+import LoadResultPage from './pages/UserPage/LoadResultPage.jsx';
 
 import AdminSessionPage from './pages/AdminPage/SessionPage.jsx';
 
@@ -42,6 +44,9 @@ function App() {
             <Route path="/user/aiDiscussion" element={<AIDiscussionPage />} />
             <Route path="/user/discussionResult" element={<DiscussionResultPage />} />
           </Route>
+          <Route path="/user/finalResult" element={<FinalResultPage />} />
+          <Route path="/user/loadResult" element={<LoadResultPage />} />
+
           <Route path="/user/end" element={<EndPage />} />
           <Route path="/admin/session" element={<AdminSessionPage />} />
           <Route path="/test" element={<TestApi />} />

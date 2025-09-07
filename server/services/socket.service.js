@@ -1,5 +1,7 @@
 // server/services/socket.service.js
 import { randomUUID } from "crypto";
+import fs from 'fs/promises';
+import path from 'path';
 
 // ===== In-memory stores =====
 const MAX_RECENT = 100;
@@ -15,6 +17,17 @@ const resultsByRoom = new Map();
 /** @type {Map<string, { roomId:string, rank:number, score:number, totalMessages:number, totalReactions:number, labels: Record<string, number>, createdAt:number, topReacted?: { messageId:string, text:string, reactionsCount:number, createdAt:string } }>} */
 const lastResultByUser = new Map();
 
+// ===== Room ID helpers =====
+function composeRoomId(baseId, round){
+  if (round === undefined || round === null) return String(baseId);
+  return `${baseId}__r${round}`;
+}
+function decomposeRoomId(composed){
+  const m = /^(.+?)__r(\d+)$/.exec(composed || "");
+  if (!m) return { baseId: composed, round: undefined };
+  return { baseId: m[1], round: Number(m[2]) };
+}
+
 // ===== Config / constants =====
 const ALLOWED_LABELS = new Set(["열정","정직","창의","존중"]);
 const MIN_AI_SCORE = Number(process.env.AI_MIN_SCORE || 0.6);
@@ -22,6 +35,12 @@ const MIN_AI_SCORE = Number(process.env.AI_MIN_SCORE || 0.6);
 // const AI_ENDPOINT = process.env.AI_ENDPOINT;
 const AI_ENDPOINT = "http://localhost:8000";
 const AI_API_KEY = process.env.AI_API_KEY;
+
+// ===== Archiving (persist chat logs per room) =====
+const ARCHIVE_DIR = process.env.CHAT_ARCHIVE_DIR || path.join(process.cwd(), 'data', 'chat_archives');
+async function ensureDir(dir){ try{ await fs.mkdir(dir, { recursive: true }); }catch{ /*noop*/ } }
+async function writeJSON(file, obj){ await ensureDir(path.dirname(file)); await fs.writeFile(file, JSON.stringify(obj, null, 2), 'utf-8'); }
+async function readJSON(file){ const buf = await fs.readFile(file, 'utf-8'); return JSON.parse(buf); }
 
 // ===== Room lifetime =====
 const ROOM_MAX_AGE_MS = Number(process.env.ROOM_MAX_AGE_MS || 25 * 60 * 1000); // 기본 25분
@@ -107,6 +126,36 @@ function calcUserScore(u) {
   return (u.totalReactions||0)*3 + labelSum*1 + (u.totalMessages||0)*0.5;
 }
 
+function serializeMessagesForArchive(roomId){
+  const arr = recentByRoom.get(roomId) || [];
+  return arr.map(m => {
+    const set = reactionsByMsg.get(m.id) || new Set();
+    const ai = aiByMsg.get(m.id) || {};
+    const { baseId, round } = decomposeRoomId(m.roomId);
+    return {
+      id: m.id,
+      roomId: m.roomId,
+      baseRoomId: baseId,
+      round_number: round,
+      nickname: m.nickname,
+      text: m.text,
+      createdAt: m.createdAt,
+      reactedUsers: Array.from(set),
+      reactionsCount: set.size,
+      ai: {
+        label: ai.label,
+        labels: ai.labels,
+        scores: ai.scores,
+        score: ai.score,
+        summary: ai.summary,
+        method: ai.method,
+        confidence: ai.confidence,
+        state: ai.state,
+      }
+    };
+  });
+}
+
 // ---- Room cleanup: when room has no connected clients (only AI/bot would remain) ----
 function cleanupRoomIfEmpty(io, roomId) {
   const ns = io.of('/chat');
@@ -139,8 +188,10 @@ function cleanupRoomIfEmpty(io, roomId) {
   return true;
 }
 
+
+
 // ---- Room expiry helpers ----
-function expireRoom(io, roomId) {
+async function expireRoom(io, roomId) {
   const ns = io.of('/chat');
   const roomKey = `room:${roomId}`;
   // 알림 브로드캐스트
@@ -216,6 +267,29 @@ function expireRoom(io, roomId) {
       createdAt,
       topReacted: perUser[r.nickname]?.topReacted,
     });
+  }
+
+  // === Archive to disk ===
+  const stMeta = roomStates.get(roomId) || {};
+  const archive = {
+    roomId,
+    createdAt,
+    expireAt: stMeta.expireAt || Date.now(),
+    topic: stMeta.topic || '',
+    round_number: stMeta.roundNumber || (stMeta.context && stMeta.context.round_number) || undefined,
+    messages: serializeMessagesForArchive(roomId),
+    perUser,
+    ranking: rankingArr
+  };
+  const { baseId, round } = decomposeRoomId(roomId);
+  const suffix = round !== undefined ? `-r${round}` : '';
+  const latestFile = path.join(ARCHIVE_DIR, `${baseId}${suffix}-latest.json`);
+  const datedFile = path.join(ARCHIVE_DIR, `${baseId}${suffix}-${createdAt}.json`);
+  try {
+    await writeJSON(datedFile, archive);
+    await writeJSON(latestFile, archive);
+  } catch (e) {
+    console.error('[ARCHIVE] write error:', e?.message || e);
   }
 
   // 전체 총평을 한 번 생성(성공/실패와 무관하게 이후 정리 진행)
@@ -590,26 +664,25 @@ export function initChatSocket(io) {
   io.of("/chat").on("connection", (socket) => {
     let joinedRoomId = null;
 
-    socket.on("room:join", ({ roomId }) => {
+    socket.on("room:join", ({ roomId, round }) => {
       if (!roomId) return;
+      const composed = composeRoomId(roomId, round);
       let prevRoom = joinedRoomId;
       if (prevRoom) socket.leave(`room:${prevRoom}`);
-      joinedRoomId = roomId;
-      socket.join(`room:${roomId}`);
-      // after leaving previous room, cleanup if empty
+      joinedRoomId = composed;
+      socket.join(`room:${composed}`);
       if (prevRoom) setTimeout(() => cleanupRoomIfEmpty(io, prevRoom), 0);
 
       // ensure room state exists
-      getRoomState(roomId);
+      getRoomState(composed);
 
-      // start per-room test bot (posts every 10s)
-      ensureRoomBot(io, roomId);
+      // start per-room test bot
+      ensureRoomBot(io, composed);
 
-      // start/ensure room expiry timer (max 25분)
-      ensureRoomExpiry(io, roomId);
+      // start/ensure room expiry timer
+      ensureRoomExpiry(io, composed);
 
-      // recent with reactions + ai
-      const base = recentByRoom.get(roomId) ?? [];
+      const base = recentByRoom.get(composed) ?? [];
       const recent = base.map(m => {
         const set = reactionsByMsg.get(m.id) ?? new Set();
         const ai = aiByMsg.get(m.id) || {};
@@ -617,22 +690,19 @@ export function initChatSocket(io) {
           ...m, 
           reactedUsers: Array.from(set), 
           reactionsCount: set.size,
-          // multi-label fields
           aiLabels: ai.labels,
           aiScores: ai.scores,
           aiSummary: ai.summary,
           aiMethod: ai.method,
           aiConfidence: ai.confidence,
-          // backward-compat single fields
           aiLabel: ai.label,
           aiScore: ai.score
         };
       });
       socket.emit("room:recent", { messages: recent });
-      // Send initial remaining time info
-      const st0 = getRoomState(roomId);
+      const st0 = getRoomState(composed);
       socket.emit('room:time', {
-        roomId,
+        roomId: composed,
         expireAt: st0.expireAt,
         now: Date.now(),
         remainingMs: Math.max(0, (st0.expireAt || Date.now()) - Date.now()),
@@ -641,12 +711,10 @@ export function initChatSocket(io) {
 
     socket.on("message:send", (payload, cb) => {
       try {
-        const { roomId, text, nickname } = payload || {};
+        const { roomId: baseId, round, text, nickname } = payload || {};
+        const roomId = baseId ? composeRoomId(baseId, round) : joinedRoomId;
         const trimmed = (text || "").trim();
-        if (!roomId || !trimmed) {
-          cb?.({ ok: false });
-          return;
-        }
+        if (!roomId || !trimmed) { cb?.({ ok:false }); return; }
         // guard if room is expired
         const stGuard = roomStates.get(roomId);
         if (stGuard && stGuard.expireAt && Date.now() >= stGuard.expireAt) {
@@ -716,6 +784,7 @@ export function initChatSocket(io) {
       });
     });
 
+
     socket.on('disconnect', () => {
       if (joinedRoomId) setTimeout(() => cleanupRoomIfEmpty(io, joinedRoomId), 0);
     });
@@ -782,3 +851,87 @@ export function getOverview() {
 
 export function getRoomResult(roomId){ return resultsByRoom.get(roomId) || null; }
 export function getUserLastResult(nickname){ return lastResultByUser.get(nickname) || null; }
+
+export async function getRoomArchive(roomId){
+  try {
+    const { baseId, round } = decomposeRoomId(roomId);
+    const suffix = round !== undefined ? `-r${round}` : '';
+    return await readJSON(path.join(ARCHIVE_DIR, `${baseId}${suffix}-latest.json`));
+  } catch { return null; }
+}
+
+export async function listRoomArchives(roomId){
+  try {
+    const { baseId, round } = decomposeRoomId(roomId);
+    const files = await fs.readdir(ARCHIVE_DIR);
+    const prefix = round !== undefined ? `${baseId}-r${round}-` : `${baseId}-`;
+    const hits = files.filter(f => f.startsWith(prefix) && f.endsWith('.json') && !f.endsWith('-latest.json'));
+    const results = [];
+    for (const f of hits){
+      try { results.push(await readJSON(path.join(ARCHIVE_DIR, f))); } catch {}
+    }
+    results.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0));
+    return results;
+  } catch { return []; }
+}
+
+export async function aggregateArchives(roomIds = []){
+  // 병합: perUser 합산 후 점수 재계산, 메시지는 필요 시 결합
+  const combo = { rooms: [], messages: [], perUser: {}, ranking: [] };
+  for (const rid of roomIds){
+    const a = await getRoomArchive(rid);
+    if (!a) continue;
+    combo.rooms.push({ roomId: a.roomId, createdAt: a.createdAt, round_number: a.round_number });
+    combo.messages.push(...(a.messages||[]));
+    for (const [nick, u] of Object.entries(a.perUser || {})){
+      if (!combo.perUser[nick]) combo.perUser[nick] = { nickname: nick, totalMessages:0, totalReactions:0, labels:{ 정직:0, 창의:0, 존중:0, 열정:0 } };
+      combo.perUser[nick].totalMessages += (u.totalMessages||0);
+      combo.perUser[nick].totalReactions += (u.totalReactions||0);
+      for (const k of Object.keys(combo.perUser[nick].labels)){
+        combo.perUser[nick].labels[k] += (u.labels?.[k]||0);
+      }
+    }
+  }
+  // 랭킹 재산출
+  const arr = Object.values(combo.perUser).map(u => ({
+    nickname: u.nickname,
+    totalMessages: u.totalMessages,
+    totalReactions: u.totalReactions,
+    labels: u.labels,
+    score: calcUserScore(u),
+  })).sort((a,b)=> b.score - a.score);
+  let rank=1, same=0, last=null;
+  for (let i=0;i<arr.length;i++){
+    const s = arr[i].score;
+    if (last===null){ rank=1; same=1; last=s; }
+    else if (s===last){ same++; }
+    else { rank+=same; same=1; last=s; }
+    arr[i].rank = rank;
+  }
+  combo.ranking = arr;
+  return combo;
+}
+
+// ===== Aggregate all rounds of a roomId =====
+export async function aggregateRoom(roomId){
+  const all = await listRoomArchives(roomId);
+  const ids = all.map(a => a.roomId); // same id; reuse aggregator by composing archives directly
+  // Build combo similar to aggregateArchives but using loaded archives
+  const combo = { rooms: [], messages: [], perUser: {}, ranking: [] };
+  for (const a of all){
+    combo.rooms.push({ roomId: a.roomId, createdAt: a.createdAt, round_number: a.round_number });
+    combo.messages.push(...(a.messages||[]));
+    for (const [nick, u] of Object.entries(a.perUser || {})){
+      if (!combo.perUser[nick]) combo.perUser[nick] = { nickname: nick, totalMessages:0, totalReactions:0, labels:{ 정직:0, 창의:0, 존중:0, 열정:0 } };
+      combo.perUser[nick].totalMessages += (u.totalMessages||0);
+      combo.perUser[nick].totalReactions += (u.totalReactions||0);
+      for (const k of Object.keys(combo.perUser[nick].labels)){
+        combo.perUser[nick].labels[k] += (u.labels?.[k]||0);
+      }
+    }
+  }
+  const arr = Object.values(combo.perUser).map(u => ({ nickname:u.nickname, totalMessages:u.totalMessages, totalReactions:u.totalReactions, labels:u.labels, score:calcUserScore(u) })).sort((a,b)=>b.score-a.score);
+  let rank=1,same=0,last=null; for (const r of arr){ if(last===null){rank=1;same=1;last=r.score;} else if(r.score===last){same++;} else {rank+=same;same=1;last=r.score;} r.rank=rank; }
+  combo.ranking = arr;
+  return combo;
+}

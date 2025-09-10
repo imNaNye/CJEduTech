@@ -1,19 +1,61 @@
 // src/lib/http.js
-const API = import.meta.env.VITE_API_URL;
-async function request(path, options={}) {
-  const res = await fetch(`${API}${path}`, {
-    credentials: 'include',
-    headers: {'Content-Type': 'application/json', ...(options.headers||{})},
-    ...options,
-  });
-  let data=null; try { data = await res.json(); } catch {}
-  if (!res.ok) {
-    const err = new Error(data?.message || `HTTP ${res.status}`);
-    err.status = res.status; err.payload = data; throw err;
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
+async function request(path, opts = {}) {
+  const {
+    method = 'GET',
+    headers = {},
+    body = undefined,
+    credentials = 'include',
+  } = opts;
+
+  const url = `${API_BASE}${path}`;
+
+  const init = {
+    method,
+    mode: 'cors',
+    credentials,
+    headers: { ...headers },
+  };
+
+  const isPlainObject = body && typeof body === 'object' && !(body instanceof FormData) && !(body instanceof Blob) && !(body instanceof ArrayBuffer);
+  if (body !== undefined) {
+    if (isPlainObject) {
+      init.headers['Content-Type'] = init.headers['Content-Type'] || 'application/json';
+      init.body = JSON.stringify(body);
+    } else {
+      init.body = body;
+    }
   }
+
+  let res;
+  try {
+    res = await fetch(url, init);
+  } catch (err) {
+    const e = new Error(`Network error (possible CORS): ${err?.message || err}`);
+    e.cause = err;
+    throw e;
+  }
+
+  let data = null;
+  const text = await res.text().catch(() => '');
+  if (text) {
+    try { data = JSON.parse(text); } catch { data = text; }
+  }
+
+  if (!res.ok) {
+    const err = new Error((data && data.message) || `HTTP ${res.status}`);
+    err.status = res.status;
+    err.payload = data;
+    throw err;
+  }
+
   return data;
 }
+
 export const http = {
-  get: (p) => request(p, { method:'GET' }),
-  post: (p,b) => request(p, { method:'POST', body: JSON.stringify(b) }),
+  get: (p, headers) => request(p, { method: 'GET', headers }),
+  post: (p, b, headers) => request(p, { method: 'POST', body: b, headers }),
+  put: (p, b, headers) => request(p, { method: 'PUT', body: b, headers }),
+  del: (p, headers) => request(p, { method: 'DELETE', headers }),
 };

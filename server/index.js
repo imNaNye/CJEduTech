@@ -15,21 +15,35 @@ import { initChatSocket } from './services/socket.service.js';
 // ENV: AI_SERVER_BASE (e.g., http://localhost:8000) used by services/review.service.js
 
 dotenv.config();
-
-const allowed = ["https://aigora-beige.vercel.app",
-"https://distinction-prizes-gross-graphs.trycloudflare.com","http://localhost:8080","http://localhost:5173" ];
+const allowed = [
+  'https://aigora.kr',
+  'https://www.aigora.kr',
+  'https://api.aigora.kr',
+  "http://localhost:5173",
+  "http://localhost:8080",
+];
 
 const app = express();
-app.use(cors({ origin: allowed, credentials: true }));
+app.set('trust proxy', 1);
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true); // SSR/healthz/curl
+    return cb(null, allowed.includes(origin));
+  },
+  credentials: true,
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization']
+}));
 app.use(express.json());
 app.use(cookieParser());
-
+app.options('*', cors());
 // HTTP 서버 및 Socket.IO 설정
 const httpServer = http.createServer(app);
 const io = new SocketIOServer(httpServer, {
+  path: '/socket.io',
   cors: {
     origin: allowed,
-    methods: ["GET", "POST"],
+    methods: ['GET','POST'],
     credentials: true
   }
 });

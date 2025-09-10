@@ -36,7 +36,6 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
-app.options('*', cors());
 // HTTP 서버 및 Socket.IO 설정
 const httpServer = http.createServer(app);
 const io = new SocketIOServer(httpServer, {

@@ -1,5 +1,6 @@
 // src/components/user/selectAvatar/AvatarSelector.jsx
 import { useEffect, useState } from 'react';
+import { useUser } from '@/contexts/UserContext';
 import ActionButtons from './ActionButtons.jsx';
 import AvatarButtons from './AvatarButtons.jsx';
 import './selectAvatar.css';
@@ -11,6 +12,7 @@ export default function AvatarSelector() {
   const [selected, setSelected] = useState(null); // '1'..'12' 문자열 또는 null
   const [msg, setMsg] = useState('');
   const [saving, setSaving] = useState(false);
+  const { setAvatarUrl } = useUser();
 
   // 현재 사용자 아바타 불러오기
   useEffect(() => {
@@ -44,6 +46,8 @@ export default function AvatarSelector() {
         setMsg(body?.message || '저장에 실패했습니다.');
         return;
       }
+      setAvatarUrl(String(selected));
+      localStorage.setItem('avatarUrl', String(selected));
       setMsg('아바타가 저장되었습니다!');
     } catch (e) {
       setMsg('서버 오류가 발생했습니다.');

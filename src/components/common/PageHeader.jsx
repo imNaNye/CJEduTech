@@ -1,15 +1,23 @@
 // src/components/common/PageHeader.jsx
-import { useUser } from '../../contexts/UserContext';
+
+import { useUser } from '@/contexts/UserContext';
 import './PageHeader.css';
 
-export default function PageHeader({ title, isShort}) {
-  const { nickname, avatarUrl } = useUser(); {/* 유저 관련 정보는 contexts/UserContext에서 해당 함수를 통해 받아옴*/}
+function getAvatarSrc(avatarNumber) {
+  if (!avatarNumber) return '';
+  // public 폴더 기준 (프로덕션에서도 동작)
+  return `/assets/avatar/avatar${avatarNumber}.png`;
+}
+
+export default function PageHeader({ title, isShort }) {
+  const { nickname, avatarUrl } = useUser();
+  console.log('header user', { nickname, avatarUrl });
 
   return (
-    <div className={isShort ? "page-header-short" : "page-header"}>
-      <div className="title">{title}</div>  {/* title은 props에서 가져옴 */}
-
+    <div className={isShort ? 'page-header-short' : 'page-header'}>
+      <div className="title">{title}</div>
       <div className="user-info">
+        {avatarUrl && <img src={getAvatarSrc(avatarUrl)} alt="avatar" className="avatar-icon" />}
         {nickname && <span className="nickname">{nickname}</span>}
       </div>
     </div>

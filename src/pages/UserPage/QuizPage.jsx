@@ -4,6 +4,7 @@ import { quizQuestions } from '../../components/user/quiz/quizQuestions';
 import { useNavigate } from 'react-router-dom';
 import { quizApi } from '@/api/quiz';
 import '@/components/user/quiz/quiz.css'
+import PageHeader from '@/components/common/PageHeader.jsx';
 
 const QUESTIONS_PER_ROUND = 3;
 const SECONDS_PER_QUESTION = 20;
@@ -180,15 +181,12 @@ export default function QuizPage() {
   if (!current) return <div>이 라운드의 퀴즈 데이터가 없습니다.</div>;
 
   return (
+    <div>
+    <PageHeader title='CJ 인재상 퀴즈'></PageHeader>
     <section>
-      <header>
-        <div>Round {round}</div>
-        <div>Question {idx + 1} / {QUESTIONS_PER_ROUND}</div>
-        <div>Timer {secondsLeft}s</div>
-      </header>
-
-      <div>
-        <h3>{current.q}</h3>
+      <div className='quiz-page'>
+        <div className='timer'>Timer {secondsLeft}s</div>
+        <h3>Q{idx + 1}. {current.q}</h3>
         {current.desc && (
           <p className="quiz-desc">{current.desc}</p>
         )}
@@ -204,7 +202,7 @@ export default function QuizPage() {
                     {item.img && (
                       <img className="opt-img" src={item.img} alt={item.alt || item.label || `옵션 ${i+1}`} />
                     )}
-                    {item.label && <div className="opt-label">{item.label}</div>}
+                    {item.label ? <div className="opt-label">{item.label}</div> : null}
                   </div>
                 </li>
               );
@@ -215,25 +213,24 @@ export default function QuizPage() {
         {/* SELECT: 등뒤 카드 3개, 선택 가능 */}
         {phase === 'select' && (
           <ul className="quiz-cards" aria-label="선택할 카드">
-            {[0,1,2].map((i) => (
-              <li key={i}>
-                <button
-                  ref={(el) => (optionRefs.current[i] = el)}
-                  className="card-back"
-                  disabled={!running}
-                  aria-disabled={!running}
-                  onClick={() => onPickCard(i)}
-                >
-                  {(() => {
-                    const item = toOpt(current.options[i]);
-                    if (item.backImg) {
-                      return <img className="opt-back-img" src={item.backImg} alt={item.alt || `옵션 ${i+1} 뒷면`} />;
-                    }
-                    return null;
-                  })()}
-                </button>
-              </li>
-            ))}
+            {current.options.map((opt, i) => {
+              const item = toOpt(opt);
+              return (
+                <li key={i}>
+                  <button
+                    ref={(el) => (optionRefs.current[i] = el)}
+                    className="card-back"
+                    disabled={!running}
+                    aria-disabled={!running}
+                    onClick={() => onPickCard(i)}
+                  >
+                    {item.backImg ? (
+                      <img className="opt-back-img" src={item.backImg} alt={item.alt || `옵션 ${i+1} 뒷면`} />
+                    ) : null}
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         )}
 
@@ -283,5 +280,6 @@ export default function QuizPage() {
         <button onClick={goNextQuestion} disabled={phase !== 'result'}>다음 문제</button>
       </div>
     </section>
+    </div>
   );
 }

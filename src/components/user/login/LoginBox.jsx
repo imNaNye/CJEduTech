@@ -8,6 +8,7 @@ import { authApi } from '@/api/auth';
 import nickIcon from '@/assets/images/login/nickIcon.svg';
 import psIcon from '@/assets/images/login/psIcon.svg';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@/contexts/UserContext';
 
 export default function LoginBox() {
   const [nickname, setNickname] = useState('');
@@ -16,6 +17,7 @@ export default function LoginBox() {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
   const navigate = useNavigate();
+  const { setNickname: setUserNickname, setAvatarUrl } = useUser();
 
   const showToast = (message, type) => {
     setToast({ message, type });
@@ -30,6 +32,11 @@ export default function LoginBox() {
     setMsg('');
     try {
       const { user } = await authApi.login({ nickname, password });
+      // 컨텍스트 & 로컬스토리지 업데이트
+      setUserNickname(user.nickname);
+      setAvatarUrl(user.avatar ?? '');
+      localStorage.setItem('nickname', user.nickname);
+      if (user.avatar) localStorage.setItem('avatarUrl', user.avatar); else localStorage.removeItem('avatarUrl');
       setMsg(`${user.nickname}님 환영합니다!`);
       showToast(`${user.nickname}님 환영합니다!`, 'success');
       navigate('/user/selectAvatar');

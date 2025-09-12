@@ -1,88 +1,57 @@
 /* src/components/common/PageHeader.css */
 
-.page-header {
-display: flex;
-width: 2000px;
-padding: 24px 64px;
-align-items: flex-start;
-gap: 10px;
-border-bottom: 1px solid var(--grey04, #D9D9D9);
-background: var(--grey07, #FAFAFA);
-
-box-sizing: border-box;
-}
-
+/* ===== Page Header ===== */
+.page-header,
 .page-header-short {
-display: flex;
-padding: 24px 64px 24px 38px;
-box-sizing: border-box;
-width: 1318px;
-align-items: flex-start;
-gap: 10px;
-border-bottom: 1px solid var(--grey04, #D9D9D9);
-background: var(--grey07, #FAFAFA);
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* title ←→ user-info */
+  gap: 12px;
+  padding: 12px 20px;            /* 여백 */
+  box-sizing: border-box;
 }
 
-.title {
-width: 1558.148px;
-color: var(--grey01, #555);
-font-family: "CJ ONLYONE NEW title";
-font-size: 32px;
-font-style: normal;
-font-weight: 700;
-line-height: normal;
-box-sizing: border-box;
-}
-.page-header-short.title {
-width: 926px;
-color: var(--grey01, #555);
-font-family: "CJ ONLYONE NEW title";
-font-size: 32px;
-font-style: normal;
-font-weight: 700;
-line-height: normal;
-box-sizing: border-box;
+/* 제목(좌측) */
+.page-header .title,
+.page-header-short .title {
+  margin-left: 64px;
+  font-weight: 800;
+  font-size: 27px;
+  line-height: 1.2;
+  color: var(--ink, #222);
 }
 
+/* 우측 유저 정보 컨테이너 */
 .user-info {
-display: flex;
-width: 275.173px;
-height: 36px;
-justify-content: flex-end;
-align-items: flex-start;
-gap: 12px;
-box-sizing: border-box;
-flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
+/* 아바타 아이콘: 원형, 작게 */
+.avatar-icon {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: scale-down;
+  background: #eee;              /* 이미지 없을 때 배경 */
+  border: 3px solid rgba(0,0,0,0.08);
+}
+
+
+/* 닉네임 텍스트 */
 .nickname {
-color: var(--grey01, #555);
-text-align: right;
-font-family: "CJ ONLYONE NEW body";
-font-size: 24px;
-font-style: normal;
-font-weight: 300;
-box-sizing: border-box;
-line-height: normal;
+  font-weight: 600;
+  font-size: 27px;
+  color: #666;
+  margin-left: 15px;
+  margin-right: 64px;
 }
 
-.page-header-short.user-info {
-display: flex;
-width: 273.011px;
-height: 36px;
-align-items: center;
-gap: 12px;
-flex-shrink: 0;
-box-sizing: border-box;
-}
-
-.page-header-short.nickname {
-color: var(--grey01, #555);
-text-align: right;
-font-family: "CJ ONLYONE NEW body";
-font-size: 24px;
-font-style: normal;
-font-weight: 300;
-box-sizing: border-box;
-line-height: normal;
+/* 작은 화면에서 살짝 압축 */
+@media (max-width: 640px) {
+  .page-header .title,
+  .page-header-short .title { font-size: 18px; }
+  .nickname { font-size: 13px; }
+  .avatar-icon { width: 24px; height: 24px; }
 }

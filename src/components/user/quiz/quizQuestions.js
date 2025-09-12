@@ -72,9 +72,9 @@ export const quizQuestions = {
       q: '다음 중 아래 설명에 부합하는 카드는?',
       desc: '개인의 내면적인 성품과 관련된 능력으로 자신과 타인, 사회와의 관계 속에서 바람직한 가치관과 태도를 가지고 행동하는 능력',
       options: [
-        { label: '인성', img: r1q1A, alt: '인성',  backImage: verticalBack },
-        { label: '태도', img: r1q1B, alt: '태도', backImage: verticalBack },
-        { label: '기능', img: r1q1C, alt: '기능', backImage: verticalBack },
+        {  img: r1q1A, alt: '인성',  backImg: verticalBack },
+        {  img: r1q1B, alt: '태도', backImg: verticalBack },
+        {  img: r1q1C, alt: '기능', backImg: verticalBack },
       ],
       answer: 0,
       explanation: 'OO의 정의와 대표 사례를 기억하세요.',
@@ -84,11 +84,12 @@ export const quizQuestions = {
     },
     {
       q: '다음 중 아래 설명에 부합하는 카드는?',
+      desc: '제한된 시간 안에 효율적으로 일처리를 조율하는 능력',
       options: [
-        { label: '시간관리능력', img: r1q2A, alt: '가 이미지', backImage: verticalBack },
-        { label: '팀워크능력', img: r1q2B, alt: '나 이미지', backImage: verticalBack },
-        { label: '위기관리능력', img: r1q2C, alt: '다 이미지', backImage: verticalBack },
-        { label: '창의성', img: r1q2D, alt: '창의성', backImage: verticalBack}
+        {  img: r1q2A, alt: '가 이미지', backImg: verticalBack },
+        {  img: r1q2B, alt: '나 이미지', backImg: verticalBack },
+        {  img: r1q2C, alt: '다 이미지', backImg: verticalBack },
+        {  img: r1q2D, alt: '창의성', backImg: verticalBack}
       ],
       answer: 0,
       explanation: '핵심 키워드는 X, Y 입니다.',
@@ -98,9 +99,9 @@ export const quizQuestions = {
     {
       q: '제시상황에 적절한 응대를 찾아 연결하세요.',
       options: [
-        { label: 'X', img: r1q3X, alt: 'X 이미지', backImage: horizontalBack },
-        { label: 'Y', img: r1q3Y, alt: 'Y 이미지', backImage: horizontalBack },
-        { label: 'Z', img: r1q3Z, alt: 'Z 이미지', backImage: horizontalBack },
+        { label: 'X', img: r1q3X, alt: 'X 이미지', backImg: horizontalBack },
+        { label: 'Y', img: r1q3Y, alt: 'Y 이미지', backImg: horizontalBack },
+        { label: 'Z', img: r1q3Z, alt: 'Z 이미지', backImg: horizontalBack },
       ],
       answer: 2,
       explanation: '아동 동반 고객이 방문할 경우, 아동용 의자가 있는 좌석 쪽으로 안내하거나 아동용 의자를 제공해드려야해요.',
@@ -109,10 +110,11 @@ export const quizQuestions = {
   2: [
     {
       q: '2라운드 Q1?',
+      desc: '고객, 동료 등의 입장을 헤아리고 먼저 생각하는 마음',
       options: [
-        { label: 'A1', img: r2q1A1, alt: 'A1 이미지', backImage: verticalBack },
-        { label: 'B1', img: r2q1B1, alt: 'B1 이미지', backImage: verticalBack },
-        { label: 'C1', img: r2q1C1, alt: 'C1 이미지', backImage: verticalBack },
+        {  img: r2q1A1, alt: 'A1 이미지', backImg: verticalBack },
+        {  img: r2q1B1, alt: 'B1 이미지', backImg: verticalBack },
+        {  img: r2q1C1, alt: 'C1 이미지', backImg: verticalBack },
       ],
       answer: 2,
       explanation: '이 보기의 차이를 비교해 보세요.',
@@ -120,9 +122,9 @@ export const quizQuestions = {
     {
       q: '2라운드 Q2?',
       options: [
-        { label: 'A2', img: r2q2A2, alt: 'A2 이미지', backImage: verticalBack },
-        { label: 'B2', img: r2q2B2, alt: 'B2 이미지', backImage: verticalBack },
-        { label: 'C2', img: r2q2C2, alt: 'C2 이미지', backImage: verticalBack },
+        {  img: r2q2A2, alt: 'A2 이미지', backImg: verticalBack },
+        {  img: r2q2B2, alt: 'B2 이미지', backImg: verticalBack },
+        {  img: r2q2C2, alt: 'C2 이미지', backImg: verticalBack },
       ],
       answer: 0,
       explanation: '정의와 예시를 함께 외우면 좋아요.',
@@ -131,9 +133,9 @@ export const quizQuestions = {
     {
       q: '2라운드 Q3?',
       options: [
-        { label: 'A3', img: r2q3A3, alt: 'A3 이미지', backImage: horizontalBack },
-        { label: 'B3', img: r2q3B3, alt: 'B3 이미지', backImage: horizontalBack },
-        { label: 'C3', img: r2q3C3, alt: 'C3 이미지', backImage: horizontalBack },
+        { label: 'A3', img: r2q3A3, alt: 'A3 이미지', backImg: horizontalBack },
+        { label: 'B3', img: r2q3B3, alt: 'B3 이미지', backImg: horizontalBack },
+        { label: 'C3', img: r2q3C3, alt: 'C3 이미지', backImg: horizontalBack },
       ],
       answer: 1,
       explanation: '오답일 때는 근거를 다시 확인하세요.',
@@ -142,10 +144,11 @@ export const quizQuestions = {
   3: [
     {
       q: '3라운드 Q1?',
+      desc: '상황 변화나 고객, 팀 동료 특성을 빠르게 파악하는 능력',
       options: [
-        { label: 'A1', img: r3q1A1, alt: 'A1 이미지', backImage: verticalBack },
-        { label: 'B1', img: r3q1B1, alt: 'B1 이미지', backImage: verticalBack },
-        { label: 'C1', img: r3q1C1, alt: 'C1 이미지', backImage: verticalBack },
+        {  img: r3q1A1, alt: 'A1 이미지', backImg: verticalBack },
+        {  img: r3q1B1, alt: 'B1 이미지', backImg: verticalBack },
+        {  img: r3q1C1, alt: 'C1 이미지', backImg: verticalBack },
       ],
       answer: 0,
       explanation: '기본 개념을 묻는 문제입니다.',
@@ -153,9 +156,9 @@ export const quizQuestions = {
     {
       q: '3라운드 Q2?',
       options: [
-        { label: 'A2', img: r3q2A2, alt: 'A2 이미지', backImage: verticalBack },
-        { label: 'B2', img: r3q2B2, alt: 'B2 이미지', backImage: verticalBack },
-        { label: 'C2', img: r3q2C2, alt: 'C2 이미지', backImage: verticalBack },
+        {  img: r3q2A2, alt: 'A2 이미지', backImg: verticalBack },
+        {  img: r3q2B2, alt: 'B2 이미지', backImg: verticalBack },
+        {  img: r3q2C2, alt: 'C2 이미지', backImg: verticalBack },
       ],
       answer: 1,
       explanation: '비슷한 용어와 혼동하지 않도록 주의!',
@@ -163,9 +166,9 @@ export const quizQuestions = {
     {
       q: '3라운드 Q3?',
       options: [
-        { label: 'A3', img: r3q3A3, alt: 'A3 이미지', backImage: horizontalBack },
-        { label: 'B3', img: r3q3B3, alt: 'B3 이미지', backImage: horizontalBack },
-        { label: 'C3', img: r3q3C3, alt: 'C3 이미지', backImage: horizontalBack },
+        { label: 'A3', img: r3q3A3, alt: 'A3 이미지', backImg: horizontalBack },
+        { label: 'B3', img: r3q3B3, alt: 'B3 이미지', backImg: horizontalBack },
+        { label: 'C3', img: r3q3C3, alt: 'C3 이미지', backImg: horizontalBack },
       ],
       answer: 2,
       explanation: '응용 문제: 근거를 떠올리며 선택하세요.',

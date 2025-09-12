@@ -18,6 +18,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative; /* overlay anchor */
 }
 
 .video-element {
@@ -25,6 +26,8 @@
   max-width: 1600px;
   border-radius: 12px;
   box-shadow: 0 0 10px rgba(0,0,0,0.15);
+  display: block;
+  aspect-ratio: 16 / 9;
 }
 
 .video-footer {
@@ -66,4 +69,27 @@
 .finish-button:enabled {
   background-color: #ff7a00; /* 주황색 */
   cursor: pointer;
+}
+
+/* Progress bar overlaid at the top of the video, matching the video's width */
+.video-progress {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 1600px; /* same as .video-element max-width */
+  height: 15px;
+  background-color: #e5e7eb;
+  border-radius: 5px;
+  overflow: hidden;
+  z-index: 2; /* above the video */
+  pointer-events: none;
+}
+
+.video-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #ff7a00, #ff9f3f);
+  transition: width 0.2s linear;
 }

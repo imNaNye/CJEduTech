@@ -2,10 +2,11 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRoundStep } from "../../contexts/RoundStepContext";
 import PageHeader from "../../components/common/PageHeader";
-import RoundIndicatorMain from "../../components/user/roundIndicator/RoundIndicatorMain";
+import logoRobot from "@//assets/images/common/logoRobot.png";
+import "@/components/user/roundIndicator/roundIndicator.css";
 
 export default function RoundIndicatorPage(){
-    const { step } = useRoundStep();
+    const { step, round } = useRoundStep();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -17,15 +18,32 @@ export default function RoundIndicatorPage(){
             } else if(step === 3){
                 navigate('/user/aiDiscussion');
             }
-        }, 5000);
+        }, 6000);
 
         return () => clearTimeout(timeout);
     }, [step, navigate]);
 
     return(
         <div className="round-indicator-page">
-            <PageHeader/>
-            <RoundIndicatorMain/>
+            <PageHeader title={`Round ${round}`} />
+            <div className="round-indicator">
+                <h3>Round {round}</h3>
+                </div>
+                <img className="logo-robot" src={logoRobot}></img>
+                <div className = "round-step-container">
+                <div className = {((step === 1) ? 'current-step' : 'step-indicator')}>
+                    <h4>step 1</h4>
+                    퀴즈 풀이
+                </div>
+                <div className = {((step === 2) ? 'current-step' : 'step-indicator')}>
+                    <h4>step 2</h4>
+                    영상 시청
+                </div>
+                <div className = {((step === 3) ? 'current-step' : 'step-indicator')}>
+                    <h4>step 3</h4>
+                    AI 토론
+                </div>
+            </div>
         </div>
     );
 }

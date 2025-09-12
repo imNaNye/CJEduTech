@@ -1,19 +1,33 @@
+:root {
+  
+  --board-w: 1600px;   /* 보드 가로 */
+  --board-h: 900px;    /* 보드 세로 */
+  
+}
+
 /* 페이지 전체 정렬 */
 .select-avatar-page {
-  width: 2000px;
-  height: 1200px;
-  flex-shrink: 0;
-  aspect-ratio: 5/3;
-  justify-content: center;
-  align-items: center;
-  padding-top: 171px;
-  padding-bottom: 170px;
-  padding-left: 295px;
-  padding-right: 295px;
-  background-image: url('../../../src/assets/images/login/loginBackground.png');
+  /* 16:9 프레임 계산 */
+  --frame-w: min(100vw, calc(100vh * 16 / 9));
+  --frame-h: calc(var(--frame-w) * 9 / 16);
+
+  width: var(--frame-w);
+  height: var(--frame-h);
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: calc((100vh - var(--frame-h)) / 2);
+  margin-bottom: calc((100vh - var(--frame-h)) / 2);
+
+  display: flex;
+  align-items: center;   /* 수직 중앙 */
+  justify-content: center; /* 수평 중앙 */
+
+  background-image: url('../../../assets/images/login/loginBackground.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
 .avatar-button {
@@ -57,7 +71,7 @@
 .avatar-selector {
   display: flex;
   width: 1410px;
-  height: 859px;
+  height: 1009px;
   padding: 102px 143px;
   flex-direction: column;
   justify-content: center;
@@ -72,12 +86,12 @@
 
 .avatar-buttons {
   display: grid;
-  grid-template-columns: repeat(6,159px);
+  grid-template-columns: repeat(6, 159px); /* 5 x 2 레이아웃 */
   justify-content: center;
-  gap: 24px;
-  width: 100%;
-  margin-top: 90px;
-  margin-bottom: 76px;
+  gap: 28px 36px; /* row / column gap */
+  width: auto;
+  margin-top: 64px;
+  margin-bottom: 56px;
 }
 
 .action-buttons {

@@ -1,18 +1,20 @@
-
 .login-page {
-  width: 2000px;
-  height: 1200px;
-  flex-shrink: 0;
-  aspect-ratio: 5/3;
-  display: flex; 
-  flex-direction: column;
+  /* 16:9 프레임 계산 */
+  --frame-w: min(100vw, calc(100vh * 16 / 9));
+  --frame-h: calc(var(--frame-w) * 9 / 16);
+
+  position: relative;
+  width: var(--frame-w);
+  height: var(--frame-h);
+  margin: 0 auto; /* 좌우 중앙 */
+  margin-top: calc((100vh - var(--frame-h)) / 2);
+  margin-bottom: calc((100vh - var(--frame-h)) / 2);
+
+  display: flex;
   justify-content: center;
   align-items: center;
 
   box-sizing: border-box;
-  /* 디자인 시안 기준 여백 (상 217.5 / 우 133 / 하 216.5 / 좌 132) */
-  padding: 217.5px 133px 216.5px 132px;
-
   background-image: url('../../../assets/images/login/loginBackground.png');
   background-size: cover;
   background-position: center;
@@ -22,24 +24,51 @@
 .login-main{
   display: flex;
   flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6vw;
+  width: 90%;
+  max-width: 1400px;
 }
 
 .login-logo{
-  height: 560px;
-  width: 426px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;   /* 원본 비율 유지 */
 }
 
+.login-left{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
 
+.login-left-text{
+  font-family: "CJ ONLYONE NEW title";
+  font-size: clamp(28px, 4vw, 60px);
+  font-weight: 800;
+  line-height: 1.1;
+  background: linear-gradient(90deg, #ff6a00, #ff9a3f);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
 .login-container {
-  display: flex;
-  width: 922px;
-  padding: 217.5px 133px 216.5px 132px;
-  justify-content: center;
-  align-items: center;
+  flex: 1;
+  max-width: 520px;
+  width: 100%;
+  padding: clamp(24px, 8vw, 200px);
   border-radius: 26px;
   border: 1px solid var(--grey04, #D9D9D9);
   background: var(--white, #FFF);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.06);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
 }
 
 /* 로그인 제목 */
@@ -77,7 +106,7 @@ margin-bottom: 42px;
   padding: 0.6rem;
   border: 0px solid #ccc;
   border-radius: 6px;
-  font-size: 1rem;
+  font-size: 1.2rem;
   background: var(--white, #FFF);
   width: 70%;
   outline: none;
@@ -113,14 +142,8 @@ font-size : 1.75rem;
 }
 
 @media (max-width: 1024px) {
-  .login-page {
-    padding: 48px 24px; /* 모바일/태블릿에서는 여백 축소 */
-  }
-  .login-box {
-    width: 100%;
-    max-width: 922px;
-    padding: 24px; /* 내부 여백도 축소 */
-  }
+  .login-main { flex-direction: column; gap: 24px; }
+  .login-container { max-width: 560px; }
 }
 
 /* Toast */

@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 export default function VideoPage({ onComplete }) {
   const { round, step, setStep } = useRoundStep();
   const [videoEnded, setVideoEnded] = useState(false);
+  const [progress, setProgress] = useState(0); // 0 ~ 100 percent
   const videoRef = useRef(null);
   const lockSeekRef = useRef(false);
   const lastTimeRef = useRef(0);
@@ -20,9 +21,7 @@ export default function VideoPage({ onComplete }) {
     setVideoEnded(false);
     const v = videoRef.current;
     if (!v) return;
-    // iOS/Safari 호환: 인라인 재생 강제
     v.playsInline = true;
-    // 자동 재생 시도 (Muted 필요)
     const tryPlay = () => {
       const p = v.play();
       if (p && typeof p.catch === 'function') {
@@ -37,53 +36,65 @@ export default function VideoPage({ onComplete }) {
 
   return (
     <div className='video-page'>
-      <PageHeader title={content.title}></PageHeader>
-      <section>
-        <video
-          key={round}
-          ref={videoRef}
-          src={content.src}
-          autoPlay
-          playsInline
-          muted={muted}
-          controls={false}
-          controlsList="nodownload noplaybackrate"
-          disablePictureInPicture
-          onContextMenu={(e) => e.preventDefault()}
-          tabIndex={-1}
-          style={{ pointerEvents: 'none' }}
-          onRateChange={(e) => {
-            const v = e.currentTarget;
-            if (v.playbackRate !== 1) v.playbackRate = 1;
-          }}
-          onPause={(e) => {
-            // 사용자가 어떤 방식으로든 일시정지되어도 즉시 다시 재생
-            const v = e.currentTarget;
-            if (!videoEnded) {
-              const p = v.play();
-              if (p && typeof p.catch === 'function') {
-                p.catch(() => {/* ignore */});
+      <PageHeader title={content.title} />
+      <section className='video-main'>
+        <div className="video-player">
+          <div className="video-progress">
+            <div
+              className="video-progress-bar"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <video
+            className="video-element"
+            key={round}
+            ref={videoRef}
+            src={content.src}
+            autoPlay
+            playsInline
+            muted={muted}
+            controls={false}
+            controlsList="nodownload noplaybackrate"
+            disablePictureInPicture
+            onContextMenu={(e) => e.preventDefault()}
+            tabIndex={-1}
+            style={{ pointerEvents: 'none' }}
+            onRateChange={(e) => {
+              const v = e.currentTarget;
+              if (v.playbackRate !== 1) v.playbackRate = 1;
+            }}
+            onPause={(e) => {
+              const v = e.currentTarget;
+              if (!videoEnded) {
+                const p = v.play();
+                if (p && typeof p.catch === 'function') {
+                  p.catch(() => {/* ignore */});
+                }
               }
-            }
-          }}
-          onTimeUpdate={(e) => {
-            if (!lockSeekRef.current) {
-              lastTimeRef.current = e.currentTarget.currentTime;
-            }
-          }}
-          onSeeking={(e) => {
-            const v = e.currentTarget;
-            const allowed = lastTimeRef.current;
-            if (!lockSeekRef.current && Math.abs(v.currentTime - allowed) > 0.25) {
-              lockSeekRef.current = true;
-              v.currentTime = allowed;
-              setTimeout(() => { lockSeekRef.current = false; }, 0);
-            }
-          }}
-          onEnded={() => {
-            setVideoEnded(true);
-          }}
-        />
+            }}
+            onTimeUpdate={(e) => {
+              const v = e.currentTarget;
+              if (!lockSeekRef.current) {
+                lastTimeRef.current = v.currentTime;
+              }
+              if (v.duration) {
+                setProgress((v.currentTime / v.duration) * 100);
+              }
+            }}
+            onSeeking={(e) => {
+              const v = e.currentTarget;
+              const allowed = lastTimeRef.current;
+              if (!lockSeekRef.current && Math.abs(v.currentTime - allowed) > 0.25) {
+                lockSeekRef.current = true;
+                v.currentTime = allowed;
+                setTimeout(() => { lockSeekRef.current = false; }, 0);
+              }
+            }}
+            onEnded={() => {
+              setVideoEnded(true);
+            }}
+          />
+        </div>
         <button
           className='finish-button'
           disabled={!videoEnded}
@@ -92,9 +103,11 @@ export default function VideoPage({ onComplete }) {
             navigate('/user/roundIndicator');
           }}
         >
-          영상 시청 완료
+          {videoEnded
+            ? "영상 시청 종료"
+            : "영상은 자동 재생됩니다. 조작이 불가하니 집중해서 시청해 주세요."}
         </button>
-        <VideoFooter/>
+        <VideoFooter/> 
       </section>
     </div>
   );

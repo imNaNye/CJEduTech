@@ -22,7 +22,7 @@
 
 .video-element {
   width: 100%;
-  max-width: 800px;
+  max-width: 1600px;
   border-radius: 12px;
   box-shadow: 0 0 10px rgba(0,0,0,0.15);
 }
@@ -44,5 +44,26 @@
   color: white;
   border: none;
   border-radius: 6px;
+  cursor: pointer;
+}
+
+.finish-button {
+  width: 100%;
+  max-width: 1600px;
+  margin: 1rem auto 0;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  background-color: #ccc;
+  color: #fff;
+  cursor: not-allowed;
+  transition: background-color 0.3s;
+  display: block;
+}
+
+.finish-button:enabled {
+  background-color: #ff7a00; /* 주황색 */
   cursor: pointer;
 }

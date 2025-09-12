@@ -183,7 +183,7 @@ export default function QuizPage() {
   return (
     <div>
     <PageHeader title='CJ 인재상 퀴즈'></PageHeader>
-    <section>
+    <div className="quiz-section">
       <div className='quiz-page'>
         <div className='timer'>Timer {secondsLeft}s</div>
         <h3>Q{idx + 1}. {current.q}</h3>
@@ -279,7 +279,7 @@ export default function QuizPage() {
       <div>
         <button onClick={goNextQuestion} disabled={phase !== 'result'}>다음 문제</button>
       </div>
-    </section>
+    </div>
     </div>
   );
 }

@@ -25,7 +25,7 @@
   box-sizing: border-box;
 }
 
-section {
+.quiz-section {
   /* 보드는 창 크기에 맞춰 자동 스케일 (16:9 유지) */
   width: min(
     calc(100vw - 48px),           /* 좌우 여백 고려 */

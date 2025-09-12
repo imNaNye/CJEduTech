@@ -4,6 +4,18 @@ import ChatTimer from "./ChatTimer";
 import SubjectOverview from "./SubjectOverview";
 import { useNavigate } from "react-router-dom";
 
+import cake1 from '@/assets/images/discussion/cake_1.png';
+import cake2 from '@/assets/images/discussion/cake_2.png';
+import cake3 from '@/assets/images/discussion/cake_3.png';
+import cake4 from '@/assets/images/discussion/cake_4.png';
+import badge1 from '@/assets/images/discussion/badge_1.png';
+import badge2 from '@/assets/images/discussion/badge_2.png';
+import badge3 from '@/assets/images/discussion/badge_3.png';
+import badge4 from '@/assets/images/discussion/badge_4.png';
+
+const CAKES = { 1: cake1, 2: cake2, 3: cake3, 4: cake4 };
+const BADGES = { 1: badge1, 2: badge2, 3: badge3, 4: badge4 };
+
 const LABELS = ["정직", "창의", "존중", "열정"];
 
 const getMyNick = () => {
@@ -216,7 +228,7 @@ export default function ChatOverView(){
         <img
           key={`${variant}-rem-${remainder}`}
           className="cake-img"
-          src={`/src/assets/images/discussion/cake_${remainder}.png`}
+          src={CAKES[remainder]}
           alt={`${variant} 케이크(${remainder})`}
         />
       );
@@ -226,7 +238,7 @@ export default function ChatOverView(){
         <img
           key={`${variant}-full-${i}`}
           className="cake-img"
-          src={`/src/assets/images/discussion/cake_4.png`}
+          src={CAKES[4]}
           alt={`${variant} 케이크(4)`}
         />
       );
@@ -245,19 +257,19 @@ export default function ChatOverView(){
       <section className="principle-icons">
         <div className="principle-icon">
           {renderCakes(totals['정직'], 'justice')}
-          <img className="badge-img" src={`/src/assets/images/discussion/badge_1.png`} alt="정직"/>
+          <img className="badge-img" src={BADGES[1]} alt="정직"/>
         </div>
         <div className="principle-icon">
           {renderCakes(totals['열정'], 'passion')}
-          <img className="badge-img" src={`/src/assets/images/discussion/badge_2.png`} alt="열정"/>
+          <img className="badge-img" src={BADGES[2]} alt="열정"/>
         </div>
         <div className="principle-icon">
           {renderCakes(totals['창의'], 'creed')}
-          <img className="badge-img" src={`/src/assets/images/discussion/badge_3.png`} alt="창의"/>
+          <img className="badge-img" src={BADGES[3]} alt="창의"/>
         </div>
         <div className="principle-icon">
           {renderCakes(totals['존중'], 'respect')}
-          <img className="badge-img" src={`/src/assets/images/discussion/badge_4.png`} alt="존중"/>
+          <img className="badge-img" src={BADGES[4]} alt="존중"/>
         </div>
       </section>
     </div>

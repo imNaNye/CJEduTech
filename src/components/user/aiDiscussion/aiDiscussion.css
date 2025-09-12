@@ -101,6 +101,15 @@ background: var(--grey06, #F7F7F7);
 }
 /* image-based cake */
 .principle-icon .cake-img { width: 118px; height: 178px; object-fit: contain; margin-bottom: 6px; filter: drop-shadow(0 4px 10px rgba(0,0,0,.12)); }
+/* vertical stack for multiple cake layers */
+.cake-stack{
+  display:flex;
+  flex-direction: column; /* stack vertically */
+  align-items:center;
+  justify-content:flex-end; /* bottom align inside the cake area */
+  min-height: 178px; /* ensure base height even with 0 layers */
+}
+.principle-icon .cake-img{ display:block; }
 /* bottom badge image (with caption baked in the PNG) */
 .principle-icon .badge-img { width: 137px; height: 137px; object-fit: contain; }
 

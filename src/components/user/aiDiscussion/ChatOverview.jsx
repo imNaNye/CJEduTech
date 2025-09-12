@@ -218,33 +218,40 @@ export default function ChatOverView(){
 
   // cake stacking: 1..4 → cake_1..cake_4, then add another layer for 5..8 (4 per layer)
   const renderCakes = (count, variant) => {
-    if (!count || count <= 0) return null;
-    const layers = Math.floor(count / 4); // full cake_4 layers to stack
-    const remainder = count % 4;          // top layer remainder (1..3) or 0
-
     const imgs = [];
-    if (remainder > 0) {
-      imgs.push(
-        <img
-          key={`${variant}-rem-${remainder}`}
-          className="cake-img"
-          src={CAKES[remainder]}
-          alt={`${variant} 케이크(${remainder})`}
-        />
-      );
-    }
-    for (let i = 0; i < layers; i++) {
-      imgs.push(
-        <img
-          key={`${variant}-full-${i}`}
-          className="cake-img"
-          src={CAKES[4]}
-          alt={`${variant} 케이크(4)`}
-        />
-      );
+
+    if (count && count > 0) {
+      const layers = Math.floor(count / 4); // full cake_4 layers to stack
+      const remainder = count % 4;          // top layer remainder (1..3) or 0
+
+      if (remainder > 0) {
+        imgs.push(
+          <img
+            key={`${variant}-rem-${remainder}`}
+            className="cake-img"
+            src={CAKES[remainder]}
+            alt={`${variant} 케이크(${remainder})`}
+          />
+        );
+      }
+      for (let i = 0; i < layers; i++) {
+        imgs.push(
+          <img
+            key={`${variant}-full-${i}`}
+            className="cake-img"
+            src={CAKES[4]}
+            alt={`${variant} 케이크(4)`}
+          />
+        );
+      }
     }
 
-    return imgs;
+    // Always return a stack container so vertical baseline is consistent across items
+    return (
+      <div className="cake-stack">
+        {imgs}
+      </div>
+    );
   };
 
   return (
@@ -270,6 +277,8 @@ export default function ChatOverView(){
         <div className="principle-icon">
           {renderCakes(totals['존중'], 'respect')}
           <img className="badge-img" src={BADGES[4]} alt="존중"/>
+        </div>
+        <div>
         </div>
       </section>
     </div>

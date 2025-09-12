@@ -16,6 +16,7 @@ router.get("/overview", (req, res) => {
   }
 });
 router.get("/result/:roomId", (req, res) => {
+  console.log("chat get room",req.params.roomId)
   const data = getRoomResult(req.params.roomId);
   if (!data) return res.status(404).json({ error: "not_found" });
 
@@ -23,8 +24,9 @@ router.get("/result/:roomId", (req, res) => {
 });
 
 router.get("/my-result", (req, res) => {
-
   const { nickname } = req.query || {};
+
+  console.log("chat get nick",nickname);
   if (!nickname) return res.status(400).json({ error: "nickname_required" });
   const data = getUserLastResult(String(nickname));
   if (!data) return res.status(404).json({ error: "not_found" });

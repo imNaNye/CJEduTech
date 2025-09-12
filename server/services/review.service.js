@@ -108,7 +108,8 @@ export async function generateFinalResult(roomId, nickname, opts = {}){
     const myMsgs = allMessages.filter(m => (nickname||'') && m.nickname === nickname).map(m => ({ text: m.text || '' }));
     if (myMsgs.length){
       const url = `${AI_BASE.replace(/\/$/, '')}/evaluate`;
-      const payload = { user_id: nickname || 'me', messages: myMsgs, task: 'summarize' };
+      const payload = { user_id: nickname || 'me', user_messages: myMsgs, discussion_context:{} };
+      console.log(payload);
       const res = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
       if (res.ok){ const data = await res.json().catch(()=>({})); aiSummary = data?.personalized_feedback || data?.result || data?.text || null; }
     }
@@ -167,10 +168,12 @@ export async function generateOverallSummary(roomId, opts = {}) {
   }
 
   const snap = getRoomSnapshot(roomId);
+
   const messages = Array.isArray(snap?.messages) ? snap.messages : [];
   const topic = snap?.context?.topic || '';
   const duration = snap?.context?.duration;
   const round_number = snap?.context?.round_number;
+
 
   const all_user_messages = messages.map(m => ({ user_id: m.nickname || m.userId || '익명', text: m.text || m.message || '' }));
   const discussion_context = {};
@@ -187,6 +190,7 @@ export async function generateOverallSummary(roomId, opts = {}) {
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
+
     const body = await res.text().catch(() => '');
     const err = new Error(`ai_request_failed: ${res.status}`);
     err.details = body;

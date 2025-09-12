@@ -1,0 +1,113 @@
+{
+  "roomId": "general",
+  "createdAt": 1757663081585,
+  "expireAt": 1757664566898,
+  "topic": "",
+  "messages": [
+    {
+      "id": "07bd1bf5-847c-4dd3-b66b-42de29a63d7c",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "나는 정직하다",
+      "createdAt": "2025-09-12T07:44:31.018Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "e4e0f495-37bf-449d-988f-bae45bc2edcd",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "정직 정직",
+      "createdAt": "2025-09-12T07:44:32.706Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "d755ce03-9da5-4621-b8d4-9af5214a2dc3",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "한 줄 요약 가능하신가요?",
+      "createdAt": "2025-09-12T07:44:36.898Z",
+      "reactedUsers": [
+        "똑똑한여우795"
+      ],
+      "reactionsCount": 1,
+      "ai": {
+        "state": "ERROR"
+      }
+    }
+  ],
+  "perUser": {
+    "똑똑한여우795": {
+      "nickname": "똑똑한여우795",
+      "totalMessages": 2,
+      "totalReactions": 0,
+      "labels": {
+        "정직": 0,
+        "창의": 0,
+        "존중": 0,
+        "열정": 0
+      },
+      "topReacted": {
+        "messageId": "07bd1bf5-847c-4dd3-b66b-42de29a63d7c",
+        "text": "나는 정직하다",
+        "reactionsCount": 0,
+        "createdAt": "2025-09-12T07:44:31.018Z"
+      }
+    },
+    "봇(테스트)#7845": {
+      "nickname": "봇(테스트)#7845",
+      "totalMessages": 1,
+      "totalReactions": 1,
+      "labels": {
+        "정직": 0,
+        "창의": 0,
+        "존중": 0,
+        "열정": 0
+      },
+      "topReacted": {
+        "messageId": "d755ce03-9da5-4621-b8d4-9af5214a2dc3",
+        "text": "한 줄 요약 가능하신가요?",
+        "reactionsCount": 1,
+        "createdAt": "2025-09-12T07:44:36.898Z"
+      }
+    }
+  },
+  "ranking": [
+    {
+      "nickname": "봇(테스트)#7845",
+      "totalMessages": 1,
+      "totalReactions": 1,
+      "labels": {
+        "정직": 0,
+        "창의": 0,
+        "존중": 0,
+        "열정": 0
+      },
+      "score": 3.5,
+      "rank": 1
+    },
+    {
+      "nickname": "똑똑한여우795",
+      "totalMessages": 2,
+      "totalReactions": 0,
+      "labels": {
+        "정직": 0,
+        "창의": 0,
+        "존중": 0,
+        "열정": 0
+      },
+      "score": 1,
+      "rank": 2
+    }
+  ]
+}

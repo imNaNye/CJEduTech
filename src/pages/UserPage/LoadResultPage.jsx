@@ -2,13 +2,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../../components/user/finalResult/loadResultPage.css';
 
+import { http } from '@/lib/http' ;
+
 export default function LoadResultPage(){
   const navigate = useNavigate();
   const location = useLocation();
   const search = new URLSearchParams(location.search);
 
   const initialRoomId = useMemo(() => (
-    search.get('roomId') || location.state?.roomId || localStorage.getItem('roomId') || ''
+    search.get('roomId') || location.state?.roomId || localStorage.getItem('roomId') || 'general'
   ), [location.search, location.state]);
 
   const initialNickname = useMemo(() => (
@@ -31,13 +33,9 @@ export default function LoadResultPage(){
       setStatus('requesting');
       setMessage('라운드 기록을 합산 중…');
       try{
-        const res = await fetch(`/api/review/${encodeURIComponent(roomId)}/final-result?force=${encodeURIComponent('true')}`,{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ nickname })
-        });
-        if (!res.ok){ throw new Error(`HTTP ${res.status}`); }
-        const data = await res.json();
+        const res = await http.post(`/api/review/${encodeURIComponent(roomId)}/final-result?nickname=${nickname}&force=${encodeURIComponent('true')}`)
+        console.log(res)
+        const data = res.sections;
         if (aborted) return;
         setStatus('success');
         setMessage('완료되었습니다. 결과 페이지로 이동합니다…');

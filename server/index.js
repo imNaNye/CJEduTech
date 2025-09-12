@@ -62,6 +62,8 @@ export default pool;
 
 // 헬스체크
 app.get('/health', (req, res) => res.json({ ok: true }));
+// 헬스체크
+app.get('/healthz', (req, res) => res.json({ ok: true }));
 
 //로그인 api
 app.use('/api/auth', authRoutes);

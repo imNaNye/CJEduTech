@@ -3,10 +3,12 @@ import PageHeader from '../../components/common/PageHeader';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { http } from '@/lib/http' ;
+import { quizApi } from '@/api/quiz' ;
 export default function FinalResultPage() {
   const location = useLocation();
   const search = new URLSearchParams(location.search);
-  const roomId = useMemo(() => search.get('roomId') || location.state?.roomId || localStorage.getItem('roomId') || '', [location.search, location.state]);
+  const roomId = useMemo(() => search.get('roomId') || location.state?.roomId || localStorage.getItem('roomId') || 'general', [location.search, location.state]);
   const nickname = useMemo(() => search.get('nickname') || location.state?.nickname || localStorage.getItem('nickname') || '', [location.search, location.state]);
   const learnedAtStr = useMemo(() => new Date().toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' }), []);
 
@@ -86,15 +88,16 @@ export default function FinalResultPage() {
       }
       try{
         // 최종 결과 조회
-        const res = await fetch(`/api/review/${encodeURIComponent(roomId)}/final-result?nickname=${encodeURIComponent(nickname||'')}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
+        const res = await http.get(`/api/review/${encodeURIComponent(roomId)}/final-result?nickname=${encodeURIComponent(nickname||'')}`);
+        
+        const json = res;
+        console.log(json);
         if (aborted) return;
         setData(json);
 
         // 퀴즈 결과 조회 (신규 경로)
         try{
-          const qres = await fetch(`/api/quiz/scores/me?roomId=${encodeURIComponent(roomId)}&nickname=${encodeURIComponent(nickname||'')}`);
+          const qres = await quizApi.getMyScores();
           if (qres.ok){
             const qjson = await qres.json();
             // 기대 스키마: { rounds: [{ round_number, totalQuestions, correctCount, correctRate, takenAt? }, ...] }

@@ -1,30 +1,19 @@
 {
   "roomId": "general",
-  "createdAt": 1757665947010,
-  "expireAt": 1757667437780,
+  "createdAt": 1757664969972,
+  "expireAt": 1757666465282,
   "topic": "",
   "messages": [
     {
-      "id": "8ce3074f-523f-49f8-bae5-bc9dabd5b241",
+      "id": "8753b926-fdfd-42d2-a9d5-3fe4d428757d",
       "roomId": "general",
       "baseRoomId": "general",
       "nickname": "똑똑한여우795",
-      "text": "한글 정직 창의",
-      "createdAt": "2025-09-12T08:32:25.340Z",
+      "text": "asfsaf",
+      "createdAt": "2025-09-12T08:16:08.338Z",
       "reactedUsers": [],
       "reactionsCount": 0,
       "ai": {
-        "label": "정직",
-        "labels": [
-          "정직",
-          "창의"
-        ],
-        "scores": {
-          "정직": 1,
-          "창의": 1
-        },
-        "score": 1,
-        "summary": "명시적 키워드 검출: 정직, 창의",
         "state": "DONE"
       }
     }
@@ -35,16 +24,16 @@
       "totalMessages": 1,
       "totalReactions": 0,
       "labels": {
-        "정직": 1,
-        "창의": 1,
+        "정직": 0,
+        "창의": 0,
         "존중": 0,
         "열정": 0
       },
       "topReacted": {
-        "messageId": "8ce3074f-523f-49f8-bae5-bc9dabd5b241",
-        "text": "한글 정직 창의",
+        "messageId": "8753b926-fdfd-42d2-a9d5-3fe4d428757d",
+        "text": "asfsaf",
         "reactionsCount": 0,
-        "createdAt": "2025-09-12T08:32:25.340Z"
+        "createdAt": "2025-09-12T08:16:08.338Z"
       }
     }
   },
@@ -54,12 +43,12 @@
       "totalMessages": 1,
       "totalReactions": 0,
       "labels": {
-        "정직": 1,
-        "창의": 1,
+        "정직": 0,
+        "창의": 0,
         "존중": 0,
         "열정": 0
       },
-      "score": 2.5,
+      "score": 0.5,
       "rank": 1
     }
   ]

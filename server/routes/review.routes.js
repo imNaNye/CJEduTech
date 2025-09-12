@@ -6,9 +6,11 @@ const router = Router();
 
 // POST /api/review/:roomId/final-result   body: { nickname }
 router.post('/:roomId/final-result', async (req, res) => {
+    console.log("final post");
   try {
     const { roomId } = req.params;
     const nickname = req.body?.nickname || req.query?.nickname || '';
+    console.log("final",roomId,nickname);
     const force = String(req.query?.force || '').toLowerCase() === 'true';
     const result = await generateFinalResult(roomId, nickname, { force });
     return res.json(result);
@@ -19,9 +21,12 @@ router.post('/:roomId/final-result', async (req, res) => {
 
 // GET /api/review/:roomId/final-result?nickname=...  (return cached)
 router.get('/:roomId/final-result', (req, res) => {
+
+    console.log("final get");
   try {
     const { roomId } = req.params;
     const nickname = req.query?.nickname || '';
+    console.log("final",roomId,nickname);
     const v = getFinalResult(roomId, nickname);
     if (!v) return res.status(404).json({ error: 'not_found' });
     return res.json(v);
@@ -34,6 +39,8 @@ router.get('/:roomId/final-result', (req, res) => {
 router.post('/:roomId/overall-summary', async (req, res) => {
   try {
     const { roomId } = req.params;
+
+  console.log("post",roomId)
     const force = String(req.query?.force || '').toLowerCase() === 'true';
     const result = await generateOverallSummary(roomId, { force });
     return res.json(result);
@@ -47,7 +54,9 @@ router.get('/:roomId/overall-summary', (req, res) => {
   try {
     const { roomId } = req.params;
     const v = getOverallSummary(roomId);
+
     if (!v) return res.status(404).json({ error: 'not_found' });
+    
     return res.json(v);
   } catch (e) {
     return res.status(500).json({ error: 'overall_summary_failed', message: e?.message });

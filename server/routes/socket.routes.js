@@ -23,7 +23,6 @@ router.get("/result/:roomId", (req, res) => {
 });
 
 router.get("/my-result", (req, res) => {
-
   const { nickname } = req.query || {};
   if (!nickname) return res.status(400).json({ error: "nickname_required" });
   const data = getUserLastResult(String(nickname));

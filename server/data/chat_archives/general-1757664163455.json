@@ -1,0 +1,525 @@
+{
+  "roomId": "general",
+  "createdAt": 1757664163455,
+  "expireAt": 1757665597778,
+  "topic": "",
+  "messages": [
+    {
+      "id": "0837bec4-85d5-43d0-a7df-33e934b105d3",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "관련 사례가 있을까요?",
+      "createdAt": "2025-09-12T08:01:47.778Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "존중",
+        "labels": [
+          "존중"
+        ],
+        "scores": {
+          "존중": 1
+        },
+        "score": 1,
+        "summary": "유사도 분석으로 '존중' 분류 (합계: 0.459)",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "93b9ac3c-bf95-4579-9a41-d7cb779cc1f3",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "존중",
+      "createdAt": "2025-09-12T08:01:49.915Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "존중",
+        "labels": [
+          "존중"
+        ],
+        "scores": {
+          "존중": 1
+        },
+        "score": 1,
+        "summary": "명시적 키워드 검출: 존중",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "92e31120-ecac-4af3-b534-d5fe7eeb74bb",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "존중",
+      "createdAt": "2025-09-12T08:01:52.840Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "존중",
+        "labels": [
+          "존중"
+        ],
+        "scores": {
+          "존중": 1
+        },
+        "score": 1,
+        "summary": "명시적 키워드 검출: 존중",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "c0fb8748-1487-4ac5-b923-200d9f753f99",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "존중",
+      "createdAt": "2025-09-12T08:01:54.432Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "존중",
+        "labels": [
+          "존중"
+        ],
+        "scores": {
+          "존중": 1
+        },
+        "score": 1,
+        "summary": "명시적 키워드 검출: 존중",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "d44f8603-be92-4884-ae83-1a56ebee7e44",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "존중",
+      "createdAt": "2025-09-12T08:01:55.646Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "존중",
+        "labels": [
+          "존중"
+        ],
+        "scores": {
+          "존중": 1
+        },
+        "score": 1,
+        "summary": "명시적 키워드 검출: 존중",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "09526531-6287-4595-b31c-6a077a1415be",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "한 줄 요약 가능하신가요?",
+      "createdAt": "2025-09-12T08:01:57.778Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "존중",
+        "labels": [
+          "존중"
+        ],
+        "scores": {
+          "존중": 1
+        },
+        "score": 1,
+        "summary": "유사도 분석으로 '존중' 분류 (합계: 0.387)",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "f7283828-202f-4a9f-beb5-5a6400c2b96a",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "참여해주셔서 감사합니다!",
+      "createdAt": "2025-09-12T08:02:07.778Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "d6af3164-cdd3-45ed-88bd-fa8e24cb3807",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "존중",
+      "createdAt": "2025-09-12T08:02:17.382Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "존중",
+        "labels": [
+          "존중"
+        ],
+        "scores": {
+          "존중": 1
+        },
+        "score": 1,
+        "summary": "명시적 키워드 검출: 존중",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "fc64e776-ea95-4ead-81c4-43b2cf3b9515",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "한 줄 요약 가능하신가요?",
+      "createdAt": "2025-09-12T08:02:17.779Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "존중",
+        "labels": [
+          "존중"
+        ],
+        "scores": {
+          "존중": 1
+        },
+        "score": 1,
+        "summary": "유사도 분석으로 '존중' 분류 (합계: 0.387)",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "5199c9c2-937f-4909-83a7-60232456b501",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "존중",
+      "createdAt": "2025-09-12T08:02:18.310Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "존중",
+        "labels": [
+          "존중"
+        ],
+        "scores": {
+          "존중": 1
+        },
+        "score": 1,
+        "summary": "명시적 키워드 검출: 존중",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "9a780897-c98a-4352-ae6a-9b394025f9dd",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "창의",
+      "createdAt": "2025-09-12T08:02:24.190Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "창의",
+        "labels": [
+          "창의"
+        ],
+        "scores": {
+          "창의": 1
+        },
+        "score": 1,
+        "summary": "명시적 키워드 검출: 창의",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "fa095e06-e98d-4b53-acfa-a9f5b7ee2149",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "열정",
+      "createdAt": "2025-09-12T08:02:25.242Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "열정",
+        "labels": [
+          "열정"
+        ],
+        "scores": {
+          "열정": 1
+        },
+        "score": 1,
+        "summary": "명시적 키워드 검출: 열정",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "51b11690-e655-4373-9181-db139ec40d0d",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "관련 사례가 있을까요?",
+      "createdAt": "2025-09-12T08:02:27.779Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "존중",
+        "labels": [
+          "존중"
+        ],
+        "scores": {
+          "존중": 1
+        },
+        "score": 1,
+        "summary": "유사도 분석으로 '존중' 분류 (합계: 0.459)",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "69c3909b-94a8-426a-9ac4-8a83f7fab3e4",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "창의",
+      "createdAt": "2025-09-12T08:02:28.108Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "창의",
+        "labels": [
+          "창의"
+        ],
+        "scores": {
+          "창의": 1
+        },
+        "score": 1,
+        "summary": "명시적 키워드 검출: 창의",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "d34f6d2f-e488-4bd0-b74d-c8fad93fb64f",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "창의",
+      "createdAt": "2025-09-12T08:02:29.098Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "창의",
+        "labels": [
+          "창의"
+        ],
+        "scores": {
+          "창의": 1
+        },
+        "score": 1,
+        "summary": "명시적 키워드 검출: 창의",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "dd8a734d-572f-4aeb-80d1-26f551a5e5f5",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "창의",
+      "createdAt": "2025-09-12T08:02:29.906Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "창의",
+        "labels": [
+          "창의"
+        ],
+        "scores": {
+          "창의": 1
+        },
+        "score": 1,
+        "summary": "명시적 키워드 검출: 창의",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "63da449c-5306-43d6-9386-34109e0e1642",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "창의",
+      "createdAt": "2025-09-12T08:02:30.788Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "창의",
+        "labels": [
+          "창의"
+        ],
+        "scores": {
+          "창의": 1
+        },
+        "score": 1,
+        "summary": "명시적 키워드 검출: 창의",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "848a2a99-e508-423c-aab4-e4659804b873",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "정직",
+      "createdAt": "2025-09-12T08:02:34.121Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "정직",
+        "labels": [
+          "정직"
+        ],
+        "scores": {
+          "정직": 1
+        },
+        "score": 1,
+        "summary": "명시적 키워드 검출: 정직",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "2dcd9e10-a437-47ea-adad-5ca7b894487f",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "정직",
+      "createdAt": "2025-09-12T08:02:35.091Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "정직",
+        "labels": [
+          "정직"
+        ],
+        "scores": {
+          "정직": 1
+        },
+        "score": 1,
+        "summary": "명시적 키워드 검출: 정직",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "814ab093-20a8-4242-8190-2e66d26a262e",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "정직",
+      "createdAt": "2025-09-12T08:02:35.841Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "정직",
+        "labels": [
+          "정직"
+        ],
+        "scores": {
+          "정직": 1
+        },
+        "score": 1,
+        "summary": "명시적 키워드 검출: 정직",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "67b3b9be-0e2e-4490-9b59-ea21a300b693",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "관련 사례가 있을까요?",
+      "createdAt": "2025-09-12T08:02:37.780Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "존중",
+        "labels": [
+          "존중"
+        ],
+        "scores": {
+          "존중": 1
+        },
+        "score": 1,
+        "summary": "유사도 분석으로 '존중' 분류 (합계: 0.459)",
+        "state": "DONE"
+      }
+    }
+  ],
+  "perUser": {
+    "봇(테스트)#7845": {
+      "nickname": "봇(테스트)#7845",
+      "totalMessages": 6,
+      "totalReactions": 0,
+      "labels": {
+        "정직": 0,
+        "창의": 0,
+        "존중": 5,
+        "열정": 0
+      },
+      "topReacted": {
+        "messageId": "0837bec4-85d5-43d0-a7df-33e934b105d3",
+        "text": "관련 사례가 있을까요?",
+        "reactionsCount": 0,
+        "createdAt": "2025-09-12T08:01:47.778Z"
+      }
+    },
+    "똑똑한여우795": {
+      "nickname": "똑똑한여우795",
+      "totalMessages": 15,
+      "totalReactions": 0,
+      "labels": {
+        "정직": 3,
+        "창의": 5,
+        "존중": 6,
+        "열정": 1
+      },
+      "topReacted": {
+        "messageId": "93b9ac3c-bf95-4579-9a41-d7cb779cc1f3",
+        "text": "존중",
+        "reactionsCount": 0,
+        "createdAt": "2025-09-12T08:01:49.915Z"
+      }
+    }
+  },
+  "ranking": [
+    {
+      "nickname": "똑똑한여우795",
+      "totalMessages": 15,
+      "totalReactions": 0,
+      "labels": {
+        "정직": 3,
+        "창의": 5,
+        "존중": 6,
+        "열정": 1
+      },
+      "score": 22.5,
+      "rank": 1
+    },
+    {
+      "nickname": "봇(테스트)#7845",
+      "totalMessages": 6,
+      "totalReactions": 0,
+      "labels": {
+        "정직": 0,
+        "창의": 0,
+        "존중": 5,
+        "열정": 0
+      },
+      "score": 8,
+      "rank": 2
+    }
+  ]
+}

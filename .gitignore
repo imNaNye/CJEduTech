@@ -26,3 +26,6 @@ dist-ssr
 node_modules/
 dist/
 .env
+
+# Chat archives (ignore runtime-generated files)
+data/chat_archives/

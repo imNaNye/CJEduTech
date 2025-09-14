@@ -1,5 +1,6 @@
 {
   "roomId": "general",
+<<<<<<< HEAD
   "createdAt": 1757676994576,
   "expireAt": 1757676994514,
   "topic": "",
@@ -149,10 +150,63 @@
     },
     {
       "id": "b5b3c51c-1a30-4391-81bf-f4c1e8e768df",
+=======
+  "createdAt": 1757669804067,
+  "expireAt": 1757671292124,
+  "topic": "",
+  "messages": [
+    {
+      "id": "16f6a7fb-f6bc-4a9b-8750-9032ead12262",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "정직",
+      "createdAt": "2025-09-12T09:36:40.106Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "정직",
+        "labels": [
+          "정직"
+        ],
+        "scores": {
+          "정직": 1
+        },
+        "score": 1,
+        "summary": "명시적 키워드 검출: 정직",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "5f5be4f4-0061-40b8-88e3-a5f761bb538b",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "똑똑한여우795",
+      "text": "나는 정직",
+      "createdAt": "2025-09-12T09:36:41.766Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "정직",
+        "labels": [
+          "정직"
+        ],
+        "scores": {
+          "정직": 1
+        },
+        "score": 1,
+        "summary": "명시적 키워드 검출: 정직",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "5215e87f-125e-45c0-857d-f7f78700ad32",
+>>>>>>> a18bdd8 (pageheader)
       "roomId": "general",
       "baseRoomId": "general",
       "nickname": "봇(테스트)#7845",
       "text": "관련 사례가 있을까요?",
+<<<<<<< HEAD
       "createdAt": "2025-09-12T11:21:44.562Z",
       "reactedUsers": [],
       "reactionsCount": 0,
@@ -1302,41 +1356,115 @@
       "reactionsCount": 0,
       "ai": {
         "state": "ERROR"
+=======
+      "createdAt": "2025-09-12T09:36:42.126Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "존중",
+        "labels": [
+          "존중"
+        ],
+        "scores": {
+          "존중": 1
+        },
+        "score": 1,
+        "summary": "유사도 분석으로 '존중' 분류 (합계: 0.459)",
+        "state": "DONE"
+>>>>>>> a18bdd8 (pageheader)
       }
     }
   ],
   "perUser": {
+<<<<<<< HEAD
     "봇(테스트)#7845": {
       "nickname": "봇(테스트)#7845",
       "totalMessages": 100,
       "totalReactions": 0,
       "labels": {
         "정직": 0,
+=======
+    "똑똑한여우795": {
+      "nickname": "똑똑한여우795",
+      "totalMessages": 2,
+      "totalReactions": 0,
+      "labels": {
+        "정직": 2,
+>>>>>>> a18bdd8 (pageheader)
         "창의": 0,
         "존중": 0,
         "열정": 0
       },
       "topReacted": {
+<<<<<<< HEAD
         "messageId": "cc2b6611-4d85-4d04-8d98-67dd837835b8",
         "text": "한 줄 요약 가능하신가요?",
         "reactionsCount": 0,
         "createdAt": "2025-09-12T11:19:54.554Z"
+=======
+        "messageId": "16f6a7fb-f6bc-4a9b-8750-9032ead12262",
+        "text": "정직",
+        "reactionsCount": 0,
+        "createdAt": "2025-09-12T09:36:40.106Z"
+      }
+    },
+    "봇(테스트)#7845": {
+      "nickname": "봇(테스트)#7845",
+      "totalMessages": 1,
+      "totalReactions": 0,
+      "labels": {
+        "정직": 0,
+        "창의": 0,
+        "존중": 1,
+        "열정": 0
+      },
+      "topReacted": {
+        "messageId": "5215e87f-125e-45c0-857d-f7f78700ad32",
+        "text": "관련 사례가 있을까요?",
+        "reactionsCount": 0,
+        "createdAt": "2025-09-12T09:36:42.126Z"
+>>>>>>> a18bdd8 (pageheader)
       }
     }
   },
   "ranking": [
     {
+<<<<<<< HEAD
       "nickname": "봇(테스트)#7845",
       "totalMessages": 100,
       "totalReactions": 0,
       "labels": {
         "정직": 0,
+=======
+      "nickname": "똑똑한여우795",
+      "totalMessages": 2,
+      "totalReactions": 0,
+      "labels": {
+        "정직": 2,
+>>>>>>> a18bdd8 (pageheader)
         "창의": 0,
         "존중": 0,
         "열정": 0
       },
+<<<<<<< HEAD
       "score": 50,
+=======
+      "score": 3,
+>>>>>>> a18bdd8 (pageheader)
       "rank": 1
+    },
+    {
+      "nickname": "봇(테스트)#7845",
+      "totalMessages": 1,
+      "totalReactions": 0,
+      "labels": {
+        "정직": 0,
+        "창의": 0,
+        "존중": 1,
+        "열정": 0
+      },
+      "score": 1.5,
+      "rank": 2
     }
   ]
 }

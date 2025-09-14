@@ -1,0 +1,173 @@
+{
+  "roomId": "general",
+  "createdAt": 1757669564497,
+  "expireAt": 1757670996993,
+  "topic": "",
+  "messages": [
+    {
+      "id": "f2258f0e-6c95-4436-8b17-c665730bd269",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "반대 관점도 들어보고 싶어요.",
+      "createdAt": "2025-09-12T09:31:46.995Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "존중",
+        "labels": [
+          "존중",
+          "열정"
+        ],
+        "scores": {
+          "존중": 1,
+          "열정": 0.83
+        },
+        "score": 1,
+        "summary": "유사도 분석으로 '존중' 분류 (합계: 0.513)",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "85f01f4d-d4eb-4173-a86e-28fce2fec8a8",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "근거를 조금 더 구체화해볼까요?",
+      "createdAt": "2025-09-12T09:31:56.995Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "존중",
+        "labels": [
+          "존중",
+          "열정"
+        ],
+        "scores": {
+          "존중": 1,
+          "열정": 0.8
+        },
+        "score": 1,
+        "summary": "유사도 분석으로 '존중' 분류 (합계: 0.336)",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "754d8eed-a5f1-4ded-bf93-e244f2359a9c",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "이 주제에 대해 어떻게 생각하세요?",
+      "createdAt": "2025-09-12T09:32:06.996Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "존중",
+        "labels": [
+          "존중"
+        ],
+        "scores": {
+          "존중": 1
+        },
+        "score": 1,
+        "summary": "키워드 매칭으로 '존중' 분류",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "c689fa1c-0a86-4746-83e1-ce160ed074f3",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "근거를 조금 더 구체화해볼까요?",
+      "createdAt": "2025-09-12T09:32:16.998Z",
+      "reactedUsers": [
+        "똑똑한여우795"
+      ],
+      "reactionsCount": 1,
+      "ai": {
+        "label": "존중",
+        "labels": [
+          "존중",
+          "열정"
+        ],
+        "scores": {
+          "존중": 1,
+          "열정": 0.8
+        },
+        "score": 1,
+        "summary": "유사도 분석으로 '존중' 분류 (합계: 0.336)",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "647ffe41-8e9d-40c2-bf99-0edb82071c6a",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "이 주제에 대해 어떻게 생각하세요?",
+      "createdAt": "2025-09-12T09:32:26.998Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "label": "존중",
+        "labels": [
+          "존중"
+        ],
+        "scores": {
+          "존중": 1
+        },
+        "score": 1,
+        "summary": "키워드 매칭으로 '존중' 분류",
+        "state": "DONE"
+      }
+    },
+    {
+      "id": "5eaf8be3-2302-466b-9900-78f36167da01",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "테스트용 멘트입니다.",
+      "createdAt": "2025-09-12T09:32:36.998Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "DONE"
+      }
+    }
+  ],
+  "perUser": {
+    "봇(테스트)#7845": {
+      "nickname": "봇(테스트)#7845",
+      "totalMessages": 6,
+      "totalReactions": 1,
+      "labels": {
+        "정직": 0,
+        "창의": 0,
+        "존중": 5,
+        "열정": 3
+      },
+      "topReacted": {
+        "messageId": "c689fa1c-0a86-4746-83e1-ce160ed074f3",
+        "text": "근거를 조금 더 구체화해볼까요?",
+        "reactionsCount": 1,
+        "createdAt": "2025-09-12T09:32:16.998Z"
+      }
+    }
+  },
+  "ranking": [
+    {
+      "nickname": "봇(테스트)#7845",
+      "totalMessages": 6,
+      "totalReactions": 1,
+      "labels": {
+        "정직": 0,
+        "창의": 0,
+        "존중": 5,
+        "열정": 3
+      },
+      "score": 14,
+      "rank": 1
+    }
+  ]
+}

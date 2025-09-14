@@ -3,13 +3,14 @@ import AIChat from "./AIChat";
 import ChatHistory from "./ChatHistory";
 import ChatInput from "./ChatInput";
 import ChatSubmitButton from "./ChatSubmitButton";
-import { useRoundStep } from '../../../contexts/RoundStepContext';
-
+import { useRoundStep } from '@/contexts/RoundStepContext';
+ 
 export default function ChatContainer({ nickname, topic }) {
     const [localNickname, setLocalNickname] = useState(nickname);
     const [localTopic, setLocalTopic] = useState(topic);
 
     const { round, setRound, step, setStep } = useRoundStep();
+    console.log(round);
     useEffect(() => {
       if (!nickname) {
         const storedNickname = localStorage.getItem("nickname");

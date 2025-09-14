@@ -28,4 +28,4 @@ dist/
 .env
 
 # Chat archives (ignore runtime-generated files)
-server/data/chat_archives/
+server/data/chat_archives/*

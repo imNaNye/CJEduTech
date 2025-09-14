@@ -9,6 +9,7 @@
   gap: 12px;
   padding: 12px 20px;            /* 여백 */
   box-sizing: border-box;
+  background: #FAFAFA;
 }
 
 /* 제목(좌측) */

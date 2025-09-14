@@ -1,33 +1,48 @@
-// src/slides/ClickableTarget.jsx
-import React from 'react';
-import { useSlides } from './SlideProvider';
+// src/components/user/slide/ClickableTarget.jsx
+import React from 'react'
+import { useSlides } from './SlideProvider'
 
-export default function ClickableTarget({ id, as: Tag = 'button', onClick, children }) {
-  const { markClicked, clickedSet, required, page, isBlocked, msRemaining } = useSlides();
-  const isRequired = required.includes(id);
-  const isDone = clickedSet.has(id);
+export default function ClickableTarget({ id, as: Tag = 'button', onClick, className = '', children }) {
+  const { markClicked, clickedSet, required, page, isBlocked } = useSlides()
 
-  const content = page?.targets?.[id] ?? null;
-  const title = content?.title ?? id;
-  const postText = content?.postText ?? '';
-  const image = content?.image ?? '';
+  const isRequired = required.includes(id)
+  const isDone = clickedSet.has(id)
+
+  const content = page?.targets?.[id] ?? null
+  const title = content?.title ?? id
+  const postText = content?.postText ?? ''
+  const image = content?.image ?? ''
 
   const handleClick = (e) => {
-    if (onClick) onClick(e);
-    const res = markClicked(id);
-    if (!res?.ok && res?.reason === 'cooldown') {
-      // 필요시 안내 로깅/토스트 등
-      // console.log(`대기 중: ${res.waitMs}ms`);
-    }
-  };
+    if (onClick) onClick(e)
+    markClicked(id)
+  }
+
+  const classes = [
+    'target-card',
+    className,
+    isBlocked ? 'is-disabled' : '',
+    isDone ? 'is-active' : ''
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
-    <Tag onClick={handleClick} disabled={isBlocked} aria-disabled={isBlocked ? 'true' : 'false'}>
-      <div>{title} {isRequired ? '(필수)' : null}</div>
-      {!isDone ? <img src={image} /> : null}
-      <div>{isDone ? postText : null}</div>
-      {isBlocked ? <div>다음 클릭까지 {Math.ceil(msRemaining/1000)}초 대기</div> : null}
-      {children}
+    <Tag type="button" className={classes} onClick={handleClick} disabled={isBlocked} aria-disabled={isBlocked ? 'true' : 'false'}>
+      {/* 첫 번째 행: 이미지 또는 설명 텍스트 (고정 높이 영역) */}
+      {!isDone ? (
+        image ? <img className="icon" src={image} alt="" /> : <div className="icon" />
+      ) : (
+        <div className="desc">{postText}</div>
+      )}
+
+      {/* 두 번째 행: 라벨 */}
+      <div className="label">
+        {title} {isRequired ? '(필수)' : ''}
+      </div>
+
+      {/* children 사용 시에도 카드 높이 변화가 없도록 별도 레이어로 렌더 */}
+      {children ? <div style={{ position: 'absolute', inset: 8, pointerEvents: 'none' }}>{children}</div> : null}
     </Tag>
-  );
+  )
 }

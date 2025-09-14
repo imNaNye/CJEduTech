@@ -6,8 +6,7 @@ export const abilityTargets = {
     'ability.a': {
         title: '인성',
         image: abilityA,
-        postText: '개인의 내면적인 성품과 관련된 능력으로 자신과 타인, 사회와의 관계 속에서 바람직한 가치관과 태도를 가지고 행동하는 능력',
-        cooldownMs: 4000
+        postText: '개인의 내면적인 성품과 관련된 능력으로 자신과 타인, 사회와의 관계 속에서 바람직한 가치관과 태도를 가지고 행동하는 능력'
     },
 
     'ability.b': {

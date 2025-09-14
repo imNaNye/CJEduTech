@@ -2,6 +2,7 @@
 import { useSlides } from './SlideProvider.jsx'
 import { useSlideProgress } from './useSlideProgress'
 import { pageComponentMap } from './pageComponentMap'
+import './slide.css';
 import { useNavigate } from 'react-router-dom'
 import { RoundStepProvider, useRoundStep } from '../../../contexts/RoundStepContext.jsx'
 

@@ -1,24 +1,29 @@
-
 import { useSlides } from './SlideProvider'
 import ClickableTarget from './ClickableTarget'
+import './slide.css'
 
-export default function  CharacterSlide() {
+export default function CharacterSlide() {
   const { page } = useSlides()
+  const title = page?.data?.title || ''
+  const text = page?.data?.text || ''
+  const targetIds = Object.keys(page?.targets || {})
+
   return (
-    <section>
-      <h2>{page.data?.title}</h2>
+    <section className="slide-page">
+      <div className="slide-card">
+        {title && (
+          <h2 className="slide-title" dangerouslySetInnerHTML={{ __html: title }} />
+        )}
+        {text && <p className="slide-subtitle">{text}</p>}
 
-      {/* ClickableTarget 외 컴포넌트 */}
+        <div className="target-grid" data-count={targetIds.length}>
+          {targetIds.map((id) => (
+            <ClickableTarget key={id} id={id} className="target-card" />
+          ))}
+        </div>
 
-      {/* 필수 타깃 버튼들 */}
-      <ClickableTarget id="character.a" />
-      <ClickableTarget id="character.b" />
-      <ClickableTarget id="character.c" />
-      <ClickableTarget id="character.d" />
-      <ClickableTarget id="character.e" />
-      <ClickableTarget id="character.f" />
-      <ClickableTarget id="character.g" />
-      <ClickableTarget id="character.h" />
+        <p className="slide-footer">슬라이드는 자동 전환되며, 종료 후 퀴즈 화면으로 전환됩니다.</p>
+      </div>
     </section>
   )
 }

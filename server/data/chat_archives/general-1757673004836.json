@@ -1,0 +1,354 @@
+{
+  "roomId": "general",
+  "createdAt": 1757673004836,
+  "expireAt": 1757672030952,
+  "topic": "",
+  "messages": [
+    {
+      "id": "2d5596e6-8d8e-4ed0-8230-b8d9f5a48d21",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "반대 관점도 들어보고 싶어요.",
+      "createdAt": "2025-09-12T09:49:17.550Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "d5947068-556f-4715-92a4-d8b397323729",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "참여해주셔서 감사합니다!",
+      "createdAt": "2025-09-12T09:49:27.552Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "8ca4fdc7-f9c6-4039-9b81-c9c7c5d4ac58",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "근거를 조금 더 구체화해볼까요?",
+      "createdAt": "2025-09-12T09:49:37.554Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "c81230c3-7950-409d-aee9-6106b454fb50",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "이 주제에 대해 어떻게 생각하세요?",
+      "createdAt": "2025-09-12T10:03:53.469Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "a270126b-1dc9-4901-a6cf-73426fd0d855",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "한 줄 요약 가능하신가요?",
+      "createdAt": "2025-09-12T10:04:56.804Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "9093ba8d-e58e-43ad-9e71-acd23df46d57",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "테스트용 멘트입니다.",
+      "createdAt": "2025-09-12T10:05:07.650Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "9f3e1d27-f93d-400b-a104-28ec61a2b7cb",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "참여해주셔서 감사합니다!",
+      "createdAt": "2025-09-12T10:06:19.302Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "d478545c-20ca-4528-bdc1-7cd77fbc1833",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "이 주제에 대해 어떻게 생각하세요?",
+      "createdAt": "2025-09-12T10:06:29.303Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "c8da4070-3c89-483c-b8f9-d77675ee2f03",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "테스트용 멘트입니다.",
+      "createdAt": "2025-09-12T10:06:39.354Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "48a766d2-2905-4711-9afb-5416b334a2c1",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "참여해주셔서 감사합니다!",
+      "createdAt": "2025-09-12T10:06:49.399Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "d1c45ba3-d894-40f2-8ae3-ce1de7d51e68",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "관련 사례가 있을까요?",
+      "createdAt": "2025-09-12T10:07:41.400Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "c303e099-4772-47fb-ac3d-1f21723d4ae7",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "반대 관점도 들어보고 싶어요.",
+      "createdAt": "2025-09-12T10:08:38.818Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "59c10c2f-25d3-47d3-825e-27cb5197557f",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "한 줄 요약 가능하신가요?",
+      "createdAt": "2025-09-12T10:09:09.598Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "cfb8a8f1-7cb4-4a4d-860c-108abb697a1f",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "이 주제에 대해 어떻게 생각하세요?",
+      "createdAt": "2025-09-12T10:09:20.048Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "a88a4ed0-41cf-4d19-8009-985de0d5df32",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "참여해주셔서 감사합니다!",
+      "createdAt": "2025-09-12T10:09:30.049Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "4fa9e8f1-3b73-44f8-83c4-e65633ef0444",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "한 줄 요약 가능하신가요?",
+      "createdAt": "2025-09-12T10:09:40.050Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "1efa6917-dfc4-4125-b86f-b25df42179d9",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "이 주제에 대해 어떻게 생각하세요?",
+      "createdAt": "2025-09-12T10:10:38.790Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "fc3994d9-7dab-485a-bf39-1f7b2201214e",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "반대 관점도 들어보고 싶어요.",
+      "createdAt": "2025-09-12T10:12:15.730Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "2849a7b4-4429-4413-bfe6-0f4c00d40749",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "관련 사례가 있을까요?",
+      "createdAt": "2025-09-12T10:12:30.539Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "c8de07f5-34da-4818-92ff-1053c0182de7",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "이 주제에 대해 어떻게 생각하세요?",
+      "createdAt": "2025-09-12T10:12:54.985Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "51635af6-ef13-42c0-bacb-0dbdc17d45af",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "반대 관점도 들어보고 싶어요.",
+      "createdAt": "2025-09-12T10:13:04.986Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "e4aeec8d-4b26-4fa5-8a08-7077040f1620",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "테스트용 멘트입니다.",
+      "createdAt": "2025-09-12T10:13:17.978Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "8ebbf2fe-9f96-4d74-9886-22e45a3d2e0f",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "한 줄 요약 가능하신가요?",
+      "createdAt": "2025-09-12T10:13:27.980Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "ERROR"
+      }
+    },
+    {
+      "id": "10f3487f-091c-4109-8fa8-f5a920490b49",
+      "roomId": "general",
+      "baseRoomId": "general",
+      "nickname": "봇(테스트)#7845",
+      "text": "참여해주셔서 감사합니다!",
+      "createdAt": "2025-09-12T10:30:04.823Z",
+      "reactedUsers": [],
+      "reactionsCount": 0,
+      "ai": {
+        "state": "PENDING"
+      }
+    }
+  ],
+  "perUser": {
+    "봇(테스트)#7845": {
+      "nickname": "봇(테스트)#7845",
+      "totalMessages": 24,
+      "totalReactions": 0,
+      "labels": {
+        "정직": 0,
+        "창의": 0,
+        "존중": 0,
+        "열정": 0
+      },
+      "topReacted": {
+        "messageId": "2d5596e6-8d8e-4ed0-8230-b8d9f5a48d21",
+        "text": "반대 관점도 들어보고 싶어요.",
+        "reactionsCount": 0,
+        "createdAt": "2025-09-12T09:49:17.550Z"
+      }
+    }
+  },
+  "ranking": [
+    {
+      "nickname": "봇(테스트)#7845",
+      "totalMessages": 24,
+      "totalReactions": 0,
+      "labels": {
+        "정직": 0,
+        "창의": 0,
+        "존중": 0,
+        "열정": 0
+      },
+      "score": 12,
+      "rank": 1
+    }
+  ]
+}

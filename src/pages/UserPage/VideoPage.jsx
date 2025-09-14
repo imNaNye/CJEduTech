@@ -10,12 +10,29 @@ export default function VideoPage({ onComplete }) {
   const { round, step, setStep } = useRoundStep();
   const [videoEnded, setVideoEnded] = useState(false);
   const [progress, setProgress] = useState(0); // 0 ~ 100 percent
+  const [videoIdx, setVideoIdx] = useState(0);
   const videoRef = useRef(null);
   const lockSeekRef = useRef(false);
   const lastTimeRef = useRef(0);
-  const [muted] = useState(true);
+  const [muted, setMuted] = useState(true);
   const navigate = useNavigate();
-  const content = videoByRound[round];
+  const unmuteAndPlay = () => {
+    setMuted(false);
+    const v = videoRef.current;
+    if (v) {
+      v.muted = false;
+      const p = v.play();
+      if (p && typeof p.catch === 'function') {
+        p.catch(() => {/* autoplay policy may still block until next gesture */});
+      }
+    }
+  };
+  const playlist = videoByRound[round] || [];
+  const content = playlist[videoIdx];
+
+  useEffect(() => {
+    setVideoIdx(0);
+  }, [round]);
 
   useEffect(() => {
     setVideoEnded(false);
@@ -30,13 +47,24 @@ export default function VideoPage({ onComplete }) {
     };
     if (v.readyState >= 2) tryPlay();
     else v.addEventListener('loadeddata', tryPlay, { once: true });
-  }, [round]);
+  }, [round, videoIdx]);
+
+  useEffect(() => {
+    // Chrome/iOS 정책: 사용자 제스처 이후에만 소리 재생 허용
+    const handler = () => {
+      if (muted) unmuteAndPlay();
+      window.removeEventListener('pointerdown', handler, true);
+    };
+    window.addEventListener('pointerdown', handler, true);
+    return () => window.removeEventListener('pointerdown', handler, true);
+  }, [round, videoIdx, muted]);
 
   if (!content) return <div>이 라운드의 영상이 없습니다.</div>;
+  const isLast = videoIdx === playlist.length - 1;
 
   return (
     <div className='video-page'>
-      <PageHeader title={content.title} />
+      <PageHeader title={`${content.title} (${videoIdx + 1} / ${playlist.length})`} />
       <section className='video-main'>
         <div className="video-player">
           <div className="video-progress">
@@ -45,9 +73,23 @@ export default function VideoPage({ onComplete }) {
               style={{ width: `${progress}%` }}
             />
           </div>
+          {!videoEnded && muted && (
+            <button
+              type="button"
+              onClick={unmuteAndPlay}
+              style={{
+                position: 'absolute', right: 12, top: 12,
+                zIndex: 3, padding: '6px 10px', borderRadius: 8,
+                border: '0', background: 'rgba(0,0,0,0.55)', color: '#fff',
+                fontSize: 12, cursor: 'pointer'
+              }}
+            >
+              🔊 소리 켜기
+            </button>
+          )}
           <video
             className="video-element"
-            key={round}
+            key={`${round}-${videoIdx}`}
             ref={videoRef}
             src={content.src}
             autoPlay
@@ -99,15 +141,21 @@ export default function VideoPage({ onComplete }) {
           className='finish-button'
           disabled={!videoEnded}
           onClick={() => {
-            setStep(3);
-            navigate('/user/roundIndicator');
+            if (!videoEnded) return;
+            if (!isLast) {
+              setVideoEnded(false);
+              setProgress(0);
+              setVideoIdx((i) => i + 1);
+            } else {
+              setStep(3);
+              navigate('/user/roundIndicator');
+            }
           }}
         >
           {videoEnded
-            ? "영상 시청 종료"
-            : "영상은 자동 재생됩니다. 조작이 불가하니 집중해서 시청해 주세요."}
+            ? (isLast ? '영상 시청 종료' : '다음 영상 보기')
+            : '영상은 자동 재생됩니다. 한 번 클릭해서 음소거를 해제해 주세요.'}
         </button>
-        <VideoFooter/> 
       </section>
     </div>
   );

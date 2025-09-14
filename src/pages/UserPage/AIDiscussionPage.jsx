@@ -1,5 +1,6 @@
 import { socket } from "@/api/chat";
 import { useState } from "react";
+import { useRoundStep } from '@/contexts/RoundStepContext';
 import AiDiscussionMain from "../../components/user/aiDiscussion/AiDiscussionMain";
 import PageHeader from '../../components/common/PageHeader.jsx';
 import '../../components/user/aiDiscussion/aiDiscussion.css'
@@ -16,16 +17,17 @@ export default function AIDiscussionPage(){
 
     const [overlayImages, setOverlayImages] = useState([example1, example2]);
 
+    const { round, setRound, step, setStep } = useRoundStep();
     const handleOverlayClick = () => {
         setOverlayImages((prev) => prev.slice(1));
     };
 
     const handleSkip = () => {
-        socket.emit('room:end', { roomId: 'general' });
+        socket.emit('room:end', { });
     };
 
     const handleRequestMent = () => {
-        socket.emit("ai:ment:request", { roomId: "general" });
+        socket.emit("ai:ment:request", { });
     };
 
     return (

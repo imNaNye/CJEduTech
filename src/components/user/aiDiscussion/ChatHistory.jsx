@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { socket } from "@/api/chat";
 import Chat from "./Chat";
+import { useRoundStep } from '@/contexts/RoundStepContext';
 
 function generateRandomNickname() {
   const adjectives = ["빠른", "멋진", "똑똑한", "용감한", "행복한"];
@@ -19,6 +20,7 @@ export default function ChatHistory() {
     }
     return storedNick;
   });
+
   const [messages, setMessages] = useState([]);
   const [autoScroll, setAutoScroll] = useState(false);
   const roomId = "general";
@@ -26,6 +28,8 @@ export default function ChatHistory() {
   const bottomRef = useRef(null);
   const historyRef = useRef(null);
   const prevScrollHeightRef = useRef(0);
+
+  const { round, setRound, step, setStep } = useRoundStep();
 
   const isNearBottom = () => {
     if (!historyRef.current) return false;
@@ -58,7 +62,7 @@ export default function ChatHistory() {
   }, [messages, autoScroll]);
 
   useEffect(() => {
-    socket.emit("room:join", { roomId });
+    socket.emit("room:join", { roomId,round});
 
     socket.on("room:recent", (payload) => {
       setMessages(payload.messages || []);

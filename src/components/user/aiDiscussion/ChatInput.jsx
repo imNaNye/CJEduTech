@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { socket } from "@/api/chat";
 
+import { useRoundStep } from '@/contexts/RoundStepContext';
 export default function ChatInput() {
   const [text, setText] = useState("");
   const [isComposing, setIsComposing] = useState(false);
 
+    const { round, setRound, step, setStep } = useRoundStep();
   const send = () => {
     if (!text.trim()) return;
     const nickname = localStorage.getItem("nickname") || "익명";
@@ -12,6 +14,7 @@ export default function ChatInput() {
       roomId: "general",
       text,
       nickname,
+      round,
     });
     setText("");
   };

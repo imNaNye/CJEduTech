@@ -1,10 +1,11 @@
-// src/components/user/slide/SlideRenderer.jsx
+import { useEffect } from 'react'
 import { useSlides } from './SlideProvider.jsx'
 import { useSlideProgress } from './useSlideProgress'
 import { pageComponentMap } from './pageComponentMap'
 import './slide.css';
 import { useNavigate } from 'react-router-dom'
 import { RoundStepProvider, useRoundStep } from '../../../contexts/RoundStepContext.jsx'
+import PageHeader from '@/components/common/PageHeader.jsx';
 
 export default function SlideRenderer() {
   const { page, pageIndex, setPageIndex, config } = useSlides()
@@ -12,10 +13,20 @@ export default function SlideRenderer() {
   const navigate = useNavigate()   // 👈 추가
   const { round, setRound, step, setStep } = useRoundStep()
 
-  setStep(1)
-  setRound(1)
+  const lastIndex = config.length - 1
 
   if (!page) return <div>끝</div>
+
+  useEffect(() => {
+    if (pageIndex === lastIndex && allDone) {
+      setRound(1)
+      setStep(1)
+      navigate('/user/roundIndicator')
+    }
+  }, [pageIndex, lastIndex, allDone, navigate, setRound, setStep])
+
+  setStep(1)
+  setRound(1)
 
   const PageComponent = pageComponentMap[page.id]
 
@@ -32,28 +43,9 @@ export default function SlideRenderer() {
   }
 
   return (
-    <div>
-      <header>
-        <div>페이지 {pageIndex + 1} / {config.length}</div>
-        <div>필수 {clickedCount}/{requiredCount}</div>
-        {!allDone && remainingIds.length > 0 ? (
-          <div>남은 항목: {remainingIds.join(', ')}</div>
-        ) : null}
-        {allDone && page.timeoutSec > 0 ? (
-          <div>{page.timeoutSec}초 뒤 자동 이동</div>
-        ) : null}
-      </header>
-
+    <div className="slide-div">
+      <PageHeader title='CJ인 인재상 교육'></PageHeader>
       {PageComponent ? <PageComponent /> : <div>구현되지 않은 페이지: {page.id}</div>}
-
-      <nav>
-        <button onClick={() => setPageIndex(i => Math.max(0, i - 1))} disabled={pageIndex === 0}>
-          이전
-        </button>
-        <button onClick={handleNext} disabled={!allDone}>
-          다음
-        </button>
-      </nav>
     </div>
   )
 }

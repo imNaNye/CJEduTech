@@ -22,7 +22,7 @@ export default function CharacterSlide() {
           ))}
         </div>
 
-        <p className="slide-footer">슬라이드는 자동 전환되며, 종료 후 퀴즈 화면으로 전환됩니다.</p>
+       <p className="info-text">슬라이드는 자동 전환되며, 종료 후 퀴즈 화면으로 전환됩니다.</p>
       </div>
     </section>
   )

@@ -38,7 +38,7 @@ export default function ClickableTarget({ id, as: Tag = 'button', onClick, class
 
       {/* 두 번째 행: 라벨 */}
       <div className="label">
-        {title} {isRequired ? '(필수)' : ''}
+        {title}
       </div>
 
       {/* children 사용 시에도 카드 높이 변화가 없도록 별도 레이어로 렌더 */}

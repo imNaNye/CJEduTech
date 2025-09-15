@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { socket } from "@/api/chat";
+import aiIcon from "@/assets/images/discussion/AI_icon.png";
 
 function formatTime(iso) {
   try {
@@ -41,7 +42,7 @@ export default function AIChat() {
   const m = ments[0];
   return (
       <div key={m.id} className="ai-chat">
-        <img className="badge-img" src={`/src/assets/images/discussion/AI_icon.png`} alt="aiIcon"/>
+        <img className="badge-img" src={aiIcon} alt="aiIcon"/>
         <div className="ai-chat-text">{m.text}</div>
     </div>
   );

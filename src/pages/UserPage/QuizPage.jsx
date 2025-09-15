@@ -181,7 +181,7 @@ export default function QuizPage() {
   if (!current) return <div>이 라운드의 퀴즈 데이터가 없습니다.</div>;
 
   return (
-    <div>
+    <div className="quiz">
     <PageHeader title='CJ 인재상 퀴즈'></PageHeader>
     <div className="quiz-section">
       <div className='quiz-page'>
@@ -190,7 +190,7 @@ export default function QuizPage() {
         {current.desc && (
           <p className="quiz-desc">{current.desc}</p>
         )}
-
+        
         {/* PREVIEW: 앞면 3초 공개 (선택 불가) */}
         {phase === 'preview' && (
           <ul className="quiz-cards open" aria-label="카드 미리보기">
@@ -254,7 +254,7 @@ export default function QuizPage() {
         )}
       </div>
 
-      {/* RESULT: 큰 O/X + 해설 */}
+      {/* RESULT: 정답 카드 + O/X + 해설 */}
       {phase === 'result' && (
         <div
           ref={feedbackRef}
@@ -263,16 +263,40 @@ export default function QuizPage() {
           tabIndex={-1}
           className="quiz-result"
         >
-          <div className={`big-mark ${isCorrect ? 'ok' : 'no'}`}>
-            {isCorrect ? 'O' : 'X'}
+          {/* Left: correct option card front */}
+          <div className="result-left">
+            {(() => {
+              const correctIdx = current?.answer;
+              const correctOpt = current?.options ? toOpt(current.options[correctIdx]) : null;
+              if (!correctOpt) return null;
+              return (
+                <div className="card-front result-card">
+                  {correctOpt.img && (
+                    <img
+                      className="opt-img"
+                      src={correctOpt.img}
+                      alt={correctOpt.alt || correctOpt.label || '정답 카드'}
+                    />
+                  )}
+                  {correctOpt.label && <div className="opt-label">{correctOpt.label}</div>}
+                </div>
+              );
+            })()}
           </div>
-          {(() => {
-            const q = current;
-            const text = isCorrect
-              ? (q?.explainCorrect ?? q?.explanation)
-              : (q?.explainWrong ?? q?.explanation);
-            return text ? <p className="quiz-explain">{text}</p> : null;
-          })()}
+
+          {/* Right: O/X + title + explanation */}
+          <div className="result-right">
+            <div className={`big-mark ${isCorrect ? 'ok' : 'no'}`}>{isCorrect ? 'O' : 'X'}</div>
+            <div className={`result-title ${isCorrect ? 'ok' : 'no'}`}>
+              {isCorrect ? '정답이에요!' : '오답이에요!'}
+            </div>
+            {(() => {
+              const text = isCorrect
+                ? (current?.explainCorrect ?? current?.explanation)
+                : (current?.explainWrong ?? current?.explanation);
+              return text ? <p className="quiz-explain">{text}</p> : null;
+            })()}
+          </div>
         </div>
       )}
 

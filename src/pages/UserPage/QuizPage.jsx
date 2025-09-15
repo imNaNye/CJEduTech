@@ -178,7 +178,11 @@ export default function QuizPage() {
   };
 
   const current = questions[idx];
-  if (!current) return <div>이 라운드의 퀴즈 데이터가 없습니다.</div>;
+  if (!current) {
+    setStep(2);
+    navigate('/user/roundIndicator', { replace: true });
+    return <div>이 라운드의 퀴즈 데이터가 없습니다.</div>;
+  }
 
   return (
     <div className="quiz">

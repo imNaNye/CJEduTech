@@ -98,12 +98,14 @@ export const quizQuestions = {
     },
     {
       q: '제시상황에 적절한 응대를 찾아 연결하세요.',
+
+      desc: '아동 동반 고객이 방문할 경우',
       options: [
-        { label: 'X', img: r1q3X, alt: 'X 이미지', backImg: horizontalBack },
-        { label: 'Y', img: r1q3Y, alt: 'Y 이미지', backImg: horizontalBack },
-        { label: 'Z', img: r1q3Z, alt: 'Z 이미지', backImg: horizontalBack },
+        { label: '', img: r1q3X, alt: 'X 이미지', backImg: horizontalBack },
+        { label: '', img: r1q3Y, alt: 'Y 이미지', backImg: horizontalBack },
+        { label: '', img: r1q3Z, alt: 'Z 이미지', backImg: horizontalBack },
       ],
-      answer: 2,
+      answer: 0,
       explanation: '아동 동반 고객이 방문할 경우, 아동용 의자가 있는 좌석 쪽으로 안내하거나 아동용 의자를 제공해드려야해요.',
     },
   ],

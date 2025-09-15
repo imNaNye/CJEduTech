@@ -45,25 +45,59 @@ async function readJSON(file){ const buf = await fs.readFile(file, 'utf-8'); ret
 // ===== Room lifetime =====
 const ROOM_MAX_AGE_MS = Number(process.env.ROOM_MAX_AGE_MS || 25 * 60 * 1000); // 기본 25분
 
-// ===== Test Bot (per-room, optional) =====
+// ===== Test Bot (per-room, optional, multi-bot) =====
 const BOT_ENABLED = process.env.CHAT_TEST_BOT !== '0';
-const BOT_INTERVAL_MS = Number(process.env.CHAT_TEST_BOT_INTERVAL_MS || 10000);
-const BOT_MESSAGES = [
-  "테스트용 멘트입니다.",
-  "이 주제에 대해 어떻게 생각하세요?",
-  "한 줄 요약 가능하신가요?",
-  "관련 사례가 있을까요?",
-  "근거를 조금 더 구체화해볼까요?",
-  "반대 관점도 들어보고 싶어요.",
-  "참여해주셔서 감사합니다!",
+const BOT_MIN_INTERVAL_MS = Number(process.env.CHAT_TEST_BOT_MIN_MS || 10000);
+const BOT_MAX_INTERVAL_MS = Number(process.env.CHAT_TEST_BOT_MAX_MS || 25000);
+const BOT_COUNT = Number(process.env.CHAT_TEST_BOT_COUNT || 5);
+
+// 20개 페르소나(이름 + 말투 키워드)
+const BOT_PERSONAS = [
+  { name: '소피아', tone: '분석적' },
+  { name: '민준', tone: '직설적' },
+  { name: '지우', tone: '호기심' },
+  { name: '하연', tone: '정중함' },
+  { name: '도윤', tone: '사실검증' },
+  { name: '서연', tone: '격려' },
+  { name: '현우', tone: '반론제기' },
+  { name: '지민', tone: '요약' },
+  { name: '가을', tone: '사례중심' },
+  { name: '태윤', tone: '비유' },
+  { name: '나래', tone: '창의적' },
+  { name: '유진', tone: '정직' },
+  { name: '주원', tone: '열정' },
+  { name: '하늘', tone: '존중' },
+  { name: '서준', tone: '논리' },
+  { name: '수아', tone: '문제정의' },
+  { name: '예준', tone: '데이터' },
+  { name: '현서', tone: '리스크' },
+  { name: '채원', tone: '아이디어' },
+  { name: '이안', tone: '정리' },
 ];
-function pickBotMessage() {
-  return BOT_MESSAGES[Math.floor(Math.random() * BOT_MESSAGES.length)];
-}
-function makeBotNickname(roomId) {
-  // roomId 기준 고정 닉네임 생성(방마다 1봇)
-  const suffix = Math.abs([...roomId].reduce((a, c) => (a * 33 + c.charCodeAt(0)) | 0, 7)).toString().slice(-4);
-  return `봇(테스트)#${suffix}`;
+
+const BOT_OPENERS = [
+  (t) => `${t ? `“${t}”에 대해 ` : ''}핵심 쟁점을 한 줄로 정리해보면 어떨까요?`,
+  () => `먼저 기준을 정하면 좋겠습니다. 무엇을 최우선으로 볼까요?`,
+  () => `관련 데이터나 사례가 있으면 공유 부탁드려요.`,
+];
+const BOT_MOVERS = [
+  () => `좋은 포인트네요. 반대 관점에서 보면 어떤 리스크가 있을까요?`,
+  () => `지금까지 의견을 근거/예시로 확장해볼까요?`,
+  () => `논의된 대안을 비교할 기준을 제안해 봅니다: 비용, 시간, 영향도.`,
+];
+const BOT_SUMMARIZERS = [
+  () => `잠깐 정리하면, 지금까지 나온 의견은 ① ② ③ 정도로 보입니다. 빠진 게 있을까요?`,
+  () => `요약하면 방향 A vs B 논점으로 보입니다. 추가 의견 있으신가요?`,
+];
+
+function randInt(a, b){ return a + Math.floor(Math.random() * (b - a + 1)); }
+function randPick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+function makeBotNickname(roomId, idx) {
+  const p = BOT_PERSONAS[idx % BOT_PERSONAS.length];
+  const seed = Math.abs([...roomId].reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 13) + idx)
+                .toString(36).slice(-3);
+  return `토론봇·${p.name}#${seed}`;
 }
 
 // ===== Room state for AI mentor (silence tracking, topic, cooldown) =====
@@ -72,7 +106,7 @@ const SILENCE_THRESHOLD_SEC = Number(process.env.AI_MENT_SILENCE_SEC || 45);    
 const USER_SILENCE_THRESHOLD_SEC = Number(process.env.AI_USER_SILENCE_SEC || 60);  // per-user silence
 /**
  * @typedef {{ topic?: string, lastMessageAt?: number, cooldownUntil?: number, userLastAt: Map<string, number>, rollingSummary?: string,
- *            topicNextAt?: number, topicIntervalMs?: number, encourageCooldownByUser?: Map<string, number>, botTimer?: any, botNickname?: string,
+ *            topicNextAt?: number, topicIntervalMs?: number, encourageCooldownByUser?: Map<string, number>, botTimers?: any[], botNicknames?: string[],
  *            createdAt?: number, expireAt?: number, expireTimer?: any }} RoomState
  */
 /** @type {Map<string, RoomState>} */
@@ -87,8 +121,8 @@ function getRoomState(roomId) {
       topicNextAt: Date.now(),
       topicIntervalMs: 180000,
       encourageCooldownByUser: new Map(),
-      botTimer: null,
-      botNickname: makeBotNickname(roomId),
+      botTimers: [],
+      botNicknames: [],
       createdAt: Date.now(),
       expireAt: Date.now() + ROOM_MAX_AGE_MS,
       expireTimer: null,
@@ -164,11 +198,11 @@ function cleanupRoomIfEmpty(io, roomId) {
   // if room exists and has clients, do nothing
   if (room && room.size > 0) return false;
 
-  // stop test bot if running
+  // stop test bots if running
   const st = roomStates.get(roomId);
-  if (st?.botTimer) {
-    clearInterval(st.botTimer);
-    st.botTimer = null;
+  if (st?.botTimers && st.botTimers.length) {
+    for (const t of st.botTimers) clearTimeout(t);
+    st.botTimers = [];
   }
   if (st?.expireTimer) {
     clearTimeout(st.expireTimer);
@@ -204,6 +238,13 @@ async function expireRoom(io, roomId) {
       const s = ns.sockets.get(socketId);
       if (s) s.leave(roomKey);
     }
+  }
+
+  // stop test bots if running
+  const st = roomStates.get(roomId);
+  if (st?.botTimers && st.botTimers.length) {
+    for (const t of st.botTimers) clearTimeout(t);
+    st.botTimers = [];
   }
 
   // 결과 집계 (per user)
@@ -317,30 +358,86 @@ function ensureRoomExpiry(io, roomId) {
 function ensureRoomBot(io, roomId) {
   if (!BOT_ENABLED) return;
   const st = getRoomState(roomId);
-  if (st.botTimer) return; // already running
-  const nickname = st.botNickname || makeBotNickname(roomId);
-  st.botNickname = nickname;
+  if (st.botTimers && st.botTimers.length >= BOT_COUNT) return; // already running
 
-  st.botTimer = setInterval(() => {
-    try {
-      const text = pickBotMessage();
-      const msg = {
-        id: randomUUID(),
-        roomId,
-        nickname,
-        text,
-        createdAt: new Date().toISOString(),
-      };
-      const now = Date.now();
-      st.lastMessageAt = now;
-      st.userLastAt.set(nickname, now);
-      pushRecent(roomId, msg);
-      io.of('/chat').to(`room:${roomId}`).emit('message:new', { ...msg, reactedUsers: [], reactionsCount: 0 });
-      classifyAndBroadcast(io, msg);
-    } catch (e) {
-      // swallow errors to keep interval alive
-    }
-  }, BOT_INTERVAL_MS);
+  // 생성되지 않은 봇 닉네임 채우기
+  if (!Array.isArray(st.botNicknames)) st.botNicknames = [];
+  while (st.botNicknames.length < BOT_COUNT) {
+    st.botNicknames.push(makeBotNickname(roomId, st.botNicknames.length));
+  }
+
+  // 각 봇마다 개별 타이머 시작
+  const timers = st.botTimers || [];
+  while (timers.length < BOT_COUNT) {
+    const botIndex = timers.length;
+    const nickname = st.botNicknames[botIndex];
+    const startDelay = randInt(1000, 4000);
+
+    const run = () => {
+      try {
+        const base = recentByRoom.get(roomId) ?? [];
+        const state = getRoomState(roomId);
+        const now = Date.now();
+        // 마지막 메시지 기반으로 타입 선택
+        const last = base[base.length - 1];
+        let text;
+        if (!last) {
+          text = randPick(BOT_OPENERS)(state.topic || '');
+        } else if (Math.random() < 0.3) {
+          text = randPick(BOT_SUMMARIZERS)();
+        } else {
+          text = randPick(BOT_MOVERS)();
+        }
+
+        const msg = {
+          id: randomUUID(),
+          roomId,
+          nickname,
+          text,
+          createdAt: new Date().toISOString(),
+        };
+        state.lastMessageAt = now;
+        state.userLastAt.set(nickname, now);
+        pushRecent(roomId, msg);
+        io.of('/chat').to(`room:${roomId}`).emit('message:new', { ...msg, reactedUsers: [], reactionsCount: 0 });
+        classifyAndBroadcast(io, msg);
+        scheduleRandomReactions(io, roomId, msg);
+      } catch {}
+
+      // 다음 실행 간격 (개인별 랜덤)
+      const nextMs = randInt(BOT_MIN_INTERVAL_MS, BOT_MAX_INTERVAL_MS);
+      timers[botIndex] = setTimeout(run, nextMs);
+    };
+
+    timers.push(setTimeout(run, startDelay));
+  }
+  st.botTimers = timers;
+}
+
+function scheduleRandomReactions(io, roomId, msg) {
+  // 최근 메시지에 대해 일부 봇이 랜덤하게 반응 토글 (지연 후)
+  const st = getRoomState(roomId);
+  const bots = st.botNicknames || [];
+  if (!bots.length) return;
+
+  // 0~3명 정도 랜덤 반응
+  const reactCount = randInt(0, Math.min(3, bots.length));
+  const picks = [...bots].sort(() => Math.random() - 0.5).slice(0, reactCount);
+
+  for (const nick of picks) {
+    if (nick === msg.nickname) continue; // 자기 메시지에 반응 금지
+    const delay = randInt(500, 2500);
+    setTimeout(() => {
+      const set = getReactionSet(msg.id);
+      if (set.has(nick)) return; // 이미 눌렀으면 스킵
+      set.add(nick);
+      io.of('/chat').to(`room:${roomId}`).emit('reaction:update', {
+        messageId: msg.id,
+        reactedUsers: Array.from(set),
+        reactionsCount: set.size,
+      });
+    }, delay);
+  }
 }
 
 // ---- AI simulator (when external AI server is not configured) ----
@@ -736,6 +833,7 @@ export function initChatSocket(io) {
         cb?.({ ok: true, serverId: msg.id, createdAt: msg.createdAt });
         io.of("/chat").to(`room:${roomId}`).emit("message:new", { ...msg, reactedUsers: [], reactionsCount: 0 });
         classifyAndBroadcast(io, msg);
+        scheduleRandomReactions(io, roomId, msg);
       } catch (e) {
         cb?.({ ok: false });
       }

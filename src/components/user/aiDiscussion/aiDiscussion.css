@@ -1,6 +1,6 @@
 .ai-discussion-page{
-width: 2000px;
-height: 1200px;
+width: 100vw;
+height: 100vh;
 background: var(--grey06, #F7F7F7);
 }
 
@@ -13,6 +13,8 @@ background: var(--grey06, #F7F7F7);
 }
 
 .ai-discussion-main {
+  transform: scale(0.67);
+  transform-origin:  center top;
   display: flex;
   flex-direction: row;
 }

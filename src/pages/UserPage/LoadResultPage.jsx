@@ -50,8 +50,8 @@ export default function LoadResultPage(){
         setStatus('success');
         setMessage('완료되었습니다. 결과 페이지로 이동합니다…');
         // FinalResultPage로 이동 (라우트 경로는 프로젝트 라우터에 맞춰 조정)
-        navigate(`/user/finalResult?roomId=${encodeURIComponent(roomId)}&nickname=${encodeURIComponent(nickname||'')}`,
-          { replace: true, state: { roomId, nickname, finalSeed: Date.now(), serverCached: !!data.cached } });
+        //navigate(`/user/finalResult?roomId=${encodeURIComponent(roomId)}&nickname=${encodeURIComponent(nickname||'')}`,
+        //  { replace: true, state: { roomId, nickname, finalSeed: Date.now(), serverCached: !!data.cached } });
       }catch(err){
         console.error('[final-result] create failed', err);
         if (aborted) return;

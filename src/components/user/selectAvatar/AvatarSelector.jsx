@@ -61,12 +61,6 @@ export default function AvatarSelector() {
       <h3>프로필 선택</h3>
       <AvatarButtons selected={selected} onSelect={setSelected} />
 
-      <div className="avatar-actions">
-        <button className="avatar-save" onClick={saveAvatar} disabled={saving || !selected}>
-          {saving ? '저장 중...' : '저장'}
-        </button>
-      </div>
-
       {msg && <p className="avatar-msg" role="alert">{msg}</p>}
 
       <ActionButtons />

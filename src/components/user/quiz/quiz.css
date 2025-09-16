@@ -15,7 +15,11 @@
 }
 
 .quiz {
-  background: #fff;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #F7F7F7;
 }
 
 
@@ -32,11 +36,8 @@
 
 .quiz-section {
   /* 보드는 창 크기에 맞춰 자동 스케일 (16:9 유지) */
-  width: min(
-    calc(100vw - 48px),           /* 좌우 여백 고려 */
-    calc((100vh - 48px) * 16/9)   /* 세로 기준으로 환산 */
-  );
-  height: 80vh;
+  width: 100vw;
+  height: 85vh;
   aspect-ratio: 16 / 9;
   max-height: calc(100vh - 48px);
   margin: 0 auto;
@@ -328,7 +329,7 @@ section > header .timer {
   align-items: center;              /* h3, desc, cards 중앙 정렬 */
 }
 
-/* 좌상단 타이머 (원형 뱃지 유지) */
+/* 좌상단 타이머 (원형 뱃지 + 진행 링) */
 .quiz-page > .timer {
   position: absolute;
   top: 40px;
@@ -338,12 +339,23 @@ section > header .timer {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: #fff;
-  border: clamp(5px, .35vw, 7px) solid var(--orange);
-  color: var(--orange);
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
   font-size: clamp(14px, 1.6vw, 18px);
+  color: var(--orange);
+  background: #fff; /* 내부 바탕 */
+
+  /* progress ring */
+  --ring-w: clamp(5px, .35vw, 7px); /* 링 두께 */
+  --remain: 1;                      /* JS에서 0~1 값으로 주입 */
+  --deg: calc(var(--remain) * 360deg);
+  background:
+    radial-gradient(#fff 0 49%, transparent 50%) padding-box,
+    conic-gradient(var(--orange) var(--deg), #e6e6e6 0 360deg) border-box;
+  border: var(--ring-w) solid transparent; /* conic-gradient 를 보이게 하기 위한 투명 보더 */
+
+  /* 텍스트 가독성 */
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  transition: background 120ms linear;
 }
 
 /* 상단 중앙 제목 */

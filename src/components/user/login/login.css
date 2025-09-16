@@ -76,6 +76,7 @@
 
 /* 로그인 제목 */
 .login-title {
+  margin-top: 20px;
   color: var(--grey01, #555);
 text-align: center;
 font-family: "CJ ONLYONE NEW title";

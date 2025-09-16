@@ -26,6 +26,7 @@
 }
 
 .video-element {
+  height: 70vh;
   width: 100%;
   max-width: 1600px;
   border-radius: 12px;

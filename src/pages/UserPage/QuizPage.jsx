@@ -189,7 +189,12 @@ export default function QuizPage() {
     <PageHeader title='CJ 인재상 퀴즈'></PageHeader>
     <div className="quiz-section">
       <div className='quiz-page'>
-        <div className='timer'>Timer {secondsLeft}s</div>
+        <div
+          className='timer'
+          style={{ '--remain': Math.max(0, Math.min(1, secondsLeft / SECONDS_PER_QUESTION)) }}
+        >
+          {secondsLeft}s
+        </div>
         <h3>Q{idx + 1}. {current.q}</h3>
         {current.desc && (
           <p className="quiz-desc">{current.desc}</p>

@@ -1,11 +1,17 @@
 .discussion-result-page{
-width: 2000px;
-height: 1200px;
+width: 100vw;
+height: 100vh;
 background: var(--grey06, #F7F7F7);
+
+  background-image: url('../../../assets/images/login/loginBackground.png');
 }
 
 .discussion-result-main {
-  padding-top: 100px;
+
+  transform: scale(0.75);
+  transform-origin:  center center;
+
+  padding-top: 20px;
   padding-left: 100px;
 }
 
@@ -163,8 +169,25 @@ aspect-ratio: 1/1;
   font-weight: 700;
 }
 .dr-hero-summary {
-  color: #666;
-  font-size: 14px;
+  display: flex;
+  width: 598px; /* 441px → rem */
+  padding: 1.5rem 1.375rem; /* 24px 22px */
+  align-items: flex-start;
+  gap: 0.875rem; /* 14px */
+  border-radius: 0 0 0.75rem 0.75rem; /* 12px */
+  background: var(--orange02, #FF6E37);
+  box-shadow: 0 0 0.375rem 0.0625rem rgba(142, 142, 142, 0.10);
+  
+}
+.dr-hero-summary-text {
+  flex: 1 0 0;
+color: var(--white, #FFF);
+font-family: "CJ ONLYONE NEW body";
+font-size: 19px;
+font-style: normal;
+font-weight: 400;
+line-height: 150%; /* 28.5px */
+letter-spacing: 0.354px;
 }
 .dr-hero-actions {
   display: flex;
@@ -173,6 +196,7 @@ aspect-ratio: 1/1;
 
 /* --- Scroll area (right) : my report + ranking --- */
 .dr-scroll-area {
+  margin-left: 100px;
   flex: 1;
   display: flex;
   align-items: stretch;
@@ -207,18 +231,18 @@ aspect-ratio: 1/1;
 /* --- My Report (center) --- */
 .dr-my-report {
   flex: 0 0 auto;
-  min-width: 720px; /* wider card */
+  min-width: 1100px; /* wider card */
 }
-.dr-card-body {
-  display: grid;
-  grid-template-columns: 260px 1fr; /* left profile / right distribution */
-  gap: 24px;
+.dr-card-body-2x2 {
+  display:grid;
+  grid-template-columns: 230px 1fr; /* 2 x 2 */
+  grid-auto-rows: minmax(220px, auto);
+  gap:20px;
 }
 /* Left profile column */
 .dr-profile {
-  display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 14px;
 }
 .dr-rank-badge {
@@ -276,7 +300,13 @@ aspect-ratio: 1/1;
 .dr-participation .pill { display:flex; align-items:center; gap:8px; padding:8px 12px; background:#f5f5f5; border-radius:999px; font-weight:700; }
 
 .dr-top-quote { border:1px solid #eee; border-radius:12px; padding:12px 14px; background:#fff; }
-.dr-top-quote-head { display:flex; align-items:center; justify-content:space-between; font-weight:800; color:#333; margin-bottom:6px; }
+.dr-top-quote-head { display:flex; align-items:center; justify-content:space-between; font-weight:800; color:#333; margin-bottom:6px; color: var(--grey01, #555);
+font-family: "CJ ONLYONE NEW title";
+font-size: 24px;
+font-style: normal;
+font-weight: 500;
+line-height: 155%; /* 37.2px */
+letter-spacing: 0.354px;}
 .dr-quote { margin:0; color:#555; line-height:1.6; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; }
 
 /* --- Ranking (right) --- */
@@ -296,3 +326,94 @@ aspect-ratio: 1/1;
 .dr-ranking-item.first { border-color:#FFD166; background:linear-gradient(180deg,#FFF7DD 0%, #FFF2C1 100%); }
 .dr-ranking-item.second { border-color:#B0C4FF; background:linear-gradient(180deg,#F3F7FF 0%, #E8F0FF 100%); }
 .dr-ranking-item.third { border-color:#C9F0D6; background:linear-gradient(180deg,#F3FFF6 0%, #E8FFEF 100%); }
+.dr-card-body-2x2{
+  display:grid;
+  grid-template-columns: 1fr 1fr; /* 2 x 2 */
+  grid-auto-rows: minmax(220px, auto);
+  gap:20px;
+}
+
+/* Profile quadrant tweaks */
+.dr-profile{ align-items:center; justify-content:center; }
+.dr-profile .dr-rank-badge{ margin-top:4px; }
+
+/* Distribution quadrant tweaks */
+.dr-distribution{ grid-template-columns: 220px 1fr; gap:14px; align-items:center; }
+.dr-donut-wrap{ width:645px; height:330px; display:flex; align-items:center; justify-content:center; }
+.dr-donut{ width:100%; height:100%; object-fit:contain; }
+.dr-traits{ grid-template-columns: 1fr 1fr; gap:8px; }
+.dr-traits .trait{ padding:8px 10px; }
+
+/* Participation quadrant tweaks */
+.dr-participation{ align-items:flex-start; }
+.dr-participation .pill{ background:#fff; border:1px solid #eee; }
+
+/* Top quote quadrant tweaks */
+.dr-top-quote{ background:#fff; border:1px solid #eee; }
+.dr-top-quote-head{ margin-bottom:8px; }
+
+/* --- FORCE 2x2 GRID FOR MY REPORT --- */
+.dr-my-report .dr-card-body-2x2{
+  display:grid !important;
+  grid-template-columns: 230px 1fr !important;
+  grid-auto-rows: minmax(220px, auto);
+  gap:40px 104px;
+}
+.dr-my-report .dr-card-body-2x2 > *{ min-width:0; }
+
+
+/* Adjust media query threshold if present */
+@media (max-width: 960px){
+  .dr-card-body-2x2{
+    grid-template-columns: 1fr;
+  }
+}
+
+.dr-ranking-item{ position:relative; }
+.avatar-wrap{ position:relative; width:48px; height:48px; }
+.avatar-wrap .avatar{ width:48px; height:48px; border-radius:50%; object-fit:cover; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,0.06); }
+.dr-ranking-item .badge.badge--overlay{
+  position:absolute;
+  left:-8px;
+  top:-8px;
+  min-width:26px;
+  height:26px;
+  padding:0 6px;
+  border-radius:999px;
+  background:#FF6E37;
+  color:#fff;
+  font-weight:900;
+  font-size:12px;
+  line-height:26px;
+  text-align:center;
+  box-shadow:0 2px 6px rgba(0,0,0,0.12);
+  pointer-events:none;
+}
+
+/* Make section titles occupy full row above content */
+.dr-distribution .dr-top-quote-head{ grid-column: 1 / -1; margin-bottom:8px; }
+.dr-participation{ display:flex; flex-wrap:wrap; }
+.dr-participation .dr-top-quote-head{ flex: 0 0 100%; width:100%; margin-bottom:8px; }
+.dr-profile .dr-top-quote-head{ width:100%; margin-bottom:8px; }
+.dr-top-quote .dr-top-quote-head{ margin-bottom:8px; }
+
+/* My rank: overlay badge on large avatar */
+.my-avatar-wrap{  position:relative; width:229px; height:229px; }
+.my-avatar-wrap .avatar{ width:212px; height:212px; border-radius:50%; object-fit:cover; border:3px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,0.08); }
+.badge.badge--overlay-lg{
+  position:absolute;
+  left:-10px; /* 좌상단으로 살짝 겹치게 */
+  top:-10px;
+  min-width:34px;
+  height:34px;
+  padding:0 8px;
+  border-radius:999px;
+  background:#FF6E37;
+  color:#fff;
+  font-weight:900;
+  font-size:14px;
+  line-height:34px;
+  text-align:center;
+  box-shadow:0 3px 10px rgba(0,0,0,0.16);
+  pointer-events:none;
+}

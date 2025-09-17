@@ -56,7 +56,8 @@ export default function AIDiscussionPage(){
                 </div>
             ) : (
                 <>
-                    <div style={{ display: "flex", justifyContent: "flex-end", padding: "20px", background:"black"}}>
+
+                                       <div style={{ display: "flex", justifyContent: "flex-end"}}>
                         <button className="skip-button" onClick={handleSkip}>
                             스킵
                         </button>
@@ -65,6 +66,7 @@ export default function AIDiscussionPage(){
                         </button>
                     </div>
                     <AiDiscussionMain/>
+
                 </>
             )}
         </div>

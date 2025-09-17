@@ -1,12 +1,7 @@
-import badgeJustice from '@/assets/badges/justice.png';
-import badgePassion from '@/assets/badges/passion.png';
-import badgeRespect from '@/assets/badges/respect.png';
-import badgeCreativity from '@/assets/badges/creativity.png';
 import '../../components/user/finalResult/finalResult.css';
 import PageHeader from '../../components/common/PageHeader';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import myAvatar from "@/assets/images/avatar/avatar2.png";
 
 import { http } from '@/lib/http' ;
 import { quizApi } from '@/api/quiz' ;
@@ -83,10 +78,46 @@ export default function FinalResultPage() {
   useEffect(() => {
     let aborted = false;
     async function fetchData(){
-      const mock = { sections: buildMockSections() };
-      setData(mock);
-      setQuiz({ rounds: buildMockQuiz() });
-      setLoading(false);
+      // 테스트 용이성: roomId가 없으면 임시 데이터로 조회
+      if (!roomId){
+        const mock = { sections: buildMockSections() };
+        setData(mock);
+        setQuiz({ rounds: buildMockQuiz() });
+        setLoading(false);
+        return;
+      }
+      try{
+        // 최종 결과 조회
+        const res = await http.get(`/api/review/${encodeURIComponent(roomId)}/final-result?nickname=${encodeURIComponent(nickname||'')}`);
+        
+        const json = res;
+        console.log(json);
+        if (aborted) return;
+        setData(json);
+
+        // 퀴즈 결과 조회 (신규 경로)
+        try{
+          const qres = await quizApi.getMyScores();
+          if (qres.ok){
+            const qjson = await qres.json();
+            // 기대 스키마: { rounds: [{ round_number, totalQuestions, correctCount, correctRate, takenAt? }, ...] }
+            if (Array.isArray(qjson?.rounds)) setQuiz(qjson);
+            else setQuiz({ rounds: buildMockQuiz() });
+          }else{
+            setQuiz({ rounds: buildMockQuiz() });
+          }
+        }catch{
+          setQuiz({ rounds: buildMockQuiz() });
+        }
+      }catch(e){
+        if (aborted) return;
+        // 서버 실패 시에도 임시 데이터로 폴백
+        setData({ sections: buildMockSections() });
+        setQuiz({ rounds: buildMockQuiz() });
+        setError('서버 조회 실패: 임시 데이터로 표시합니다.');
+      }finally{
+        if (!aborted) setLoading(false);
+      }
     }
     fetchData();
     return () => { aborted = true };
@@ -157,6 +188,9 @@ export default function FinalResultPage() {
         const labels = ['정직','열정','존중','창의'];
         const vals = labels.map(k => Number(pComputed?.[k]||0));
 
+        // Vite base path for public assets
+        const baseURL = (import.meta && import.meta.env && import.meta.env.BASE_URL) ? import.meta.env.BASE_URL : '/';
+
         // Create rank-based size mapping: 1st=156, 2nd/3rd=122, 4th=76
         const sorted = [...vals].map((v,i)=>({ v, i })).sort((a,b)=> b.v - a.v);
         const sizeMap = {};
@@ -168,10 +202,10 @@ export default function FinalResultPage() {
 
         // --- Badge images for persona labels (Vite-safe asset paths) ---
         const badgeSources = {
-          '정직': badgeJustice,
-          '열정': badgePassion,
-          '존중': badgeRespect,
-          '창의': badgeCreativity,
+          '정직': `${baseURL}assets/badges/justice.png`,
+          '열정': `${baseURL}assets/badges/passion.png`,
+          '존중': `${baseURL}assets/badges/respect.png`,
+          '창의': `${baseURL}assets/badges/creativity.png`,
         };
         const badgeImages = {};
         Object.entries(badgeSources).forEach(([k, src]) => {
@@ -467,10 +501,7 @@ export default function FinalResultPage() {
           </header>
           <div className="frp-rank__body">
             <div className="frp-avatarWrap">
-              <div className={`frp-avatar ${avatarTierClass}`} aria-label={overall.rank ? `${overall.rank}위 아바타` : '아바타'}>
-
-              <img className="avatar-small" src={myAvatar} alt="내 프로필" />
-              </div>
+              <div className={`frp-avatar ${avatarTierClass}`} aria-label={overall.rank ? `${overall.rank}위 아바타` : '아바타'}></div>
               {overall.rank ? (
                 <div className={`frp-rank-badge ${rankBadgeClass}`} title={`순위 ${overall.rank}위`}>
                   {overall.rank}

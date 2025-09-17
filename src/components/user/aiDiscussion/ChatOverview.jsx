@@ -8,10 +8,10 @@ import cake1 from '@/assets/images/discussion/cake_1.png';
 import cake2 from '@/assets/images/discussion/cake_2.png';
 import cake3 from '@/assets/images/discussion/cake_3.png';
 import cake4 from '@/assets/images/discussion/cake_4.png';
-import badge1 from '@/assets/images/discussion/badge_1.png';
-import badge2 from '@/assets/images/discussion/badge_2.png';
-import badge3 from '@/assets/images/discussion/badge_3.png';
-import badge4 from '@/assets/images/discussion/badge_4.png';
+import badge1 from '@/assets/images/discussion/badge_1_large.png';
+import badge2 from '@/assets/images/discussion/badge_2_large.png';
+import badge3 from '@/assets/images/discussion/badge_3_large.png';
+import badge4 from '@/assets/images/discussion/badge_4_large.png';
 
 const CAKES = { 1: cake1, 2: cake2, 3: cake3, 4: cake4 };
 const BADGES = { 1: badge1, 2: badge2, 3: badge3, 4: badge4 };

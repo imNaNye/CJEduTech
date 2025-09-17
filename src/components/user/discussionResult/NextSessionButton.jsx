@@ -9,7 +9,7 @@ export default function NextSessionButton() {
     <button
       className="next-session-button"
       onClick={() => {
-        if (round === 3) {
+        if (round === 1) {//임시, 원래는 3
           navigate("/user/loadResult");
         } else {
           setRound(round + 1);

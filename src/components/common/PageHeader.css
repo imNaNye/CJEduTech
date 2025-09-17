@@ -14,15 +14,20 @@
 }
 
 /* 제목(좌측) */
-.page-header .title,
-.page-header-short .title {
+.page-header .title{
   margin-left: 64px;
   font-weight: 800;
   font-size: 18px;
   line-height: 1.2;
   color: var(--ink, #222);
 }
-
+.page-header-short .title {
+  margin-left: 64px;
+  font-weight: 800;
+  font-size: 32px;
+  line-height: 1.2;
+  color: var(--ink, #222);
+}
 /* 우측 유저 정보 컨테이너 */
 .user-info {
   display: flex;

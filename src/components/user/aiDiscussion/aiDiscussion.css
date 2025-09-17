@@ -10,10 +10,11 @@ background: var(--grey06, #F7F7F7);
   --pill-bg: #fff7ed;
   --pill-border: #ffd8b5;
   --pill-text: #9a4a00;
+  background-color: #fff7ed;
 }
 
 .ai-discussion-main {
-  transform: scale(0.67);
+  transform: scale(0.75);
   transform-origin:  center top;
   display: flex;
   flex-direction: row;
@@ -33,15 +34,15 @@ background: var(--grey06, #F7F7F7);
 }
 
 /* ---- Overview top (timer + stat pills) ---- */
-.overview-top { display: grid; grid-template-columns: 88px 1fr; align-items: start; column-gap: 20px; }
+.overview-top { display: grid; grid-template-columns: 150px 1fr; align-items: start; column-gap: 20px; }
 .timer-card { display: contents; }
 
 .timer-wrap { position: relative; }
 .timer-caption { position: absolute; top: -8px; left: -6px; font-size: 12px; color:#8c8c8c; }
 
-.timer-face { position: relative; width: 88px; height: 88px; border-radius: 50%; --p: 0.0; background: radial-gradient(circle at 50% 50%, #fff 58%, transparent 60%), conic-gradient(var(--brand-orange) calc(var(--p)*360deg), var(--brand-orange-weak) 0); display: grid; place-items: center; outline: 6px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
-.timer-remaining { font-weight: 800; font-size: 18px; line-height: 1; color: var(--brand-orange); letter-spacing: .2px; }
-.timer-total-inside { position:absolute; top: 8px; font-size: 11px; color:#777; }
+.timer-face { position: relative; width: 150px; height: 150px; border-radius: 50%; --p: 0.0; background: radial-gradient(circle at 50% 50%, #fff 58%, transparent 60%), conic-gradient(var(--brand-orange) calc(var(--p)*360deg), var(--brand-orange-weak) 0); display: grid; place-items: center; outline: 6px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+.timer-remaining { font-weight: 800; font-size: 38px; line-height: 1; color: var(--brand-orange); letter-spacing: .2px; }
+.timer-total-inside { position:absolute; top: 20px; font-size: 20px; color:#777; }
 
 /* summary box (single soft-orange container, items inside) */
 .summary-box {
@@ -66,18 +67,15 @@ background: var(--grey06, #F7F7F7);
   gap: 6px;
   padding: 6px 10px;
   border-radius: 10px;
-  background: #FFF2DF;
-  border: 1px solid #FFDAB8;
-  box-shadow: 0 1px 0 rgba(0,0,0,.03);
   color: #9a4a00;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 24px;
   line-height: 1;
 }
 
 .summary-item .icon {
-  width: 18px;
-  height: 18px;
+  width: 50px;
+  height: 50px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;

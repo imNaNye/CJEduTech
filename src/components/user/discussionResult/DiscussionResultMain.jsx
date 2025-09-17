@@ -155,9 +155,8 @@ export default function DiscussionResultMain() {
             <div className="dr-hero-summary">
                       <img className="badge-img" src={aiIcon} alt="aiIcon"/>
               <div className="dr-hero-summary-text">
-                {overallSummary}
                 {overallSummary ? 
-                  {overallSummary}
+                  overallSummary
                  : 
                   "총평을 준비하고 있습니다…"
                 }

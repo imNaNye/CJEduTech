@@ -111,7 +111,7 @@ export const quizQuestions = {
   ],
   2: [
     {
-      q: '2라운드 Q1?',
+      q: '다음 중 아래 설명에 부합하는 카드는?',
       desc: '고객, 동료 등의 입장을 헤아리고 먼저 생각하는 마음',
       options: [
         {  img: r2q1A1, alt: 'A1 이미지', backImg: verticalBack },
@@ -122,7 +122,7 @@ export const quizQuestions = {
       explanation: '이 보기의 차이를 비교해 보세요.',
     },
     {
-      q: '2라운드 Q2?',
+      q: '다음 중 아래 설명에 부합하는 카드는?',
       options: [
         {  img: r2q2A2, alt: 'A2 이미지', backImg: verticalBack },
         {  img: r2q2B2, alt: 'B2 이미지', backImg: verticalBack },
@@ -133,11 +133,11 @@ export const quizQuestions = {
       delayMs: 2500,
     },
     {
-      q: '2라운드 Q3?',
+      q: '제시상황에 적절한 응대를 찾아 연결하세요.',
       options: [
-        { label: 'A3', img: r2q3A3, alt: 'A3 이미지', backImg: horizontalBack },
-        { label: 'B3', img: r2q3B3, alt: 'B3 이미지', backImg: horizontalBack },
-        { label: 'C3', img: r2q3C3, alt: 'C3 이미지', backImg: horizontalBack },
+        { label: '', img: r2q3A3, alt: 'A3 이미지', backImg: horizontalBack },
+        { label: '', img: r2q3B3, alt: 'B3 이미지', backImg: horizontalBack },
+        { label: '', img: r2q3C3, alt: 'C3 이미지', backImg: horizontalBack },
       ],
       answer: 1,
       explanation: '오답일 때는 근거를 다시 확인하세요.',
@@ -145,7 +145,7 @@ export const quizQuestions = {
   ],
   3: [
     {
-      q: '3라운드 Q1?',
+      q: '다음 중 아래 설명에 부합하는 카드는?',
       desc: '상황 변화나 고객, 팀 동료 특성을 빠르게 파악하는 능력',
       options: [
         {  img: r3q1A1, alt: 'A1 이미지', backImg: verticalBack },
@@ -156,7 +156,7 @@ export const quizQuestions = {
       explanation: '기본 개념을 묻는 문제입니다.',
     },
     {
-      q: '3라운드 Q2?',
+      q: '다음 중 아래 설명에 부합하는 카드는?',
       options: [
         {  img: r3q2A2, alt: 'A2 이미지', backImg: verticalBack },
         {  img: r3q2B2, alt: 'B2 이미지', backImg: verticalBack },
@@ -166,11 +166,11 @@ export const quizQuestions = {
       explanation: '비슷한 용어와 혼동하지 않도록 주의!',
     },
     {
-      q: '3라운드 Q3?',
+      q: '제시상황에 적절한 응대를 찾아 연결하세요.',
       options: [
-        { label: 'A3', img: r3q3A3, alt: 'A3 이미지', backImg: horizontalBack },
-        { label: 'B3', img: r3q3B3, alt: 'B3 이미지', backImg: horizontalBack },
-        { label: 'C3', img: r3q3C3, alt: 'C3 이미지', backImg: horizontalBack },
+        { label: '', img: r3q3A3, alt: 'A3 이미지', backImg: horizontalBack },
+        { label: '', img: r3q3B3, alt: 'B3 이미지', backImg: horizontalBack },
+        { label: '', img: r3q3C3, alt: 'C3 이미지', backImg: horizontalBack },
       ],
       answer: 2,
       explanation: '응용 문제: 근거를 떠올리며 선택하세요.',

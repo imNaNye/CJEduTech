@@ -47,7 +47,7 @@ export default function ChatTimer(){
     <div className="overview-top">
       <div className="timer-wrap">
         <div className="timer-face" style={{"--p": String(progress)}}>
-          <div className="timer-total-inside">24:00</div>
+          <div className="timer-total-inside">25:00</div>
           <div className="timer-remaining">{mm}:{ss}</div>
         </div>
       </div>

@@ -62,7 +62,7 @@ export default function FinalResultPage() {
     };
     return {
       overall: { rank: 1, score: 123.4, totalMessages: participationByRound.reduce((a,b)=>a+b.myMessages,0), totalReactions: participationByRound.reduce((a,b)=>a+b.myReactions,0) },
-      aiSummary: '테스트 모드: 내 발화를 요약한 예시 텍스트입니다. 실제 환경에서는 AI 서버 응답이 표시됩니다.',
+      aiSummary: "명확한 기준과 효과적인 요약이 돋보였습니다. '비용, 시간, 영향도'를 기준으로 대안을 비교하는 발언들은 효율적 의사결정의 중요성을 잘 보여주었습니다. 실무에서 이러한 접근 방식을 계속 활용해 주시길 기대합니다.",
       personaIntegrated,
       personaByRound,
       participationByRound,

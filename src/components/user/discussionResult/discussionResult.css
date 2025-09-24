@@ -106,21 +106,32 @@ aspect-ratio: 1/1;
   margin-top: 20px;
 }
 
-.save-pdf-button,
+.save-pdf-button{
+  border-radius: 13px;
+background: var(--grey04, #D9D9D9);
+color: var(--grey01, #555);
+text-align: center;
+font-family: "CJ ONLYONE NEW body";
+font-size: 24px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+letter-spacing: 0.769px;
+
+}
 .next-session-button {
-  padding: 10px 18px;
-  background-color: #666;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  cursor: pointer;
+  border-radius: 13px;
+  background: var(--orange02, #FF6E37);
+  color: var(--grey07, #FAFAFA);
+text-align: center;
+font-family: "CJ ONLYONE NEW body";
+font-size: 24px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+letter-spacing: 0.769px;
 }
 
-.save-pdf-button:hover,
-.next-session-button:hover {
-  background-color: #444;
-}
 
 /* =============================
    Discussion Result – New Layout
@@ -233,6 +244,8 @@ letter-spacing: 0.354px;
 .dr-my-report {
   flex: 0 0 auto;
   min-width: 1100px; /* wider card */
+  padding: 38px;
+  box-sizing: border-box;
 }
 .dr-card-body-2x2 {
   display:grid;
@@ -300,16 +313,134 @@ letter-spacing: 0.354px;
 .dr-participation { display:flex; gap:10px; flex-wrap: wrap; }
 .dr-participation .pill { display:flex; align-items:center; gap:8px; padding:8px 12px; background:#f5f5f5; border-radius:999px; font-weight:700; }
 
-.dr-top-quote { border:1px solid #eee; border-radius:12px; padding:12px 14px; background:#fff; }
-.dr-top-quote-head { display:flex; align-items:center; justify-content:space-between; font-weight:800; color:#333; margin-bottom:6px; color: var(--grey01, #555);
+
+.result-summary-box{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, auto));
+  gap: 10px 16px;
+  padding: 12.216px 15.548px;
+  align-items: center;
+  border-radius: 8.885px;
+  background: rgba(255, 227, 179, 0.50);
+}
+@media (max-width: 520px){
+  .result-summary-box{ grid-template-columns: 1fr; }
+}
+
+.result-summary-item{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  color: var(--orange02, #FF6E37);
+  font-family: "CJ ONLYONE NEW title";
+  font-size: 18.15px;
+  font-weight: 500;
+  line-height: 1;
+}
+.result-summary-item .icon{
+  display:inline-block;
+  width:24px; height:24px;
+  background-size:contain;
+  background-position:center;
+  background-repeat:no-repeat;
+  flex:0 0 24px;
+}
+
+.result-category-summary-box{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+  padding: 12.216px 15.548px;
+  align-items: center;
+  align-self: stretch;
+  border-radius: 8.885px;
+  background: rgba(255, 227, 179, 0.50);
+}
+
+.result-category-summary-item{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  color: var(--orange02, #FF6E37);
+  font-family: "CJ ONLYONE NEW title";
+  font-size: 18.15px;
+  font-weight: 500;
+}
+
+.result-summary-item.lk .icon { background-image: url('../../../assets/images/discussion/like.svg'); width: 24px;height: 24px;}
+.result-summary-item.ch .icon { background-image: url('../../../assets/images/discussion/Send.svg'); width: 24px;height: 24px;}
+
+.result-category-summary-item.j .icon  { background-image: url('../../../assets/images/discussion/badge_1.png'); width: 38px;height: 38px;}
+.result-category-summary-item.p .icon  { background-image: url('../../../assets/images/discussion/badge_2.png'); width: 38px;height: 38px;}
+.result-category-summary-item.c .icon  { background-image: url('../../../assets/images/discussion/badge_3.png'); width: 38px;height: 38px;}
+.result-category-summary-item.r .icon  { background-image: url('../../../assets/images/discussion/badge_4.png'); width: 38px;height: 38px;}
+
+
+
+.result-category-summary-item .icon{
+  display:inline-block;
+  width:38px; height:38px;
+  background-size:contain;
+  background-position:center;
+  background-repeat:no-repeat;
+  flex:0 0 38px;
+}
+
+.dr-top-quote-head { display:flex; align-items:center; 
+   font-weight:800;
+   margin-bottom:6px; 
+   color: var(--grey01, #555);
 font-family: "CJ ONLYONE NEW title";
 font-size: 24px;
 font-style: normal;
 font-weight: 500;
 line-height: 155%; /* 37.2px */
 letter-spacing: 0.354px;}
-.dr-quote { margin:0; color:#555; line-height:1.6; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; }
+.dr-top-quote-head .likes-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 10px;
+  background:#f1f1f1; /* 회색 배경 */
+  border-radius:999px;
+  color: var(--orange02, #FF6E37);
+font-family: "Pretendard Variable";
+font-size: 22px;
+font-style: normal;
+font-weight: 400;
+line-height: 102%; /* 22.44px */
+letter-spacing: -0.4px;
+}
+.dr-top-quote-head .likes-badge .icon{
+  background-image: url('../../../assets/images/discussion/like.svg');
+  display:inline-block;
+  width:20px;
+  height:20px;
+  background-size:contain;
+  background-repeat:no-repeat;
+  background-position:center;
+  flex:0 0 20px;
+}
+.dr-quote { 
+  display: flex;
+padding: 24px;
+flex-direction: column;
+align-items: flex-start;
+gap: 10px;
+align-self: stretch;
+border-radius: 12px;
+background: rgba(255, 227, 179, 0.50);
 
+color: black;
+font-family: "CJ ONLYONE NEW body";
+font-size: 19px;
+font-style: normal;
+font-weight: 300;
+line-height: 155%; /* 29.45px */
+letter-spacing: 0.354px;
+}
 /* --- Ranking (right) --- */
 .dr-ranking {
   flex: 0 0 auto;
@@ -350,7 +481,7 @@ letter-spacing: 0.354px;}
 .dr-participation .pill{ background:#fff; border:1px solid #eee; }
 
 /* Top quote quadrant tweaks */
-.dr-top-quote{ background:#fff; border:1px solid #eee; }
+.dr-top-quote{ background:#fff; }
 .dr-top-quote-head{ margin-bottom:8px; }
 
 /* --- FORCE 2x2 GRID FOR MY REPORT --- */
@@ -372,7 +503,9 @@ letter-spacing: 0.354px;}
 
 .dr-ranking-item{ position:relative; }
 .avatar-wrap{ position:relative; width:48px; height:48px; }
-.avatar-wrap .avatar{ width:48px; height:48px; border-radius:50%; object-fit:cover; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,0.06); }
+.avatar-wrap .avatar{ width:48px; 
+  height:48px; border-radius:50%; 
+  object-fit:cover; border: 2px solid var(--orange02, #FF6E37); box-shadow:0 2px 6px rgba(0,0,0,0.06); }
 .dr-ranking-item .badge.badge--overlay{
   position:absolute;
   left:-8px;
@@ -395,26 +528,38 @@ letter-spacing: 0.354px;}
 .dr-distribution .dr-top-quote-head{ grid-column: 1 / -1; margin-bottom:8px; }
 .dr-participation{ display:flex; flex-wrap:wrap; }
 .dr-participation .dr-top-quote-head{ flex: 0 0 100%; width:100%; margin-bottom:8px; }
-.dr-profile .dr-top-quote-head{ width:100%; margin-bottom:8px; }
+.dr-profile .dr-top-quote-head{ width:100%; margin-bottom:50px; }
 .dr-top-quote .dr-top-quote-head{ margin-bottom:8px; }
 
 /* My rank: overlay badge on large avatar */
-.my-avatar-wrap{  position:relative; width:229px; height:229px; }
-.my-avatar-wrap .avatar{ width:212px; height:212px; border-radius:50%; object-fit:cover; border:3px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,0.08); }
+.my-avatar-wrap{  position:relative; width:229px; height:229px; padding-left: 30px;}
+.my-avatar-wrap .avatar{ width:212px; 
+  height:212px; border-radius:50%;
+   object-fit:cover; border: 4px solid var(--orange02, #FF6E37);
+    box-shadow:0 3px 10px rgba(0,0,0,0.08); }
 .badge.badge--overlay-lg{
   position:absolute;
-  left:-10px; /* 좌상단으로 살짝 겹치게 */
-  top:-10px;
-  min-width:34px;
-  height:34px;
-  padding:0 8px;
+  left:0px; /* 좌상단으로 살짝 겹치게 */
+  top:-30px;
+  min-width:114px;
+  height:109px;
+  padding: 21.376px 24.939px;
   border-radius:999px;
   background:#FF6E37;
-  color:#fff;
-  font-weight:900;
-  font-size:14px;
   line-height:34px;
   text-align:center;
   box-shadow:0 3px 10px rgba(0,0,0,0.16);
   pointer-events:none;
+
+
+  color: var(--grey07, #FAFAFA);
+font-family: "CJ ONLYONE NEW title";
+font-size: 32px;
+font-style: normal;
+font-weight: 700;
+line-height: normal;
+
+box-sizing: border-box;
+
 }
+

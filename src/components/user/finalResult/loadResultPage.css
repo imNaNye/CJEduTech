@@ -1,0 +1,90 @@
+/* 페이지 배경 */
+.lrp-page {
+width: 100vw;
+height: 100vh;
+background: var(--grey06, #F7F7F7);
+
+  background-image: url('../../../assets/images/login/loginBackground.png');
+}
+/* 상단바 */
+.lrp-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 28px;
+  background: #fff;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+}
+.lrp-title {
+  margin: 0;
+  font-family: "CJ ONLYONE NEW title", sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #333;
+}
+.lrp-user {
+  font-family: "CJ ONLYONE NEW body", sans-serif;
+  color: #777;
+}
+
+/* 메인 영역 */
+.lrp-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 반원형 아크 + 봇 */
+.lrp-arc {
+  position: relative;
+}
+.lrp-arc svg {
+  display: block;
+}
+.lrp-bot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: auto;
+}
+
+/* 텍스트 */
+.lrp-text {
+  text-align: center;
+}
+.lrp-step-title {
+  margin: 18px 0 6px;
+  color: #6b6b6b;
+  font-family: "CJ ONLYONE NEW title", sans-serif;
+  font-size: 46px;
+  font-weight: 800;
+}
+.lrp-step-sub {
+  margin: 0;
+  color: #9a9a9a;
+  font-family: "CJ ONLYONE NEW body", sans-serif;
+  font-size: 20px;
+  line-height: 1.7;
+  white-space: pre-line; /* 줄바꿈 유지 */
+}
+
+/* 반응형(좁은 화면) */
+@media (max-width: 640px) {
+  .lrp-step-title {
+    font-size: 32px;
+  }
+  .lrp-step-sub {
+    font-size: 18px;
+  }
+  .lrp-bot {
+    width: 160px;
+  }
+}

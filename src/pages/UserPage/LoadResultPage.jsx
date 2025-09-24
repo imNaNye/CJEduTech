@@ -1,66 +1,137 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import botImg from '@/assets/images/discussion/AI_icon.png';
 import '../../components/user/finalResult/loadResultPage.css';
-
-import { http } from '@/lib/http' ;
-
-export default function LoadResultPage(){
+/**
+ * 3-STEP LOADING PAGE
+ * - 3단계 순차 표시, 각 단계 최소 3초
+ * - 반원형 프로그래스(아크) 단계별 0→100% 애니메이션
+ * - 마지막 단계 종료 후 FinalResultPage로 이동
+ * - roomId / nickname 은 쿼리·세션에서 읽고 세션에 저장
+ */
+export default function LoadResultPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const search = new URLSearchParams(location.search);
+  const { search } = useLocation();
+  const params = new URLSearchParams(search);
+  const roomId =
+    params.get('roomId') || sessionStorage.getItem('lastRoomId') || '';
+  const nickname =
+    params.get('nickname') ||
+    sessionStorage.getItem('myNickname') ||
+    localStorage.getItem('nickname') ||
+    '';
 
-  const initialRoomId = useMemo(() => (
-    search.get('roomId') || location.state?.roomId || localStorage.getItem('roomId') || 'general'
-  ), [location.search, location.state]);
+  // 단계 텍스트
+  const steps = useMemo(
+    () => [
+      {
+        title: '교육 진행률 확인중…',
+        sub: '학습 데이터를 분석중입니다.\n잠시후 전체적인 피드백을 전달드릴게요.',
+      },
+      {
+        title: 'AI 피드백 작성중…',
+        sub: '학습 데이터를 분석중입니다.\n잠시후 전체적인 피드백을 전달드릴게요.',
+      },
+      {
+        title: '인재상 키워드 추출중…',
+        sub: '학습 데이터를 분석중입니다.\n잠시후 전체적인 피드백을 전달드릴게요.',
+      },
+    ],
+    []
+  );
 
-  const initialNickname = useMemo(() => (
-    search.get('nickname') || location.state?.nickname || localStorage.getItem('nickname') || ''
-  ), [location.search, location.state]);
+  // 상태
+  const [idx, setIdx] = useState(0); // 0..2
+  const [progress, setProgress] = useState(0); // 0..100 (각 단계)
+  const animRef = useRef(null);
 
-  const [roomId] = useState(initialRoomId);
-  const [nickname] = useState(initialNickname);
-  const [status, setStatus] = useState('init'); // init | requesting | success | error
-  const [message, setMessage] = useState('최종 결과를 준비하고 있습니다…');
-
+  // 단계별 반원형 프로그래스 애니메이션 (최소 3초)
   useEffect(() => {
-    let aborted = false;
-    async function run(){
-      if (!roomId){
-        setStatus('error');
-        setMessage('roomId가 없습니다. URL 파라미터 또는 state로 전달해주세요.');
-        return;
-      }
-      setStatus('requesting');
-      setMessage('라운드 기록을 합산 중…');
-      try{
-        const res = await http.post(`/api/review/${encodeURIComponent(roomId)}/final-result?nickname=${nickname}&force=${encodeURIComponent('true')}`)
-        console.log(res)
-        const data = res.sections;
-        if (aborted) return;
-        setStatus('success');
-        setMessage('완료되었습니다. 결과 페이지로 이동합니다…');
-        // FinalResultPage로 이동 (라우트 경로는 프로젝트 라우터에 맞춰 조정)
-        navigate(`/user/finalResult?roomId=${encodeURIComponent(roomId)}&nickname=${encodeURIComponent(nickname||'')}`,
-          { replace: true, state: { roomId, nickname, finalSeed: Date.now(), serverCached: !!data.cached } });
-      }catch(err){
-        console.error('[final-result] create failed', err);
-        if (aborted) return;
-        setStatus('error');
-        setMessage('최종 결과 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
-      }
+    cancelAnimationFrame(animRef.current);
+    setProgress(0);
+    const start = performance.now();
+    const DUR = 3000;
+
+    function tick(now) {
+      const t = Math.min(1, (now - start) / DUR);
+      setProgress(Math.round(t * 100));
+      if (t < 1) animRef.current = requestAnimationFrame(tick);
     }
-    run();
-    return () => { aborted = true };
-  }, [roomId, nickname, navigate]);
+    animRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animRef.current);
+  }, [idx]);
+
+  // 3초마다 다음 단계로, 마지막은 종료 후 네비게이트
+  useEffect(() => {
+    const DUR = 3000;
+    if (idx < 2) {
+      const t = setTimeout(() => setIdx((i) => Math.min(i + 1, 2)), DUR);
+      return () => clearTimeout(t);
+    } else {
+      const t = setTimeout(() => {
+        if (roomId) sessionStorage.setItem('lastRoomId', roomId);
+        if (nickname) sessionStorage.setItem('myNickname', nickname);
+        navigate('/user/finalResult');
+      }, DUR);
+      return () => clearTimeout(t);
+    }
+  }, [idx, navigate, roomId, nickname]);
+
+  // 반원형 프로그래스 도형 계산
+  const radius = 260; // px
+  const stroke = 18; // 두께
+  const cx = radius + stroke;
+  const cy = radius + stroke;
+  const semicircLen = Math.PI * radius; // 반원 둘레길이
+  const dash = (progress / 100) * semicircLen;
 
   return (
-    <div className="load-page">
-      <div className={`loader ${status}`} aria-busy={status==='requesting'} />
-      <p className="load-message">{message}</p>
-      <div className="load-meta">
-        <div><b>roomId</b>: {roomId||'-'}</div>
-        <div><b>nickname</b>: {nickname||'-'}</div>
-      </div>
+    <div className="lrp-page">
+      <header className="lrp-topbar">
+        <h1 className="lrp-title">전체 결과 대시보드</h1>
+        <div className="lrp-user">{nickname || '사용자'}</div>
+      </header>
+
+      <main className="lrp-main">
+        <div className="lrp-arc">
+          <svg
+            width={(radius + stroke) * 2}
+            height={radius + stroke + stroke * 2}
+            viewBox={`0 0 ${(radius + stroke) * 2} ${
+              radius + stroke + stroke * 2
+            }`}
+          >
+            {/* 트랙 */}
+            <path
+              d={`M ${cx - radius},${cy} A ${radius},${radius} 0 0 1 ${
+                cx + radius
+              },${cy}`}
+              fill="none"
+              stroke="#E5E5E5"
+              strokeWidth={stroke}
+              strokeLinecap="round"
+            />
+            {/* 진행 */}
+            <path
+              d={`M ${cx - radius},${cy} A ${radius},${radius} 0 0 1 ${
+                cx + radius
+              },${cy}`}
+              fill="none"
+              stroke="#FF6E37"
+              strokeWidth={stroke}
+              strokeLinecap="round"
+              strokeDasharray={`${dash} ${semicircLen - dash}`}
+            />
+          </svg>
+          <img className="lrp-bot" src={botImg} alt="loading mascot" />
+        </div>
+
+        <div className="lrp-text">
+          <h2 className="lrp-step-title">{steps[idx].title}</h2>
+          <p className="lrp-step-sub">{steps[idx].sub}</p>
+        </div>
+      </main>
     </div>
   );
 }
+

@@ -157,8 +157,15 @@ export default function FinalResultPage() {
         const labels = ['정직','열정','존중','창의'];
         const vals = labels.map(k => Number(pComputed?.[k]||0));
 
+        // Rank-based colors (1~4): 1:#FF6620, 2:#FFCE7B, 3:#FFE3B3, 4:#EDEDED
+        const RANK_COLORS = ['#FF6620', '#FFCE7B', '#FFE3B3', '#EDEDED'];
+        // sort indices by value desc
+        const sortedForColor = [...vals].map((v,i)=>({ v, i })).sort((a,b)=> b.v - a.v);
+        const colorByIndex = Array(vals.length);
+        sortedForColor.forEach((o, rank) => { colorByIndex[o.i] = RANK_COLORS[rank] || RANK_COLORS[RANK_COLORS.length-1]; });
+
         // Create rank-based size mapping: 1st=156, 2nd/3rd=122, 4th=76
-        const sorted = [...vals].map((v,i)=>({ v, i })).sort((a,b)=> b.v - a.v);
+        const sorted = sortedForColor; // reuse the same ranking for sizing
         const sizeMap = {};
         sorted.forEach((o, rank) => {
           if (rank === 0) sizeMap[o.i] = 156;
@@ -306,7 +313,7 @@ export default function FinalResultPage() {
               // anchor dot
               ctx.beginPath();
               ctx.arc(ax, ay, 3, 0, Math.PI*2);
-              ctx.fillStyle = 'rgba(0,0,0,0.35)';
+              ctx.fillStyle = '#FF6E37';
               ctx.fill();
 
               // elbow polyline
@@ -316,18 +323,38 @@ export default function FinalResultPage() {
               ctx.lineTo(endX, endY);
               ctx.lineWidth = 2;
               ctx.lineJoin = 'round';
-              ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+              ctx.strokeStyle = '#FF6E37';
               ctx.stroke();
 
               // badge image
               ctx.drawImage(img, bx - size/2, by - size/2, size, size);
 
-              // label under badge
+              // label under badge (one line)
               ctx.font = '14px sans-serif';
-              ctx.fillStyle = '#333';
-              ctx.textAlign = 'center';
               ctx.textBaseline = 'top';
-              ctx.fillText(`${label} ${value}%`, bx, by + size/2 + 6);
+              const labelText = `${label} `;
+              const percentText = `${value}%`;
+
+              // measure to keep total centered
+              const wLabel = ctx.measureText(labelText).width;
+              const wPercent = ctx.measureText(percentText).width;
+              const totalW = wLabel + wPercent;
+              const baseY = by + size/2 + 6;
+              let startX = bx - totalW / 2;
+
+              // draw label in neutral color
+              ctx.fillStyle = '#333';
+              ctx.textAlign = 'left';
+              ctx.fillText(labelText, startX, baseY);
+
+              // draw percent in the same rank color as the arc segment
+              // use the dataset color for this arc index
+              const segColor = (chart.data.datasets?.[0]?.backgroundColor?.[it.idx]) || '#FF6620';
+              ctx.fillStyle = segColor;
+              ctx.fillText(percentText, startX + wLabel, baseY);
+
+              // restore textAlign for downstream code (safety)
+              ctx.textAlign = 'center';
 
               ctx.restore();
             });
@@ -340,7 +367,7 @@ export default function FinalResultPage() {
             labels,
             datasets: [{
               data: vals,
-              backgroundColor: [C.justice, C.passion, C.respect, C.creativity],
+              backgroundColor: colorByIndex,
               borderWidth: 0
             }]
           },
@@ -459,6 +486,7 @@ export default function FinalResultPage() {
         <div className="frp-topbar__date">학습일: {learnedAtStr}</div>
       </div>
 
+<div className='frp-dashboard'>
       {/* SECTION 1: 통합 등수/점수 + AI 요약 + 학습 완수율(총괄 메시지/반응을 진행률처럼 표시) */}
       <section className="frp-section frp-section--1">
         <article className="frp-card frp-rank">
@@ -592,6 +620,7 @@ export default function FinalResultPage() {
           </article>
         </aside>
       </section>
+      </div>
     </div>
   );
 }

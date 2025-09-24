@@ -14,6 +14,43 @@ import badgeRespect from "@/assets/images/discussion/badge_4.png";
 import user1Avatar from "@/assets/images/avatar/avatar1.png";
 import aiIcon from "@/assets/images/discussion/AI_icon.png";
 
+function buildMockRoomResult(nickname = '나'){
+  const createdAt = new Date().toISOString();
+  const perUser = {
+    [nickname]: {
+      totalMessages: 18,
+      totalReactions: 27,
+      labels: { '정직': 8, '열정': 5, '창의': 3, '존중': 2 },
+      topReacted: { text: '데이터 기반으로 의사결정하면 설득력이 높아집니다.', reactionsCount: 12 }
+    },
+    '동료A': { totalMessages: 14, totalReactions: 21, labels: { '정직': 4, '열정': 6, '창의': 2, '존중': 2 }, topReacted: { text: '고객 관점을 더 녹이면 좋겠어요.', reactionsCount: 9 } },
+    '동료B': { totalMessages: 9,  totalReactions: 13, labels: { '정직': 2, '열정': 2, '창의': 4, '존중': 1 }, topReacted: { text: '실험을 작게 자주 해보죠.', reactionsCount: 6 } },
+    '동료C': { totalMessages: 7,  totalReactions: 8,  labels: { '정직': 1, '열정': 3, '창의': 1, '존중': 2 }, topReacted: { text: '일정을 먼저 확정합시다.', reactionsCount: 4 } },
+  };
+  const ranking = [
+    { nickname, rank: 1, score: 96, totalMessages: perUser[nickname].totalMessages, totalReactions: perUser[nickname].totalReactions },
+    { nickname: '동료A', rank: 2, score: 88, totalMessages: perUser['동료A'].totalMessages, totalReactions: perUser['동료A'].totalReactions },
+    { nickname: '동료B', rank: 3, score: 80, totalMessages: perUser['동료B'].totalMessages, totalReactions: perUser['동료B'].totalReactions },
+    { nickname: '동료C', rank: 4, score: 72, totalMessages: perUser['동료C'].totalMessages, totalReactions: perUser['동료C'].totalReactions },
+  ];
+  return { perUser, ranking, createdAt };
+}
+
+function buildMockMyResult(nickname = '나', room){
+  const u = room.perUser[nickname];
+  const me = room.ranking.find(r => r.nickname === nickname) || { rank: 1, score: 96 };
+  return {
+    roomId: 'mock-room',
+    rank: me.rank,
+    score: me.score,
+    totalMessages: u.totalMessages,
+    totalReactions: u.totalReactions,
+    labels: u.labels,
+    topReacted: u.topReacted,
+    createdAt: room.createdAt,
+  };
+}
+
 export default function DiscussionResultMain() {
   const [roomId, setRoomId] = useState("");
   const [myNickname, setMyNickname] = useState("");
@@ -84,7 +121,14 @@ export default function DiscussionResultMain() {
           }
         }
       } catch (e) {
-        setError(e?.message || "failed_to_load");
+        // Fallback to mock data when API fails
+        const nickSafe = nick || '나';
+        const mockRoom = buildMockRoomResult(nickSafe);
+        const mockMe = buildMockMyResult(nickSafe, mockRoom);
+        setRoomResult(mockRoom);
+        setMyResult(mockMe);
+        setOverallSummary('토론 전반에 걸쳐 활발한 참여가 이루어졌습니다. 특히 정직과 열정 관련 메시지가 두드러졌으며, 팀 내 의사결정에 긍정적 영향을 주었습니다.');
+        setError('');
       } finally {
         setLoading(false);
       }
@@ -127,7 +171,8 @@ export default function DiscussionResultMain() {
     );
   }
 
-  if (error || !roomResult) {
+  if (error && !roomResult) {
+    // 이 경우는 모의 데이터까지 생성되지 못했을 때만
     return (
       <div className="discussion-result-main" style={{ padding:"40px" }}>
         <p style={{ color:'#c00', fontWeight:800 }}>결과를 불러오지 못했습니다.</p>
@@ -175,7 +220,7 @@ export default function DiscussionResultMain() {
         {/* 나의 레포트 */}
         <section className="dr-my-report card">
           <div className="dr-card-header">
-            <h2>{myNickname ? `${myNickname}의 토론 레포트` : '(나의 토론 레포트)'}</h2>
+            <h2>{myNickname ? `나의 첫번째 토론 레포트` : '나의 토론 레포트'}</h2>
           </div>
 
           <div className="dr-card-body-2x2">
@@ -205,22 +250,32 @@ export default function DiscussionResultMain() {
                <div className="dr-top-quote-head">
                 <span>참여 횟수</span>
               </div>
-                  <div className="summary-box">
-      <span className="summary-item lk"><i className="icon"/>+{myResult?.totalReactions || 0}건</span>
-      <span className="summary-item ch"><i className="icon"/>+{myResult?.totalMessages || 0}건</span>
+                  <div className="result-summary-box">
+      <span className="result-summary-item lk"><i className="icon"/>+{myResult?.totalReactions || 0}건</span>
+      <span className="result-summary-item ch"><i className="icon"/>+{myResult?.totalMessages || 0}건</span>
     </div>
-    
+                      <div className="result-category-summary-box">
+      <span className="result-category-summary-item j"><i className="icon"/>+{myResult?.totalReactions || 0}건</span>
+      <span className="result-category-summary-item p"><i className="icon"/>+{myResult?.totalReactions || 0}건</span>
+      <span className="result-category-summary-item c"><i className="icon"/>+{myResult?.totalReactions || 0}건</span>
+      <span className="result-category-summary-item r"><i className="icon"/>+{myResult?.totalMessages || 0}건</span>
+    </div>
             </div>
+
+            
 
             {/* 4: 가장 공감을 많이 받은 발언 */}
             <div className="dr-top-quote">
               <div className="dr-top-quote-head">
                 <span>가장 공감을 많이 받은 발언</span>
-                <span className="likes">❤️ {myResult?.topReacted?.reactionsCount ?? 0}</span>
-              </div>
-              <blockquote className="dr-quote">
+                                <span className="likes-badge">
+                  <i className="icon" />
+                  {myResult?.topReacted?.reactionsCount ?? 0}
+                </span>
+                </div>
+              <div className="dr-quote">
                 {myResult?.topReacted?.text || '베스트 메시지가 없습니다.'}
-              </blockquote>
+              </div>
             </div>
           </div>
         </section>

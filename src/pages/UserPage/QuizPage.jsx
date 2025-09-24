@@ -1,4 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import correctSound from '@/assets/sounds/correct.wav';
+import wrongSound from '@/assets/sounds/wrong.wav';
+import selectSound from '@/assets/sounds/click.wav';
 import { useRoundStep } from '../../contexts/RoundStepContext';
 import { quizQuestions } from '../../components/user/quiz/quizQuestions';
 import { useNavigate } from 'react-router-dom';
@@ -33,6 +36,10 @@ export default function QuizPage() {
   const feedbackTimeoutRef = useRef(null);
   const previewTimeoutRef = useRef(null);
   const feedbackRef = useRef(null);
+
+  const correctAudio = useRef(new Audio(correctSound));
+  const wrongAudio = useRef(new Audio(wrongSound));
+  const selectAudio = useRef(new Audio(selectSound));
 
   // helper: option을 객체 형태로 통일 (문자열 -> { label })
   const toOpt = (opt) => (typeof opt === 'string' ? { label: opt } : opt || {});
@@ -124,11 +131,17 @@ export default function QuizPage() {
     if (phase !== 'select' || answered) return;
     stopTimer();
     setPicked(selectedIdx);
+    selectAudio.current.play();
     setPhase('choices');
 
     setTimeout(() => {
       const ok = judge(selectedIdx);
       setIsCorrect(ok);
+      if (ok) {
+        correctAudio.current.play();
+      } else {
+        wrongAudio.current.play();
+      }
       if (ok) setCorrectCount((c) => c + 1);
       setAnswered(true);
       setPhase('result');
@@ -207,11 +220,14 @@ export default function QuizPage() {
               const item = toOpt(opt);
               return (
                 <li key={i}>
-                  <div className="card-front preview" aria-hidden>
-                    {item.img && (
-                      <img className="opt-img" src={item.img} alt={item.alt || item.label || `옵션 ${i+1}`} />
-                    )}
-                    {item.label ? <div className="opt-label">{item.label}</div> : null}
+                  <div className="card-container">
+                    <div className="card-front preview" aria-hidden>
+                      {item.img && (
+                        <img className="opt-img" src={item.img} alt={item.alt || item.label || `옵션 ${i+1}`} />
+                      )}
+                      {item.label ? <div className="opt-label">{item.label}</div> : null}
+                    </div>
+                    {item.caption && <div className="opt-caption">{item.caption}</div>}
                   </div>
                 </li>
               );
@@ -250,11 +266,14 @@ export default function QuizPage() {
               const item = toOpt(opt);
               return (
                 <li key={i}>
-                  <div className={`card-front ${picked === i ? 'picked' : ''}`}>
-                    {item.img && (
-                      <img className="opt-img" src={item.img} alt={item.alt || item.label || `옵션 ${i+1}`} />
-                    )}
-                    {item.label && <div className="opt-label">{item.label}</div>}
+                  <div className="card-container">
+                    <div className={`card-front ${picked === i ? 'picked' : ''}`}>
+                      {item.img && (
+                        <img className="opt-img" src={item.img} alt={item.alt || item.label || `옵션 ${i+1}`} />
+                      )}
+                      {item.label && <div className="opt-label">{item.label}</div>}
+                    </div>
+                    {item.caption && <div className="opt-caption">{item.caption}</div>}
                   </div>
                 </li>
               );
@@ -279,15 +298,18 @@ export default function QuizPage() {
               const correctOpt = current?.options ? toOpt(current.options[correctIdx]) : null;
               if (!correctOpt) return null;
               return (
-                <div className="card-front result-card">
-                  {correctOpt.img && (
-                    <img
-                      className="opt-img"
-                      src={correctOpt.img}
-                      alt={correctOpt.alt || correctOpt.label || '정답 카드'}
-                    />
-                  )}
-                  {correctOpt.label && <div className="opt-label">{correctOpt.label}</div>}
+                <div className="card-container">
+                  <div className="card-front result-card">
+                    {correctOpt.img && (
+                      <img
+                        className="opt-img"
+                        src={correctOpt.img}
+                        alt={correctOpt.alt || correctOpt.label || '정답 카드'}
+                      />
+                    )}
+                    {correctOpt.label && <div className="opt-label">{correctOpt.label}</div>}
+                  </div>
+                  {correctOpt.caption && <div className="opt-caption">{correctOpt.caption}</div>}
                 </div>
               );
             })()}

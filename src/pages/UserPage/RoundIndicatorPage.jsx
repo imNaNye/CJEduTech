@@ -1,3 +1,4 @@
+import roundStartSound from '@/assets/sounds/round_start.mp3';
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRoundStep } from "../../contexts/RoundStepContext";
@@ -10,6 +11,9 @@ export default function RoundIndicatorPage(){
     const navigate = useNavigate();
 
     useEffect(() => {
+        const audio = new Audio(roundStartSound);
+        audio.play();
+
         const timeout = setTimeout(() => {
             if(step === 1){
                 navigate('/user/quiz');

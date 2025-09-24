@@ -384,7 +384,7 @@ section > header .timer {
   list-style: none;
   padding: 0;
   margin: 0;
-  transform: scale(0.67);
+  transform: scale(0.7);
   transform-origin: top center;
 }
 
@@ -395,11 +395,9 @@ section > header .timer {
 
 /* ===== Result phase specific layout ===== */
 .quiz-result {
-  display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 40px;
-  margin-top: 0px;
+  gap: 80px;
+  margin-top: 4%;
 }
 
 .quiz-result .result-left {
@@ -437,14 +435,14 @@ section > header .timer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 14px;
 }
 
 .quiz-result .result-title {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 800;
   color: var(--orange);
-  margin-bottom: 12px;
 }
 
 .quiz-result .quiz-explain {
@@ -453,8 +451,23 @@ section > header .timer {
   color: var(--ink);
   background: #fffaf5;
   border: 1px solid var(--orange-600);
-  border-radius: 10px;
-  padding: 14px 18px;
+  border-radius: 12px;
+  padding: 14px 20px;
   text-align: center;
-  width: 30vw;
+  width: 32vw;}
+
+.card-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.opt-caption {
+  margin-top: 12px;
+  font-size: 15px;
+  color: var(--muted);
+  text-align: center;
+  max-width: var(--card-w);
+  line-height: 1.4;
+  font-size: 20px;
 }

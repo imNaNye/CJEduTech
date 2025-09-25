@@ -5,7 +5,7 @@ export default function DonorsOnboardingImgText(){
     return(
         <div className="donors-onboarding-img-text">
             <img className="donors-logo" src={donorsLogo}></img>
-            <DonorsOnboardingText heading="오늘 교육은?" p={"오늘 교육은 대한민국 미래세대인 아동 청소년의\n건강한 성장을 지원하기 위해 CJ그룹의 나눔재단에서 설립,\n운영하는 사회공헌플랫폼을 활용해 이수할 예정입니다."}></DonorsOnboardingText>
+            <DonorsOnboardingText heading={"<strong>CJ 도너스캠프 아카데미</strong>란?"} p={"건강한 사회인으로 성장을 꿈꾸는 청년들에게 요리, \n베이커리, 서비스 분야의 전문적인 직업 교육과 더불어 \n인성교육을 지원하여, CJ계열사 및 동종업계 취업연계를 \n통해 성공적인 자립을 돕는 ‘취업연계 교육 프로그램’입니다."}></DonorsOnboardingText>
         </div>
     )
 }

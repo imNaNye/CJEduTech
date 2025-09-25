@@ -1,11 +1,11 @@
 /* ===== Onboarding Page (16:9 responsive frame) ===== */
-donors-onboarding-page {
+.donors-onboarding-page {
   /* 16:9 frame that centers in the viewport */
   --frame-w: min(100vw, calc(100vh * 16 / 9));
   --frame-h: calc(var(--frame-w) * 9 / 16);
 
   width: 100vw;
-  height: 100vh;
+  height: 94vh;
   margin-left: auto;
   margin-right: auto;
   margin-top: calc((100vh - var(--frame-h)) / 2);
@@ -35,7 +35,7 @@ donors-onboarding-page {
   transform: scale(0.80);
   transform-origin: center center;
   width: min(1400px, 94%);
-  height: auto;
+  height: 70vh;
   min-height: 68%;
   border-radius: 24px;
   border: 1px solid var(--grey04, #D9D9D9);
@@ -59,12 +59,22 @@ donors-onboarding-page {
 
 /* Robot image keeps intrinsic ratio */
 .donors-logo {
-  width: clamp(220px, 22vw, 426px);
+  width: clamp(220px, 30vw, 426px);
   height: auto;
   aspect-ratio: auto;
 }
 
 /* Heading */
+.donors-onboarding-text h3 strong {
+  color: #FF6E37;
+  font-family: "CJ ONLYONE NEW title";
+  font-size: clamp(28px, 3.5vw, 54px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: 160%; /* 5.4rem */
+  letter-spacing: 0.769px;
+}
+
 .donors-onboarding-text h3 {
   color: var(--grey01, #555);
   font-family: "CJ ONLYONE NEW title";

@@ -16,6 +16,7 @@ import OnBoardingPage from './pages/UserPage/OnBoardingPage.jsx';
 import SlideRoute from './routes/SlideRoute.jsx';
 import FinalResultPage from './pages/UserPage/FinalResultPage.jsx';
 import LoadResultPage from './pages/UserPage/LoadResultPage.jsx';
+import DonorsOnboardingPage from './pages/UserPage/DonorsOnboardingPage.jsx';
 
 import AdminSessionPage from './pages/AdminPage/SessionPage.jsx';
 
@@ -34,6 +35,7 @@ function App() {
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/user/onboarding" element={<OnBoardingPage/>} />
+          <Route path="/user/donorsOnboarding" element={<DonorsOnboardingPage/>} />
           <Route path="/user/selectAvatar" element={<SelectAvatarPage />} />
           <Route element={<RoundStepLayout />}>
             <Route path="/user/slide" element={<SlideRoute />} />

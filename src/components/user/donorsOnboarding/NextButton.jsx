@@ -3,7 +3,7 @@ export default function NextButton() {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate('/user/donorsOnboarding');
+    navigate('/user/slide');
   };
 
   return (

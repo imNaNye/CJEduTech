@@ -65,7 +65,7 @@
   border: none;
   border-radius: 8px;
   background-color: #ccc;
-  color: #fff;
+  color: #555;
   cursor: not-allowed;
   transition: background-color 0.3s;
   display: block;
@@ -74,6 +74,7 @@
 .finish-button:enabled {
   background-color: #ff7a00; /* 주황색 */
   cursor: pointer;
+  color: white;
 }
 
 /* Progress bar overlaid at the top of the video, matching the video's width */

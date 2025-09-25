@@ -31,8 +31,8 @@
 
 /* 메인 컨텐츠 래퍼 */
 .round-indicator {
-  width: min(1100px, 90%);
-  margin: 36px auto 0;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -46,7 +46,7 @@
 .round-indicator h3 {
   margin: 0 0 0px;
   font-weight: 800;
-  font-size: clamp(34px, 6vw, 86px);
+  font-size: 6vw;
   letter-spacing: 2px;
   color: var(--orange);
 }
@@ -54,11 +54,11 @@
 /* 로고 로봇 중앙 */
 .logo-robot {
   display: block;
-  width: clamp(200px, 36vw, 440px);
+  width: 40vw;
   height: auto;
   object-fit: cover;
   margin: 2vh auto 2vh;
-  margin-bottom: 110px;
+  margin-bottom: 20vh;
 }
 
 /* 하단의 3단 스텝 배지 */
@@ -68,8 +68,7 @@
   gap: clamp(18px, 3vw, 28px);
   align-items: start;
   margin: -15vh auto;
-  width: min(900px, 92%);
-  transform: scale(0.67);
+  width: 60vw;
   transform-origin: center center; 
 }
 

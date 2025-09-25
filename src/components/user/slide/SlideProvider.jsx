@@ -113,7 +113,8 @@ export function SlideProvider({ children, config, defaultCooldownMs = 0, blockPo
       // 쿨다운 관련 노출
       isBlocked,
       msRemaining,
-      nextAllowedAt
+      nextAllowedAt,
+      nextRequiredId: required.find(id => !clickedSet.has(id)),
     }),
     [pageIndex, page, config, required, requiredCount, clickedSet, allDone, isBlocked, msRemaining, nextAllowedAt]
   );

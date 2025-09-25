@@ -3,10 +3,11 @@ import React from 'react'
 import { useSlides } from './SlideProvider'
 
 export default function ClickableTarget({ id, as: Tag = 'button', onClick, className = '', children }) {
-  const { markClicked, clickedSet, required, page, isBlocked } = useSlides()
+  const { markClicked, clickedSet, required, page, isBlocked, nextRequiredId } = useSlides()
 
   const isRequired = required.includes(id)
   const isDone = clickedSet.has(id)
+  const isNext = id === nextRequiredId
 
   const content = page?.targets?.[id] ?? null
   const title = content?.title ?? id
@@ -22,7 +23,8 @@ export default function ClickableTarget({ id, as: Tag = 'button', onClick, class
     'target-card',
     className,
     isBlocked ? 'is-disabled' : '',
-    isDone ? 'is-active' : ''
+    isDone ? 'is-active' : '',
+    isNext ? 'is-next' : ''
   ]
     .filter(Boolean)
     .join(' ')

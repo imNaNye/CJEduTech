@@ -55,7 +55,7 @@
   --cols: 3; /* fallback */
   display: grid;
   grid-template-columns: repeat(var(--cols), var(--card-w));
-  grid-auto-rows: calc(var(--card-w) * 3 / 5);
+  padding-top: 8vh;
   justify-content: center;   /* 마지막 행도 가운데 정렬 */
   gap: clamp(16px, 2vw, 24px) clamp(22px, 3vw, 36px);
   width: 100%;
@@ -88,7 +88,7 @@
   box-sizing: border-box;                 /* border 변화에도 크기 고정 */
   height: 100%; /* grid-auto-rows에 맞춤 */
   width: var(--card-w);
-  aspect-ratio: 5 / 3;       /* 시안 같은 납작한 타일 비율 */
+  
   border-radius: 18px;
   border: 1px solid #eee;
   background: #fafafa;
@@ -101,6 +101,21 @@
   position: relative;
   overflow: visible; /* 내용이 많아도 카드 높이 고정 */
   min-height: 0;    /* grid/min-content 팽창 방지 */
+}
+
+/* Single-row grid: update card aspect ratio */
+.target-grid[data-count="1"] .target-card,
+.target-grid[data-count="2"] .target-card,
+.target-grid[data-count="3"] .target-card {
+  aspect-ratio: 46 / 38 !important;
+}
+.target-grid[data-count="4"] .target-card,
+.target-grid[data-count="5"] .target-card,
+.target-grid[data-count="6"] .target-card, 
+.target-grid[data-count="7"] .target-card,
+.target-grid[data-count="8"] .target-card,
+.target-grid[data-count="9"] .target-card {
+  aspect-ratio: 41 / 28;
 }
 
 .target-card .icon {
@@ -152,4 +167,14 @@
 .target-card:focus,
 .target-card:focus-visible {
   outline: none;
+}
+
+/* Highlight the next required target */
+.target-card.is-next {
+  border-radius: 24px;
+  background: linear-gradient(315deg, rgba(255, 175, 47, 0.90) 0%, rgba(255, 102, 32, 0.90) 100%);
+  box-shadow: 0 0 4px 0 #FF6620;
+}
+.target-card.is-next .label {
+  color: white;
 }

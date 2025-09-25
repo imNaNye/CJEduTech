@@ -11,10 +11,10 @@ import PageHeader from '@/components/common/PageHeader.jsx';
 
 const QUESTIONS_PER_ROUND = 3;
 const SECONDS_PER_QUESTION = 20;
-const FEEDBACK_MS = 8000; // 정답/오답 피드백 유지 시간 (ms)
+const FEEDBACK_MS = 12000; // 정답/오답 피드백 유지 시간 (ms)
 const REVEAL_MS = 600;    // 선택 → 공개 대기
 const RESULT_MS = 600;    // 공개 → 결과 대기
-const PREVIEW_MS = 3000;  // 최초 3초간 카드 앞면 미리보기(선택 불가)
+const PREVIEW_MS = 4000;  // 최초 4초간 카드 앞면 미리보기(선택 불가)
 
 // phase: 'preview' | 'select' | 'choices' | 'result'
 export default function QuizPage() {
@@ -213,46 +213,48 @@ export default function QuizPage() {
           <p className="quiz-desc">{current.desc}</p>
         )}
         
-        {/* PREVIEW: 앞면 3초 공개 (선택 불가) */}
+        {/* PREVIEW: 등뒤 카드 3개 (선택 불가) */}
         {phase === 'preview' && (
-          <ul className="quiz-cards open" aria-label="카드 미리보기">
+          <ul className="quiz-cards" aria-label="카드 미리보기 (뒷면)">
             {current.options.map((opt, i) => {
               const item = toOpt(opt);
               return (
                 <li key={i}>
-                  <div className="card-container">
-                    <div className="card-front preview" aria-hidden>
-                      {item.img && (
-                        <img className="opt-img" src={item.img} alt={item.alt || item.label || `옵션 ${i+1}`} />
-                      )}
-                      {item.label ? <div className="opt-label">{item.label}</div> : null}
-                    </div>
-                    {item.caption && <div className="opt-caption">{item.caption}</div>}
-                  </div>
+                  <button
+                    className="card-back preview"
+                    aria-hidden
+                    disabled
+                  >
+                    {item.backImg && (
+                      <img className="opt-back-img" src={item.backImg} alt={item.alt || `옵션 ${i+1} 뒷면`} />
+                    )}
+                  </button>
                 </li>
               );
             })}
           </ul>
         )}
 
-        {/* SELECT: 등뒤 카드 3개, 선택 가능 */}
+        {/* SELECT: 앞면 카드 3개, 선택 가능 */}
         {phase === 'select' && (
-          <ul className="quiz-cards" aria-label="선택할 카드">
+          <ul className="quiz-cards open" aria-label="선택할 카드 (앞면)">
             {current.options.map((opt, i) => {
               const item = toOpt(opt);
               return (
                 <li key={i}>
                   <button
                     ref={(el) => (optionRefs.current[i] = el)}
-                    className="card-back"
+                    className={`card-front ${picked === i ? 'picked' : ''}`}
                     disabled={!running}
                     aria-disabled={!running}
                     onClick={() => onPickCard(i)}
                   >
-                    {item.backImg ? (
-                      <img className="opt-back-img" src={item.backImg} alt={item.alt || `옵션 ${i+1} 뒷면`} />
-                    ) : null}
+                    {item.img && (
+                      <img className="opt-img" src={item.img} alt={item.alt || item.label || `옵션 ${i+1}`} />
+                    )}
+                    {item.label && <div className="opt-label">{item.label}</div>}
                   </button>
+                  {item.caption && <div className="opt-caption">{item.caption}</div>}
                 </li>
               );
             })}

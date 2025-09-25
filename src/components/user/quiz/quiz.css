@@ -142,12 +142,11 @@ h3 {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: #fff;
-  box-shadow: var(--shadow);
+  background: none;
   cursor: pointer;
   transition: transform 120ms ease, box-shadow 120ms ease, opacity 160ms;
 }
-.card-back:disabled { cursor: not-allowed; opacity: .6; }
+.card-back:disabled { cursor: not-allowed; opacity: 1; }
 .card-back:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,.12); }
 
 .card-back .opt-back-img {
@@ -180,16 +179,13 @@ h3 {
   align-items: center;
   justify-content: center;
   padding: 0;                  /* 여백 제거: 이미지가 컨테이너를 정의 */
-  background: var(--card);
-  border: 2px solid var(--border);
   border-radius: 16px;
-  box-shadow: var(--shadow);
   text-align: center;
   font-weight: 600;
   color: var(--ink);
 }
 
-.card-front.preview { opacity: .95; animation: float-in 180ms ease-out; }
+.card-front.preview { opacity: 1; animation: float-in 180ms ease-out; }
 
 /* 선택 강조 */
 .card-front.picked {
@@ -247,8 +243,13 @@ h3 {
 }
 
 /* 버튼 기본 리셋 */
-button { appearance: none; font: inherit; }
-button[disabled] { opacity: .6; }
+button {
+  appearance: none;
+  font: inherit;
+  border: none;
+  background: none;
+}
+button[disabled] { opacity: 1; }
 
 /* 페이지 맨 아래 “다음 문제” 버튼 컨테이너 */
 section > div:last-child { display: flex; justify-content: flex-end; }

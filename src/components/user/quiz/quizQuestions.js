@@ -31,30 +31,34 @@ import r1q3Z from '@/assets/images/quiz/r1q3C.png';
 import r1q3Answer from '@/assets/images/quiz/r1q3Answer.png';
 
 // Round 2
-import r2q1A1 from '@/assets/images/quiz/r2q1A.png';
-import r2q1B1 from '@/assets/images/quiz/r2q1B.png';
-import r2q1C1 from '@/assets/images/quiz/r2q1C.png';
+import r2q1A from '@/assets/images/quiz/r2q1A.png';
+import r2q1B from '@/assets/images/quiz/r2q1B.png';
+import r2q1C from '@/assets/images/quiz/r2q1C.png';
+import r2q1D from '@/assets/images/quiz/r2q1D.png';
 import r2q1Answer from '@/assets/images/quiz/r2q1Answer.png';
 
-import r2q2A2 from '@/assets/images/quiz/r2q2A.png';
-import r2q2B2 from '@/assets/images/quiz/r2q2B.png';
-import r2q2C2 from '@/assets/images/quiz/r2q2C.png';
+import r2q2A from '@/assets/images/quiz/r2q2A.png';
+import r2q2B from '@/assets/images/quiz/r2q2B.png';
+import r2q2C from '@/assets/images/quiz/r2q2C.png';
+import r2q2D from '@/assets/images/quiz/r2q2D.png';
 import r2q2Answer from '@/assets/images/quiz/r2q2Answer.png';
 
-import r2q3A3 from '@/assets/images/quiz/r2q3A.png';
-import r2q3B3 from '@/assets/images/quiz/r2q3B.png';
-import r2q3C3 from '@/assets/images/quiz/r2q3C.png';
+import r2q3A from '@/assets/images/quiz/r2q3A.png';
+import r2q3B from '@/assets/images/quiz/r2q3B.png';
+import r2q3C from '@/assets/images/quiz/r2q3C.png';
 import r2q3Answer from '@/assets/images/quiz/r2q3Answer.png';
 
 // Round 3
-import r3q1A1 from '@/assets/images/quiz/r3q1A.png';
-import r3q1B1 from '@/assets/images/quiz/r3q1B.png';
-import r3q1C1 from '@/assets/images/quiz/r3q1C.png';
+import r3q1A from '@/assets/images/quiz/r3q1A.png';
+import r3q1B from '@/assets/images/quiz/r3q1B.png';
+import r3q1C from '@/assets/images/quiz/r3q1C.png';
+import r3q1D from '@/assets/images/quiz/r3q1D.png';
 import r3q1Answer from '@/assets/images/quiz/r3q1Answer.png';
 
-import r3q2A2 from '@/assets/images/quiz/r3q2A.png';
-import r3q2B2 from '@/assets/images/quiz/r3q2B.png';
-import r3q2C2 from '@/assets/images/quiz/r3q2C.png';
+import r3q2A from '@/assets/images/quiz/r3q2A.png';
+import r3q2B from '@/assets/images/quiz/r3q2B.png';
+import r3q2C from '@/assets/images/quiz/r3q2C.png';
+import r3q2D from '@/assets/images/quiz/r3q2D.png';
 import r3q2Answer from '@/assets/images/quiz/r3q2Answer.png';
 
 import r3q3A3 from '@/assets/images/quiz/r3q3A.png';
@@ -104,7 +108,7 @@ export const quizQuestions = {
         { label: '', img: r1q3Z, alt: 'Z 이미지', backImg: horizontalBack, caption:"아동용 의자가 있는 좌석으로 안내한다."
          },
       ],
-      answer: 0,
+      answer: 2,
       explainCorrect: '아동 동반 고객이 방문할 경우, 아동용 의자가 있는 좌석 쪽으로 안내하거나 아동용 의자를 제공해드려야해요.',
       explainWrong: '아동 동반 고객이 방문할 경우, 아동용 의자가 있는 좌석 쪽으로 안내하거나 아동용 의자를 제공해드려야해요.',
     },
@@ -114,22 +118,24 @@ export const quizQuestions = {
       q: '다음 중 아래 설명에 부합하는 카드는?',
       desc: '고객, 동료 등의 입장을 헤아리고 먼저 생각하는 마음',
       options: [
-        {  img: r2q1A1, alt: 'A1 이미지', backImg: verticalBack },
-        {  img: r2q1B1, alt: 'B1 이미지', backImg: verticalBack },
-        {  img: r2q1C1, alt: 'C1 이미지', backImg: verticalBack },
+        {  img: r2q1A, alt: 'A1 이미지', backImg: verticalBack },
+        {  img: r2q1B, alt: 'B1 이미지', backImg: verticalBack },
+        {  img: r2q1C, alt: 'C1 이미지', backImg: verticalBack },
+        {  img: r2q1D, alt: 'D1 이미지', backImg: verticalBack },
       ],
-      answer: 2,
+      answer: 3,
       explainCorrect: '배려심은 고객, 동료 등의 입장을 헤아리고 먼저 생각하는 마음을 말해요.',
       explainWrong: '배려심은 고객, 동료 등의 입장을 헤아리고 먼저 생각하는 마음을 말해요.',
     },
     {
       q: '다음 중 CJ 인재상의 4대 기준에 해당하지 않는 것은?',
       options: [
-        {  img: r2q2A2, alt: 'A2 이미지', backImg: verticalBack },
-        {  img: r2q2B2, alt: 'B2 이미지', backImg: verticalBack },
-        {  img: r2q2C2, alt: 'C2 이미지', backImg: verticalBack },
+        {  img: r2q2A, alt: 'A2 이미지', backImg: verticalBack },
+        {  img: r2q2B, alt: 'B2 이미지', backImg: verticalBack },
+        {  img: r2q2C, alt: 'C2 이미지', backImg: verticalBack },
+        {  img: r2q2D, alt: 'D2 이미지', backImg: verticalBack },
       ],
-      answer: 0,
+      answer: 1,
       explainCorrect: 'CJ 인재상의 4대 기준은 임직원 누구나 지켜야할 원칙이며, 정직, 열정, 창의, 존중으로 이루어져있어요.',
       explainWrong: 'CJ 인재상의 4대 기준은 임직원 누구나 지켜야할 원칙이며, 정직, 열정, 창의, 존중으로 이루어져있어요.',
       delayMs: 2500,
@@ -138,11 +144,11 @@ export const quizQuestions = {
       q: '제시상황에 적절한 응대를 찾아 연결하세요.',
       desc: '빵이 상했다는 컴플레인을 받은 상황',
       options: [
-        { label: '', img: r2q3A3, alt: 'A3 이미지', backImg: horizontalBack, caption:"사과 후 새로운 빵으로 교체해드린다." },
-        { label: '', img: r2q3B3, alt: 'B3 이미지', backImg: horizontalBack, caption:"원칙적으로 환불은 어렵다고 안내한다." },
-        { label: '', img: r2q3C3, alt: 'C3 이미지', backImg: horizontalBack, caption:"다른 토핑을 얹어 다시 제공한다." },
+        { label: '', img: r2q3A, alt: 'A3 이미지', backImg: horizontalBack, caption:"사과 후 새로운 빵으로 교체해드린다." },
+        { label: '', img: r2q3B, alt: 'B3 이미지', backImg: horizontalBack, caption:"원칙적으로 환불은 어렵다고 안내한다." },
+        { label: '', img: r2q3C, alt: 'C3 이미지', backImg: horizontalBack, caption:"다른 토핑을 얹어 다시 제공한다." },
       ],
-      answer: 1,
+      answer: 0,
       explainCorrect: '제공된 음식에 문제가 있을 경우, 죄송한 마음을 표현 후 새로운 제품으로 교환해드리는 것이 적절한 응대입니다.',
       explainWrong: '제공된 음식에 문제가 있을 경우, 죄송한 마음을 표현 후 새로운 제품으로 교환해드리는 것이 적절한 응대입니다.',
     },
@@ -152,9 +158,10 @@ export const quizQuestions = {
       q: '다음 중 아래 설명에 부합하는 카드는?',
       desc: '상황 변화나 고객, 팀 동료 특성을 빠르게 파악하는 능력',
       options: [
-        {  img: r3q1A1, alt: 'A1 이미지', backImg: verticalBack },
-        {  img: r3q1B1, alt: 'B1 이미지', backImg: verticalBack },
-        {  img: r3q1C1, alt: 'C1 이미지', backImg: verticalBack },
+        {  img: r3q1A, alt: 'A1 이미지', backImg: verticalBack },
+        {  img: r3q1B, alt: 'B1 이미지', backImg: verticalBack },
+        {  img: r3q1C, alt: 'C1 이미지', backImg: verticalBack },
+        {  img: r3q1D, alt: 'D1 이미지', backImg: verticalBack },
       ],
       answer: 0,
       explainCorrect: '관찰력은 상황 변화나 고객, 팀 동료 특성을  빠르게 파악하는 능력을 말해요.',
@@ -163,9 +170,10 @@ export const quizQuestions = {
     {
       q: '다음 중 CJ人의 인성적 요소에 해당하지 않는 것은?',
       options: [
-        {  img: r3q2A2, alt: 'A2 이미지', backImg: verticalBack },
-        {  img: r3q2B2, alt: 'B2 이미지', backImg: verticalBack },
-        {  img: r3q2C2, alt: 'C2 이미지', backImg: verticalBack },
+        {  img: r3q2A, alt: 'A2 이미지', backImg: verticalBack },
+        {  img: r3q2B, alt: 'B2 이미지', backImg: verticalBack },
+        {  img: r3q2C, alt: 'C2 이미지', backImg: verticalBack },
+        {  img: r3q2D, alt: 'C2 이미지', backImg: verticalBack },
       ],
       answer: 1,
       explanation: 'CJ人의 인성적 요소는 정직함, 책임감, 절제력, 배려심, 이해심, 유머 감각, 끈기, 성실함으로 구성되어있어요.',
@@ -178,7 +186,7 @@ export const quizQuestions = {
         { label: '', img: r3q3B3, alt: 'B3 이미지', backImg: horizontalBack, caption:"대기 좌석 쪽으로 안내하고 사례를 제공한다." },
         { label: '', img: r3q3C3, alt: 'C3 이미지', backImg: horizontalBack, caption:"빠르게 임시좌석을 만들어 제공한다." },
       ],
-      answer: 2,
+      answer: 1,
       explanation: '예약 손님의 자리가 없는 경우, 대기 좌석 쪽으로 안내하고 사례를 제공하는 등 양해를 구하는 것이 적절한 응대입니다.',
       explainCorrect: '정답입니다. 예약 손님의 자리가 없는 경우, 대기 좌석 쪽으로 안내하고 사례를 제공하는 등 양해를 구하는 것이 적절한 응대입니다.',
       explainWrong: '오답이에요. 예약 손님의 자리가 없는 경우, 대기 좌석 쪽으로 안내하고 사례를 제공하는 등 양해를 구하는 것이 적절한 응대입니다.',

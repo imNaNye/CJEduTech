@@ -9,7 +9,7 @@ export default function CharacterSlide() {
   const targetIds = Object.keys(page?.targets || {})
 
   return (
-    <section className="slide-page">
+    <div className="slide-page">
       <div className="slide-card">
         {title && (
           <h2 className="slide-title" dangerouslySetInnerHTML={{ __html: title }} />
@@ -24,6 +24,6 @@ export default function CharacterSlide() {
 
        <p className="info-text">슬라이드는 자동 전환되며, 종료 후 퀴즈 화면으로 전환됩니다.</p>
       </div>
-    </section>
+    </div>
   )
 }

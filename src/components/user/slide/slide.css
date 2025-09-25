@@ -7,13 +7,14 @@
   margin: 0 auto;
   box-sizing: border-box;
   background-color: #F7F7F7;
+  justify-content: flex-end;
 }
 
 /* White card container (use inside slide-page) */
 .slide-card {
   
   width: 94vw;
-  height: 88vh;
+  height: 90vh;
   margin-left: 3vw;
   margin-bottom: 3vh;
   border-radius: 18px;
@@ -22,16 +23,17 @@
   box-shadow: 0 6px 22px rgba(0,0,0,0.06);
   padding: clamp(16px, 3.2vw, 36px);
   box-sizing: border-box;
-  display: flex;
+  display:flex;
   flex-direction: column;
 }
 
 .slide-title {
+  margin-top: 5vh;
   text-align: center;
-  margin-bottom: 10vh;
-  margin-top: -10vh;
   color: #FF6E37;
   font-size: 5vh;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .slide-subtitle {
@@ -49,6 +51,7 @@
 /* Use: <div class="target-grid" data-count="5"> ...cards... </div> */
 .target-grid {
   --card-w: clamp(240px, 20vw, 340px);
+  --card-h: clamp(200px, 40vh, 320px);
   --cols: 3; /* fallback */
   display: grid;
   grid-template-columns: repeat(var(--cols), var(--card-w));
@@ -56,6 +59,9 @@
   justify-content: center;   /* 마지막 행도 가운데 정렬 */
   gap: clamp(16px, 2vw, 24px) clamp(22px, 3vw, 36px);
   width: 100%;
+  height: 70%;
+  align-content: center;
+  place-items: center;
 }
 
 /* Column presets by target count (desktop) */
@@ -93,7 +99,7 @@
   place-items: center;
   padding: clamp(10px, 1.8vw, 18px);
   position: relative;
-  overflow: hidden; /* 내용이 많아도 카드 높이 고정 */
+  overflow: visible; /* 내용이 많아도 카드 높이 고정 */
   min-height: 0;    /* grid/min-content 팽창 방지 */
 }
 
@@ -107,16 +113,15 @@
   margin-top: 4px;
   font-weight: 700;
   font-size: clamp(16px, 1.8vw, 22px);
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 /* 라벨/설명 텍스트가 길어도 높이 증가하지 않도록 라인 클램프 */
 .target-card .label,
 .target-card .desc {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;   /* 필요시 2~3줄로 조절 */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: break-word;
   max-width: 92%;
 }
 

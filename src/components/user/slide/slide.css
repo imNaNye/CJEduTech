@@ -14,7 +14,7 @@
 .slide-card {
   
   width: 94vw;
-  height: 90vh;
+  height: 88vh;
   margin-left: 3vw;
   margin-bottom: 3vh;
   border-radius: 18px;
@@ -25,20 +25,43 @@
   box-sizing: border-box;
   display:flex;
   flex-direction: column;
+  padding-bottom: 0;
+  margin-bottom: 2vh;
 }
 
 .slide-title {
-  margin-top: 5vh;
   text-align: center;
   color: #FF6E37;
   font-size: 5vh;
   margin-bottom: 0;
   padding-bottom: 0;
+  margin-top: 0;
 }
+/* slide.css */
 
 .slide-subtitle {
+  margin-top: 5vh;
   text-align: center;
-  color: #666;
+  font-size: 1.4rem;
+  color: #555;
+}
+
+.slide-subtitle strong {
+  color: #FF6B00; /* 강조 색상 */
+}
+
+.slide-title {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #333;
+  line-height: 1.4;
+}
+
+.slide-title .highlight {
+  background-color: #FFF1DA;
+  color: #FF6B00;
+  padding: 0 0.25em;
+  border-radius: 4px;
 }
 
 .info-text {
@@ -177,4 +200,16 @@
 }
 .target-card.is-next .label {
   color: white;
+}
+
+.slide-footer {
+  padding: 0;
+  margin: 0;
+  color: var(--grey02, #818181);
+text-align: center;
+font-family: "Pretendard Variable";
+font-size: 1rem;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
 }

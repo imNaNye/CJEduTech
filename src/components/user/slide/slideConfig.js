@@ -6,7 +6,10 @@ export const SlideConfig = [
         timeoutSec: 2,
         requiredTargets: ['ability.a', 'ability.b', 'ability.c'],
         targets: abilityTargets,
-        data: {title: 'CJ人의 핵심 역량', text: 'CJ人으로써 다양한 직무 관련 문제를 해결하는 데 필요한 “인성과 태도, 기능(기술적) 요소”'}
+        data: {
+            title: '3가지 <span class="highlight">핵심 구성요소</span>',
+            text: '<strong>건강한 사회인</strong>으로써 갖추어야 할 <strong>기본 역량</strong>'
+        }
     },
     {
         id: 'character',
@@ -15,27 +18,39 @@ export const SlideConfig = [
             'character.e', 'character.f', 'character.g', 'character.h'
         ],
         targets: characterTargets,
-        data: {title: 'CJ人의 인성적 요소'}
+        data: {
+            title: '8가지 <span class="highlight">주요 구성요소</span>',
+            text: '<strong>CJ人</strong>으로써 갖추어야 할 <strong>인성역량</strong>'
+        }
     },
     {
         id: 'attitude',
         timeoutSec: 2,
         requiredTargets: ['attitude.a', 'attitude.b','attitude.c','attitude.d','attitude.e'],
         targets: attitudeTargets,
-        data: {title: 'CJ人의 태도적 요소'}
+        data: {
+            title: '5가지 <span class="highlight">주요 구성요소</span>',
+            text: '<strong>CJ人</strong>으로써 갖추어야 할 <strong>태도역량</strong>'
+        }
     },
     {
         id: 'skill',
         timeoutSec: 2,
         requiredTargets: ['skill.a', 'skill.b','skill.c','skill.d','skill.e','skill.f'],
         targets: skillTargets,
-        data: {title: 'CJ人의 기능적 요소'}
+        data: {
+            title: '6가지 <span class="highlight">주요 구성요소</span>',
+            text: '<strong>CJ人</strong>으로써 갖추어야 할 <strong>기능(기술)역량</strong>'
+        }
     },
     {
         id: 'standard',
         timeoutSec: 2,
         requiredTargets: ['standard.a', 'standard.b', 'standard.c', 'standard.d'],
         targets: standardTargets,
-        data: {title: 'CJ 인재상의 4대 기준', text: 'CJ 임직원 누구나 반드시 지켜야 할 원칙이며, 인재육성의 기준'} 
+        data: {
+            title: 'CJ 인재상의 <span class="highlight">4대 기준</span>',
+            text: '<strong>CJ人</strong>이라면 지켜야 할 <strong>생각과 행동의 4가지 원칙</strong>'
+        }
     }
 ]

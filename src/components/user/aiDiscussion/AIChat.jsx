@@ -3,7 +3,7 @@ import { socket } from "@/api/chat";
 import aiIcon from "@/assets/images/discussion/AI_icon.png";
 // 효과음 리소스 (경로만 실제 보유 리소스로 교체하면 됩니다)
 import sfxComment from "@/assets/sounds/click.wav";
-import sfxEncourage from "@/assets/sounds/click.wav";
+import sfxEncourage from "@/assets/sounds/aiment.wav";
 
 function formatTime(iso) {
   try {

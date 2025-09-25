@@ -28,8 +28,7 @@
   width: clamp(320px, 34vw, 680px); /* fluid width, caps at original */
   height: 100vh;                    /* match viewport */
   flex: 0 0 auto;
-  overflow-y: auto;  /* vertical scroll only */
-  overflow-x: hidden; /* prevent horizontal scroll */
+  overflow: hidden; /* delegate scrolling to inner sections */
   background: linear-gradient(343deg, rgba(246, 242, 222, 1) 0.63%, rgba(251, 238, 214, 1) 100%);
   padding: 24px 28px 20px 28px;
   box-sizing: border-box;
@@ -109,14 +108,15 @@ letter-spacing: 0.379px;
 .summary-item.ch .icon { background-image: url('../../../assets/images/discussion/Send.svg'); }
 
 /* principle hex buttons */
-.principle-icons { display:flex; justify-content: space-between; align-items: flex-end; padding: 0 6px 2px; }
-.principle-icon {
-  width: 137px;
-  display: grid;
-  grid-template-rows: 1fr auto; /* cake area / badge image */
-  align-items: end; justify-items: center;
-  min-height: 180px;
-  position: relative;
+.principle-icons {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 6px 2px;
+  overflow-y: auto;                 /* make this section scroll vertically */
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;                    /* allow grid child to shrink */
+  max-height: 100%;                 /* fill available row height */
 }
 /* image-based cake */
 .principle-icon .cake-img { width: 118px; height: 178px; object-fit: contain; margin-bottom: 6px; filter: drop-shadow(0 4px 10px rgba(0,0,0,.12)); }
@@ -127,8 +127,8 @@ letter-spacing: 0.379px;
   align-items:center;
   justify-content:flex-end; /* bottom align inside the cake area */
   min-height: 178px; /* ensure base height even with 0 layers */
-  max-height: 178px; /* restrict height */
-  overflow-y: auto;  /* allow vertical scroll if overflowing */
+  max-height: none;  /* let it grow; scrolling handled by parent */
+  overflow: visible; /* no internal scrollbars */
 }
 .cake-stack::-webkit-scrollbar {
   width: 6px;
@@ -158,7 +158,7 @@ letter-spacing: 0.379px;
 .ai-chat {
   position: absolute;
   right: 1rem;
-  top: 3.5rem; /* keep above input area */
+  top: 3rem; /* keep above input area */
   z-index: 10;
 
   display: flex;

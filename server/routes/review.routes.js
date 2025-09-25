@@ -20,9 +20,10 @@ router.post('/:roomId/final-result', async (req, res) => {
 
 // GET /api/review/:roomId/final-result?nickname=...  (return cached)
 router.get('/:roomId/final-result', (req, res) => {
+      console.log("final get");
   try {
     const { roomId } = req.params;
-    const nickname = req.query?.nickname || '';
+    const nickname = req.body?.nickname || req.query?.nickname || '';
     const v = getFinalResult(roomId, nickname);
     if (!v) return res.status(404).json({ error: 'not_found' });
     return res.json(v);

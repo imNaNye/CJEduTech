@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import botImg from '@/assets/images/discussion/AI_icon.png';
+import botImg from '@/assets/images/AI_large_icon.png';
 import '../../components/user/finalResult/loadResultPage.css';
 /**
  * 3-STEP LOADING PAGE

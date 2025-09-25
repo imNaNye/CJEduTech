@@ -7,6 +7,7 @@ import PageHeader from '../../components/common/PageHeader';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import myAvatar from "@/assets/images/avatar/avatar2.png";
+import aiIcon from "@/assets/images/discussion/AI_icon.png";
 
 import { http } from '@/lib/http' ;
 import { quizApi } from '@/api/quiz' ;
@@ -83,14 +84,73 @@ export default function FinalResultPage() {
   useEffect(() => {
     let aborted = false;
     async function fetchData(){
-      const mock = { sections: buildMockSections() };
-      setData(mock);
-      setQuiz({ rounds: buildMockQuiz() });
-      setLoading(false);
+      // 테스트 용이성: roomId가 없으면 임시 데이터로 조회
+      if (!roomId){
+        const mock = { sections: buildMockSections() };
+        setData(mock);
+        setQuiz({ rounds: buildMockQuiz() });
+        setLoading(false);
+        return;
+      }
+      try{
+        // 1) 최종 결과 조회 (GET)
+        const res = await http.get(`/api/review/${encodeURIComponent(roomId)}/final-result?nickname=${encodeURIComponent(nickname||'')}`);
+        const json = res;
+        console.log('[FinalResultPage] GET final-result:', json);
+        if (aborted) return;
+        setData(json);
+      }catch(e){
+        if (aborted) return;
+        const status = e?.status || e?.response?.status;
+        if (status === 404) {
+          // 2) 없으면 생성 (POST)
+          try{
+            const created = await http.post(`/api/review/${encodeURIComponent(roomId)}/final-result`, { nickname: nickname || '' });
+            console.log('[FinalResultPage] POST final-result (created):', created);
+            if (!aborted) setData(created);
+          }catch(e2){
+            console.error('[FinalResultPage] POST final-result failed', e2);
+            if (!aborted){
+              setData({ sections: buildMockSections() });
+              setError('최종결과 생성 실패: 임시 데이터로 표시합니다.');
+            }
+          }
+        } else {
+          console.error('[FinalResultPage] GET final-result failed', e);
+          // 기타 실패: 임시 데이터 폴백
+          setData({ sections: buildMockSections() });
+          setError('서버 조회 실패: 임시 데이터로 표시합니다.');
+        }
+      } finally {
+        // 3) 퀴즈 결과는 GET/POST 결과와 무관하게 시도
+        try{
+          const qres = await quizApi.getMyScores();
+          if (qres?.ok){
+            const qjson = await qres.json();
+            if (Array.isArray(qjson?.rounds)) setQuiz(qjson);
+            else setQuiz({ rounds: buildMockQuiz() });
+          } else {
+            setQuiz({ rounds: buildMockQuiz() });
+          }
+        } catch {
+          setQuiz({ rounds: buildMockQuiz() });
+        }
+        if (!aborted) setLoading(false);
+      }
     }
     fetchData();
     return () => { aborted = true };
   }, [roomId, nickname]);
+
+  // Log when data/quiz states are updated (for real API integration later)
+  useEffect(() => {
+    if (data?.sections) {
+      try { console.log('[FinalResultPage] sections (state):', data.sections); } catch {}
+    }
+    if (quiz?.rounds) {
+      try { console.log('[FinalResultPage] quiz (state):', quiz.rounds); } catch {}
+    }
+  }, [data, quiz]);
 
   const sections = data?.sections;
   const overall = sections?.overall || { rank:null, score:null, totalMessages:0, totalReactions:0 };
@@ -156,7 +216,27 @@ export default function FinalResultPage() {
         donutChartRef.current?.destroy?.();
         const labels = ['정직','열정','존중','창의'];
         const vals = labels.map(k => Number(pComputed?.[k]||0));
-
+        const nonZeroCount = vals.filter(v => v > 0).length;
+        const totalVal = vals.reduce((a, b) => a + b, 0);
+        if (!nonZeroCount || totalVal <= 0){
+          donutChartRef.current = new Chart(donutCtx, {
+            type: 'doughnut',
+            data: {
+              labels: ['데이터 없음'],
+              datasets: [{ data: [1], backgroundColor: ['#EDEDED'], borderWidth: 0 }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              animation: true,
+              cutout: '65%',
+              layout: { padding: { left: 24, right: 24, top: 30, bottom: 30 } },
+              plugins: { legend: { display: false }, tooltip: { enabled: false } }
+            }
+          });
+          // No data: render placeholder donut only, continue to build other charts
+        }
+        if (nonZeroCount && totalVal > 0) {
         // Rank-based colors (1~4): 1:#FF6620, 2:#FFCE7B, 3:#FFE3B3, 4:#EDEDED
         const RANK_COLORS = ['#FF6620', '#FFCE7B', '#FFE3B3', '#EDEDED'];
         // sort indices by value desc
@@ -381,6 +461,7 @@ export default function FinalResultPage() {
           },
           plugins: [badgePlugin]
         });
+        }
       }
 
       // --- Persona by Round (LINE: x=인재상 4가지, series=라운드) ---
@@ -519,10 +600,11 @@ export default function FinalResultPage() {
             <h3>AI 요약</h3>
           </header>
           <div className="frp-ai-summary__body">
+            <img className="frp-ai-summary__icon" src={aiIcon} alt="AI" />
             {aiSummary ? (
-              <p>{aiSummary}</p>
+              <p className="frp-ai-summary__text">{aiSummary}</p>
             ) : (
-              <p className="frp-muted">요약이 없습니다. (내 발화가 부족하거나 AI 요약 비활성화)</p>
+              <p className="frp-ai-summary__text">요약이 없습니다. (내 발화가 부족하거나 AI 요약 비활성화)</p>
             )}
           </div>
         </article>

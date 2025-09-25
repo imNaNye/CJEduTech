@@ -37,27 +37,32 @@ export default function ChatHistory() {
     return scrollHeight - (scrollTop + clientHeight) < 50; // within 50px
   };
 
+  const forceScrollToBottom = () => {
+    const el = historyRef.current;
+    if (!el) return;
+    // immediate jump
+    el.scrollTop = el.scrollHeight;
+    // next paint
+    requestAnimationFrame(() => {
+      const el2 = historyRef.current; if (!el2) return;
+      el2.scrollTop = el2.scrollHeight;
+      // microtask/timeout to catch late layout (fonts/images)
+      setTimeout(() => {
+        const el3 = historyRef.current; if (!el3) return;
+        el3.scrollTop = el3.scrollHeight;
+      }, 0);
+    });
+  };
+
   useLayoutEffect(() => {
     const el = historyRef.current;
     if (!el) return;
 
-    const wasNearBottom = isNearBottom();
-    const prevH = prevScrollHeightRef.current || 0;
-    const newH = el.scrollHeight;
-
-    // Case A: 내가 보냈거나(autoscroll), 이미 하단을 보고 있다면 자동 하단 스크롤
-    if (autoScroll && bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: autoScroll ? "smooth" : "auto" });
+    if (autoScroll) {
+      forceScrollToBottom();
       setAutoScroll(false);
-    } else {
-      // Case B: 위쪽을 읽는 중인데 메시지/라벨 업데이트로 높이가 늘어났다면, 상대 위치 보존
-      const delta = newH - prevH;
-      if (delta > 0) {
-        el.scrollTop += delta; // 보정: 새로 증가한 만큼 위로 올려서 현재 뷰 유지
-      }
     }
-
-    // 다음 사이클 대비 현재 높이 저장
+    // store new height for potential future calculations
     prevScrollHeightRef.current = el.scrollHeight;
   }, [messages, autoScroll]);
 
@@ -76,11 +81,8 @@ export default function ChatHistory() {
 
     socket.on("message:new", (newMessage) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
-      if (newMessage.nickname === myNick || isNearBottom()) {
-        setAutoScroll(true);
-      } else {
-        setAutoScroll(false);
-      }
+      // 새 메시지는 무조건 하단으로 이동
+      setAutoScroll(true);
     });
 
     socket.on("reaction:update", ({ messageId, reactedUsers, reactionsCount }) => {
@@ -97,6 +99,8 @@ export default function ChatHistory() {
         aiLabel: aiLabel ?? m.aiLabel,
         aiScore: (typeof aiScore === 'number' ? aiScore : m.aiScore)
       } : m));
+      // 라벨 업데이트 시에도 무조건 하단으로 이동
+      setAutoScroll(true);
     });
 
     return () => {

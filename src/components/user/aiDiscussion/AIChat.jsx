@@ -23,7 +23,6 @@ export default function AIChat() {
   const [dots, setDots] = useState(".");
 
   const myNick = typeof window !== "undefined" ? localStorage.getItem("nickname") : null;
-  const hideTimerRef = useRef(null);
   const thinkTimerRef = useRef(null);
   const dotsTimerRef = useRef(null);
   const pendingRef = useRef(null);
@@ -53,10 +52,10 @@ export default function AIChat() {
         if (!myNick || !targets.includes(myNick)) return; // 본인 대상 아니면 스킵
       }
 
-      // 먼저 thinking 연출로 전환
+      // 먼저 thinking 연출로 전환 (이전 멘트는 유지)
       pendingRef.current = payload;
       setPhase("thinking");
-      setCurrentMent(null);
+      // setCurrentMent(null); // 유지
 
       // dots 애니메이션 시작 (".", "..", "..." 순환)
       clearInterval(dotsTimerRef.current);
@@ -80,13 +79,8 @@ export default function AIChat() {
         if (next?.type === "encourage") playSafe(encourageAudioRef.current);
         else playSafe(commentAudioRef.current);
 
-        // 멘트 표시 시간 후 idle 복귀
-        clearTimeout(hideTimerRef.current);
-        hideTimerRef.current = setTimeout(() => {
-          setPhase("idle");
-          setCurrentMent(null);
-          clearInterval(dotsTimerRef.current);
-        }, 15000);
+        // 멘트는 다음 멘트가 올 때까지 유지
+        clearInterval(dotsTimerRef.current);
       }, 900);
     };
 
@@ -94,7 +88,6 @@ export default function AIChat() {
     return () => {
       socket.off("ai:ment", onMent);
       clearTimeout(thinkTimerRef.current);
-      clearTimeout(hideTimerRef.current);
       clearInterval(dotsTimerRef.current);
     };
   }, [myNick]);
@@ -104,21 +97,25 @@ export default function AIChat() {
     <div className={`ai-chat ai-chat--${phase}`}>
       <img className="badge-img" src={aiIcon} alt="aiIcon"/>
 
-      {phase === "thinking" && (
-        <div className="ai-chat-text" aria-live="polite">
-          <span className="ai-thinking">생각중{dots}</span>
-        </div>
-      )}
-
-      {phase === "message" && currentMent && (
+      {/* 메시지는 유지 표시 (thinking 중에도) */}
+      {currentMent && (
         <div className="ai-chat-text">
           {currentMent.text}
+          {phase === 'thinking' && (
+            <div className="ai-thinking-line" aria-live="polite">생각중{dots}</div>
+          )}
         </div>
       )}
 
-      {phase === "idle" && (
-        <div className="ai-chat-text ai-chat-text--idle">
-          AI가 함께 보고 있어요
+      {/* 아직 받은 메시지가 없을 때만 idle 문구 */}
+      {!currentMent && phase === 'idle' && (
+        <div className="ai-chat-text ai-chat-text--idle">AI가 함께 보고 있어요</div>
+      )}
+
+      {/* 초기/특수한 경우: 메시지는 없지만 thinking 상태일 때 */}
+      {!currentMent && phase === 'thinking' && (
+        <div className="ai-chat-text" aria-live="polite">
+          <span className="ai-thinking">생각중{dots}</span>
         </div>
       )}
     </div>

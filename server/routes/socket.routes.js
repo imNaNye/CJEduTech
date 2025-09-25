@@ -24,6 +24,8 @@ router.get("/result/:roomId", (req, res) => {
 
 router.get("/my-result", (req, res) => {
   const { nickname } = req.query || {};
+
+  console.log("my result",nickname);
   if (!nickname) return res.status(400).json({ error: "nickname_required" });
   const data = getUserLastResult(String(nickname));
   if (!data) return res.status(404).json({ error: "not_found" });

@@ -27,8 +27,6 @@
   padding:16px 20px 40px;
   border-radius:12px;
   box-shadow:0 4px 12px rgba(0,0,0,0.05);
-    transform: scale(0.85);
-  transform-origin:  top center;
   display: block;
 }
 .final-result-page .frp-section{display:grid; gap:80px; margin:12px auto 28px; max-width:1785px;}
@@ -97,6 +95,11 @@
 
 /* AI summary */
 .frp-ai-summary__body{
+
+    display: flex; 
+  align-items: flex-start; 
+  gap: 12px; 
+  
   border-radius: 12px;
   background: rgba(255, 110, 55, 0.80);
 
@@ -105,14 +108,31 @@
 
   padding:16px; 
   color: var(--white, #FFF);
-font-family: "CJ ONLYONE NEW body";
-font-size: 24px;
-font-style: normal;
-font-weight: 400;
-line-height: 165%; /* 39.6px */
-letter-spacing: 0.354px;
+  font-family: "CJ ONLYONE NEW body";
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 165%; /* 39.6px */
+  letter-spacing: 0.354px;
 
  height: 240px;}
+/* AI 요약 섹션: 아이콘 + 텍스트 레이아웃 */
+
+.frp-ai-summary__icon { 
+  width: 56px; 
+  height: 56px; 
+  flex: 0 0 56px; 
+  border-radius: 50%; 
+  object-fit: contain; 
+}
+.frp-ai-summary__text { 
+  margin: 0; 
+  line-height: 1.6; 
+}
+
+@media (max-width: 640px){
+  .frp-ai-summary__icon { width: 44px; height: 44px; flex-basis: 44px; }
+}
 
 /* Completion */
 .frp-completion__body{padding:16px;}
@@ -192,7 +212,9 @@ font-size: 19px;
 font-style: normal;
 font-weight: 300;
 line-height: 155%; /* 29.45px */
-letter-spacing: 0.354px;}
+letter-spacing: 0.354px;
+
+}
 .frp-top3__meta{display:flex; align-items:center; justify-content:flex-end; gap:8px; font-size:12px; color:var(--frp-muted);} 
 .frp-top3__nick{max-width:60%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 .frp-top3__count{font-weight:800; color:var(--frp-accent);} 

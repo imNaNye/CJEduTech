@@ -1,8 +1,42 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import SavePDFButton from "./SavePDFButton";
 import NextSessionButton from "./NextSessionButton";
 import "./discussionResult.css";
 import { http } from '@/lib/http' ;
+
+
+// Dynamically load Chart.js from CDN (no static import)
+async function ensureChartJS(){
+  if (typeof window !== 'undefined' && window.Chart) return window.Chart;
+  const id = 'chartjs-cdn-script';
+  if (document.getElementById(id)){
+    // wait until it loads
+    await new Promise((res) => {
+      const s = document.getElementById(id);
+      if (s.getAttribute('data-loaded') === 'true') return res();
+      s.addEventListener('load', () => res(), { once: true });
+      s.addEventListener('error', () => res(), { once: true });
+    });
+    return window.Chart;
+  }
+  await new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.id = id;
+    s.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js';
+    s.async = true;
+    s.onload = () => { s.setAttribute('data-loaded','true'); res(); };
+    s.onerror = (e) => { console.error('Chart.js load failed', e); res(); };
+    document.head.appendChild(s);
+  });
+  // optional: register essentials if available
+  try {
+    const C = window.Chart;
+    if (C && C.ArcElement && C.Tooltip && C.Legend) {
+      C.register(C.ArcElement, C.Tooltip, C.Legend);
+    }
+  } catch(e){}
+  return window.Chart;
+}
 
 import heroSheep from "@/assets/images/discussion/1_sheep.png";
 import donutPlaceholder from "@/assets/images/discussion/donut_placeholder.png";
@@ -60,6 +94,9 @@ export default function DiscussionResultMain() {
   const [error, setError] = useState("");
   const [overallSummary, setOverallSummary] = useState("");
 
+  const donutRef = useRef(null);
+  const donutChartRef = useRef(null);
+
   const badgeMap = {
     justice: badgeJustice,
     passion: badgePassion,
@@ -86,6 +123,7 @@ export default function DiscussionResultMain() {
         if (roomOutcome.status !== 'fulfilled') throw roomOutcome.reason || new Error('room_result_error');
         const roomData = roomOutcome.value;
         setRoomResult(roomData);
+        console.log("[DiscussionResultMain] roomData", roomData);
 
                 // --- Overall summary (once per room) ---
         try {
@@ -104,6 +142,7 @@ export default function DiscussionResultMain() {
 
         if (myOutcome.status === 'fulfilled' && myOutcome.value) {
           setMyResult(myOutcome.value);
+          console.log("[DiscussionResultMain] myResult", myOutcome.value);
         } else {
           // fallback: derive my result from room perUser
           if (nick && roomData && roomData.perUser && roomData.perUser[nick]) {
@@ -127,6 +166,8 @@ export default function DiscussionResultMain() {
         const mockMe = buildMockMyResult(nickSafe, mockRoom);
         setRoomResult(mockRoom);
         setMyResult(mockMe);
+        console.log("[DiscussionResultMain] mockRoom", mockRoom);
+        console.log("[DiscussionResultMain] mockMe", mockMe);
         setOverallSummary('토론 전반에 걸쳐 활발한 참여가 이루어졌습니다. 특히 정직과 열정 관련 메시지가 두드러졌으며, 팀 내 의사결정에 긍정적 영향을 주었습니다.');
         setError('');
       } finally {
@@ -157,6 +198,240 @@ export default function DiscussionResultMain() {
     const sum = Object.values(L).reduce((a,b)=>a+(b||0),0) || 1;
     const entries = ["정직","열정","창의","존중"].map(k => ({ key:k, val: Number(L[k]||0), pct: Math.round((Number(L[k]||0)/sum)*100) }));
     return { entries, sum };
+  }, [myResult]);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      if (!donutRef.current) return;
+      // destroy previous
+      try { donutChartRef.current?.destroy?.(); } catch {}
+      donutChartRef.current = null;
+
+      const Chart = await ensureChartJS();
+      if (!Chart || !alive) return;
+
+      const labels = ['정직','열정','창의','존중'];
+      const raw = labels.map(k => Number(myResult?.labels?.[k] || 0));
+      for (let i = 0; i < raw.length; i++) raw[i] = Math.max(0, raw[i] || 0);
+      const total = raw.reduce((a,b)=>a+b,0);
+      const ctx = donutRef.current.getContext('2d');
+
+      if (!total){
+        // Placeholder when no data
+        donutChartRef.current = new Chart(ctx, {
+          type: 'doughnut',
+          data: { labels: ['데이터 없음'], datasets: [{ data: [1], backgroundColor: ['#EDEDED'], borderWidth: 0 }] },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            layout: { padding: { left: 24, right: 24, top: 30, bottom: 30 } },
+            plugins: { legend: { display: false }, tooltip: { enabled: false } }
+          }
+        });
+      } else {
+        // Percentages & rank-based colors
+        const vals = raw.map(v => Math.round((v / total) * 100));
+        const RANK_COLORS = ['#FF6620', '#FFCE7B', '#FFE3B3', '#EDEDED'];
+        const sortedForColor = vals.map((v,i)=>({ v, i })).sort((a,b)=> b.v - a.v);
+        const colorByIndex = Array(vals.length);
+        const rankByIndex = Array(vals.length);
+        sortedForColor.forEach((o, rank) => { colorByIndex[o.i] = RANK_COLORS[rank] || RANK_COLORS[3]; rankByIndex[o.i] = rank; });
+
+        // Rank-based badge sizes
+        const SIZE_BY_RANK = [156, 122, 122, 76];
+        const badgeSizes = vals.map((_, i) => SIZE_BY_RANK[rankByIndex[i]] || 76);
+
+        // Badge images (정직/열정/창의/존중)
+        const badgeSources = {
+          '정직': badgeJustice,
+          '열정': badgePassion,
+          '창의': badgeCreativity,
+          '존중': badgeRespect,
+        };
+        const badgeImages = {};
+        Object.entries(badgeSources).forEach(([k, src]) => {
+          const img = new Image();
+          img.src = src; // Vite handles asset path
+          badgeImages[k] = img;
+        });
+
+        // Dynamic side padding based on largest badge
+        const maxBadge = Math.max(...badgeSizes);
+        const labelBlockH = 24;
+        const sideBandPad = Math.ceil(maxBadge/2) + labelBlockH + 16;
+
+        const nonZeroCount = vals.filter(v=>v>0).length;
+        const useBadges = nonZeroCount >= 2;
+        const layoutPadding = useBadges
+          ? { left: sideBandPad, right: sideBandPad, top: 50, bottom: 50 }
+          : { left: 24, right: 24, top: 30, bottom: 30 };
+
+        // Plugin: external badges + one-elbow connector + inline tooltip text
+        const badgePlugin = {
+          id: 'persona-badges',
+          afterDatasetsDraw(chart){
+            if (!useBadges) return;
+            const { ctx, chartArea } = chart;
+            const meta = chart.getDatasetMeta(0);
+            if (!meta || !meta.data || !meta.data.length) return;
+
+            const base = meta.data[0].getProps(['x','y','outerRadius'], true);
+            const cx = base.x, cy = base.y, R = base.outerRadius;
+
+            const items = meta.data.map((arc, idx) => {
+              const label = chart.data.labels[idx];
+              const img = badgeImages[label];
+              if (!img) return null;
+              const props = arc.getProps(['x','y','startAngle','endAngle','innerRadius','outerRadius'], true);
+              const angle = (props.startAngle + props.endAngle) / 2;
+              const ax = props.x + Math.cos(angle) * (props.outerRadius + 6);
+              const ay = props.y + Math.sin(angle) * (props.outerRadius + 6);
+              const onRight = Math.cos(angle) >= 0;
+              const size0 = badgeSizes[idx] || 76;
+              const value = vals[idx];
+              return { idx, label, img, angle, ax, ay, onRight, size0, value };
+            }).filter(Boolean);
+
+            let left = items.filter(it => !it.onRight);
+            let right = items.filter(it =>  it.onRight);
+
+            function rebalance(from, to, isRightFrom){
+              while (from.length > 2){
+                from.sort((a,b) => Math.abs(a.ax - cx) - Math.abs(b.ax - cx));
+                const mv = from.shift();
+                mv.onRight = !isRightFrom;
+                to.push(mv);
+              }
+            }
+            if (right.length > 2) rebalance(right, left, true);
+            if (left.length  > 2) rebalance(left,  right, false);
+
+            left.sort((a,b)=> a.ay - b.ay);
+            right.sort((a,b)=> a.ay - b.ay);
+
+            function layoutSide(sideItems, isRight){
+              if (!sideItems.length) return [];
+              const bandTop = chartArea.top + 12;
+              const bandBot = chartArea.bottom - 12;
+              const bandH = bandBot - bandTop;
+
+              const gap = 12;
+              const minSize = 48;
+              const sumSizes = sideItems.reduce((s,it)=> s + it.size0, 0);
+              const need = sumSizes + gap*(sideItems.length-1);
+              const scale = need > bandH
+                ? Math.max((bandH - gap*(sideItems.length-1)) / Math.max(sumSizes,1), minSize/Math.max(...sideItems.map(it=>it.size0)))
+                : 1;
+
+              const laid = sideItems.map(it => ({
+                ...it,
+                size: Math.round(it.size0 * scale),
+                bx: isRight ? (chartArea.right - 16) : (chartArea.left + 16),
+                by: Math.max(bandTop + Math.round(it.size0*scale)/2, Math.min(bandBot - Math.round(it.size0*scale)/2, it.ay))
+              }));
+
+              for (let i=1;i<laid.length;i++){
+                const prev = laid[i-1];
+                const cur = laid[i];
+                const minGap = (prev.size/2 + cur.size/2 + gap);
+                if (cur.by - prev.by < minGap){ cur.by = prev.by + minGap; }
+              }
+              for (let i=laid.length-2;i>=0;i--){
+                const next = laid[i+1];
+                const cur = laid[i];
+                const minGap = (cur.size/2 + next.size/2 + gap);
+                if (next.by > bandBot){ next.by = bandBot - next.size/2; }
+                if (next.by - cur.by < minGap){ cur.by = next.by - minGap; }
+                if (cur.by < bandTop + cur.size/2){ cur.by = bandTop + cur.size/2; }
+              }
+
+              laid.forEach(cur => {
+                const margin = 24;
+                cur.bx = isRight
+                  ? Math.max(cx + R + margin + cur.size/2, chartArea.right - 16 - cur.size/2)
+                  : Math.min(cx - R - margin - cur.size/2, chartArea.left + 16 + cur.size/2);
+              });
+
+              return laid;
+            }
+
+            const laidL = layoutSide(left, false);
+            const laidR = layoutSide(right, true);
+            const laidAll = [...laidL, ...laidR];
+
+            laidAll.forEach(it => {
+              const { img, label, value, ax, ay, bx, by, size, onRight, idx } = it;
+              if (!img.complete){ img.onload = () => chart.draw(); return; }
+              ctx.save();
+
+              const elbowX = onRight ? (bx - size/2 - 10) : (bx + size/2 + 10);
+              const elbowY = ay;
+              const endX   = onRight ? (bx - size/2 - 4)  : (bx + size/2 + 4);
+              const endY   = by;
+
+              // anchor dot
+              ctx.beginPath();
+              ctx.arc(ax, ay, 3, 0, Math.PI*2);
+              ctx.fillStyle = '#FF6E37';
+              ctx.fill();
+
+              // elbow polyline
+              ctx.beginPath();
+              ctx.moveTo(ax, ay);
+              ctx.lineTo(elbowX, elbowY);
+              ctx.lineTo(endX, endY);
+              ctx.lineWidth = 2;
+              ctx.lineJoin = 'round';
+              ctx.strokeStyle = '#FF6E37';
+              ctx.stroke();
+
+              // badge image
+              ctx.drawImage(img, bx - size/2, by - size/2, size, size);
+
+              // one-line label under badge (centered)
+              const labelText = `${label} `;
+              const percentText = `${value}%`;
+              ctx.font = '14px sans-serif';
+              ctx.textBaseline = 'top';
+              ctx.textAlign = 'left';
+              const wLabel = ctx.measureText(labelText).width;
+              const wPercent = ctx.measureText(percentText).width;
+              const totalW = wLabel + wPercent;
+              const baseY = by + size/2 + 6;
+              let startX = bx - totalW / 2;
+
+              // label
+              ctx.fillStyle = '#555';
+              ctx.fillText(labelText, startX, baseY);
+
+              // percent with segment color (rank color)
+              const segColor = (chart.data.datasets?.[0]?.backgroundColor?.[idx]) || '#FF6620';
+              ctx.fillStyle = segColor;
+              ctx.fillText(percentText, startX + wLabel, baseY);
+
+              ctx.restore();
+            });
+          }
+        };
+
+        donutChartRef.current = new Chart(ctx, {
+          type: 'doughnut',
+          data: { labels, datasets: [{ data: vals, backgroundColor: colorByIndex, borderWidth: 0 }] },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: true,
+            cutout: '65%',
+            layout: { padding: layoutPadding },
+            plugins: { legend: { display: false }, tooltip: { enabled: true } }
+          },
+          plugins: useBadges ? [badgePlugin] : []
+        });
+      }
+    })();
+    return () => { alive = false; try { donutChartRef.current?.destroy?.(); } catch {} };
   }, [myResult]);
 
   // Ranking list (top 10)
@@ -241,7 +516,7 @@ export default function DiscussionResultMain() {
                 <span>인재상 분포</span>
               </div>
               <div className="dr-donut-wrap">
-                <img className="dr-donut" src={donutPlaceholder} alt="인재상 분포 도넛" />
+                <canvas ref={donutRef} className="dr-donut-canvas" aria-label="인재상 분포 차트"></canvas>
               </div>
             </div>
 
@@ -255,10 +530,10 @@ export default function DiscussionResultMain() {
       <span className="result-summary-item ch"><i className="icon"/>+{myResult?.totalMessages || 0}건</span>
     </div>
                       <div className="result-category-summary-box">
-      <span className="result-category-summary-item j"><i className="icon"/>+{myResult?.totalReactions || 0}건</span>
-      <span className="result-category-summary-item p"><i className="icon"/>+{myResult?.totalReactions || 0}건</span>
-      <span className="result-category-summary-item c"><i className="icon"/>+{myResult?.totalReactions || 0}건</span>
-      <span className="result-category-summary-item r"><i className="icon"/>+{myResult?.totalMessages || 0}건</span>
+      <span className="result-category-summary-item j"><i className="icon"/>+{myResult?.labels["정직"] || 0}건</span>
+      <span className="result-category-summary-item p"><i className="icon"/>+{myResult?.labels["열정"] || 0}건</span>
+      <span className="result-category-summary-item c"><i className="icon"/>+{myResult?.labels["창의"] || 0}건</span>
+      <span className="result-category-summary-item r"><i className="icon"/>+{myResult?.labels["존중"] || 0}건</span>
     </div>
             </div>
 

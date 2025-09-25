@@ -2,20 +2,27 @@
 import r1_1 from '/videos/round1_1.mp4';
 import r1_2 from '/videos/round1_2.mp4';
 import r1_3 from '/videos/round1_3.mp4';
+import r2_1 from '/videos/round2_1.mp4';
+import r2_2 from '/videos/round2_2.mp4';
+import r2_3 from '/videos/round2_3.mp4';
+import r3_1 from '/videos/round3_1.mp4';
+import r3_2 from '/videos/round3_2.mp4';
+import r3_3 from '/videos/round3_3.mp4';
 
-// 필요 시 라운드 2/3도 같은 방식으로 import 하세요.
-// 현재는 예시로 라운드 1의 영상들을 재활용합니다.
 export const videoByRound = {
   1: [
-    { title: '1라운드 영상 1', src: r1_1 },
-    { title: '1라운드 영상 2', src: r1_2 },
-    { title: '1라운드 영상 3', src: r1_3 },
+    { title: 'Round 1 - 갓 구운 빵의 비밀', src: r1_1 },
+    { title: 'Round 1 - 할인율의 미로', src: r1_2 },
+    { title: 'Round 1 - 마감할인 그 이상의 가치', src: r1_3 },
   ],
   2: [
-    { title: '2라운드 영상 1', src: r1_1 },
-    { title: '2라운드 영상 2', src: r1_2 },
+    { title: 'Round 2 - 예약 시스템 오류와 고객의 분노', src: r2_1 },
+    { title: 'Round 2 - VIPS 단체 고객의 무리한 요구', src: r2_2 },
+    { title: 'Round 2 - SNS 대기불만폭주! 고객경험혁신', src: r2_3 },
   ],
   3: [
-    { title: '3라운드 영상 1', src: r1_1 },
+    { title: 'Round 3 - 시그니처 폭립의 화룡점정', src: r3_1 },
+    { title: 'Round 3 - VIPS 주방 내 갈등해결', src: r3_2 },
+    { title: 'Round 3 - VIPS 주방 막내의 스마트한 식자재관리', src: r3_3 },
   ],
 };

@@ -208,9 +208,13 @@ export default function QuizPage() {
         >
           {secondsLeft}s
         </div>
-        <h3>Q{idx + 1}. {current.q}</h3>
-        {current.desc && (
-          <p className="quiz-desc">{current.desc}</p>
+        {phase !== 'result' && (
+          <>
+            <h3>Q{idx + 1}. {current.q}</h3>
+            {current.desc && (
+              <p className="quiz-desc">{current.desc}</p>
+            )}
+          </>
         )}
         
         {/* PREVIEW: 등뒤 카드 3개 (선택 불가) */}
@@ -282,56 +286,56 @@ export default function QuizPage() {
             })}
           </ul>
         )}
-      </div>
 
-      {/* RESULT: 정답 카드 + O/X + 해설 */}
-      {phase === 'result' && (
-        <div
-          ref={feedbackRef}
-          role="status"
-          aria-live="polite"
-          tabIndex={-1}
-          className="quiz-result"
-        >
-          {/* Left: correct option card front */}
-          <div className="result-left">
-            {(() => {
-              const correctIdx = current?.answer;
-              const correctOpt = current?.options ? toOpt(current.options[correctIdx]) : null;
-              if (!correctOpt) return null;
-              return (
-                <div className="card-container">
-                  <div className="card-front result-card">
-                    {correctOpt.img && (
-                      <img
-                        className="opt-img"
-                        src={correctOpt.img}
-                        alt={correctOpt.alt || correctOpt.label || '정답 카드'}
-                      />
-                    )}
-                    {correctOpt.label && <div className="opt-label">{correctOpt.label}</div>}
+        {/* RESULT: 정답 카드 + O/X + 해설 */}
+        {phase === 'result' && (
+          <div
+            ref={feedbackRef}
+            role="status"
+            aria-live="polite"
+            tabIndex={-1}
+            className="quiz-result"
+          >
+            {/* Left: correct option card front */}
+            <div className="result-left">
+              {(() => {
+                const correctIdx = current?.answer;
+                const correctOpt = current?.options ? toOpt(current.options[correctIdx]) : null;
+                if (!correctOpt) return null;
+                return (
+                  <div className="card-container">
+                    <div className="card-front result-card">
+                      {correctOpt.img && (
+                        <img
+                          className="opt-img"
+                          src={correctOpt.img}
+                          alt={correctOpt.alt || correctOpt.label || '정답 카드'}
+                        />
+                      )}
+                      {correctOpt.label && <div className="opt-label">{correctOpt.label}</div>}
+                    </div>
+                    {correctOpt.caption && <div className="opt-caption">{correctOpt.caption}</div>}
                   </div>
-                  {correctOpt.caption && <div className="opt-caption">{correctOpt.caption}</div>}
-                </div>
-              );
-            })()}
-          </div>
-
-          {/* Right: O/X + title + explanation */}
-          <div className="result-right">
-            <div className={`big-mark ${isCorrect ? 'ok' : 'no'}`}>{isCorrect ? 'O' : 'X'}</div>
-            <div className={`result-title ${isCorrect ? 'ok' : 'no'}`}>
-              {isCorrect ? '정답이에요!' : '오답이에요!'}
+                );
+              })()}
             </div>
-            {(() => {
-              const text = isCorrect
-                ? (current?.explainCorrect ?? current?.explanation)
-                : (current?.explainWrong ?? current?.explanation);
-              return text ? <p className="quiz-explain">{text}</p> : null;
-            })()}
+
+            {/* Right: O/X + title + explanation */}
+            <div className="result-right">
+              <div className={`big-mark ${isCorrect ? 'ok' : 'no'}`}>{isCorrect ? 'O' : 'X'}</div>
+              <div className={`result-title ${isCorrect ? 'ok' : 'no'}`}>
+                {isCorrect ? '정답이에요!' : '오답이에요!'}
+              </div>
+              {(() => {
+                const text = isCorrect
+                  ? (current?.explainCorrect ?? current?.explanation)
+                  : (current?.explainWrong ?? current?.explanation);
+                return text ? <p className="quiz-explain">{text}</p> : null;
+              })()}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div> {/* end of .quiz-page */}
 
       <div>
         <button onClick={goNextQuestion} disabled={phase !== 'result'}>다음 문제</button>

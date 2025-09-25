@@ -18,7 +18,7 @@ export default function Chat({ isMine, nickname, text, createdAt, reactionsCount
             {labels.map((l) => {
               const s = aiScores && typeof aiScores[l] === 'number' ? aiScores[l] : (l === aiLabel && typeof aiScore === 'number' ? aiScore : undefined);
               return (
-                <span key={l} className="chat-ai-badge">🔖 {l}{typeof s === 'number' ? ` (${s.toFixed(2)})` : ''}</span>
+                <span key={l} className="chat-ai-badge">🔖 {l}</span>
               );
             })}
           </div>

@@ -46,7 +46,7 @@ async function readJSON(file){ const buf = await fs.readFile(file, 'utf-8'); ret
 const ROOM_MAX_AGE_MS = Number(process.env.ROOM_MAX_AGE_MS || 25 * 60 * 1000); // 기본 25분
 
 // ===== Test Bot (per-room, optional, multi-bot) =====
-const BOT_ENABLED = process.env.CHAT_TEST_BOT !== '0';
+const BOT_ENABLED = false;
 const BOT_MIN_INTERVAL_MS = Number(process.env.CHAT_TEST_BOT_MIN_MS || 10000);
 const BOT_MAX_INTERVAL_MS = Number(process.env.CHAT_TEST_BOT_MAX_MS || 25000);
 const BOT_COUNT = Number(process.env.CHAT_TEST_BOT_COUNT || 5);

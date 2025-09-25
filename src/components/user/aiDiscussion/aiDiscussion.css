@@ -127,6 +127,15 @@ letter-spacing: 0.379px;
   align-items:center;
   justify-content:flex-end; /* bottom align inside the cake area */
   min-height: 178px; /* ensure base height even with 0 layers */
+  max-height: 178px; /* restrict height */
+  overflow-y: auto;  /* allow vertical scroll if overflowing */
+}
+.cake-stack::-webkit-scrollbar {
+  width: 6px;
+}
+.cake-stack::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 3px;
 }
 .principle-icon .cake-img{ display:block; }
 /* bottom badge image (with caption baked in the PNG) */
@@ -149,7 +158,7 @@ letter-spacing: 0.379px;
 .ai-chat {
   position: absolute;
   right: 1rem;
-  top: 6rem; /* keep above input area */
+  top: 3.5rem; /* keep above input area */
   z-index: 10;
 
   display: flex;

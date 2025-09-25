@@ -280,7 +280,7 @@ export default function DiscussionResultMain() {
           </div>
         </section>
 
-        {/* 전체 랭킹 */}
+        {/* 전체 랭킹 
         <aside className="dr-ranking card">
           <header className="dr-card-header">
             <h3>전체 랭킹</h3>
@@ -299,7 +299,7 @@ export default function DiscussionResultMain() {
               </li>
             ))}
           </ol>
-        </aside>
+        </aside>*/}
       </div>
     </div>
   );

@@ -1,7 +1,6 @@
 .ai-discussion-page{
-width: 100vw;
-height: 100vh;
-background: var(--grey06, #F7F7F7);
+  background: var(--grey06, #F7F7F7);
+  min-height: 100vh; /* fill viewport height */
 }
 
 :root{
@@ -10,21 +9,27 @@ background: var(--grey06, #F7F7F7);
   --pill-bg: #fff7ed;
   --pill-border: #ffd8b5;
   --pill-text: #9a4a00;
-  background-color: #fff7ed;
+  background-color: #F7F7F7;
 }
 
 .ai-discussion-main {
-  transform: scale(0.75);
-  transform-origin:  center top;
   display: flex;
   flex-direction: row;
+  height: 100vh;            /* fit browser height */
+  box-sizing: border-box;
+                   /* breathing space between panels */
+  padding: 16px;             /* optional safe padding */
+  justify-content: center;   /* horizontally center child panels */
+  align-items: center;       /* vertically center child panels */
 }
 
 /* 왼쪽 개요 영역 */
 .chat-overview {
-  width: 682px;
-  height: 1200px;
-  flex-shrink: 0;
+  width: clamp(320px, 34vw, 680px); /* fluid width, caps at original */
+  height: 100vh;                    /* match viewport */
+  flex: 0 0 auto;
+  overflow-y: auto;  /* vertical scroll only */
+  overflow-x: hidden; /* prevent horizontal scroll */
   background: linear-gradient(343deg, rgba(246, 242, 222, 1) 0.63%, rgba(251, 238, 214, 1) 100%);
   padding: 24px 28px 20px 28px;
   box-sizing: border-box;
@@ -58,6 +63,20 @@ background: var(--grey06, #F7F7F7);
   background: #FFE8CC; /* closer to mock */
   border: 1px solid #FFD7B0;
   box-shadow: 0 2px 8px rgba(0,0,0,.04);
+}
+
+/* summary title: span full width (new row) */
+.summary-box > .summary-title{
+  grid-column: 1 / -1; /* occupy full row */
+  margin: 6px;
+  color: var(--orange03, #E66433);
+
+font-family: "CJ ONLYONE NEW title";
+font-size: 16px;
+font-style: normal;
+font-weight: 500;
+line-height: normal;
+letter-spacing: 0.379px;
 }
 
 /* each small rounded item inside the box */
@@ -115,14 +134,15 @@ background: var(--grey06, #F7F7F7);
 
 /* 오른쪽 채팅 영역 */
 .chat-container {
-  width: 1318px;
-  height: 1200px; /* match canvas height so inner area can scroll */
-  flex-shrink: 0;
+  flex: 1 1 auto;            /* take remaining width */
+  min-width: 1200px;          /* ensure a comfortable minimum width */
+  height: 100vh;             /* match viewport */
   box-shadow: 0 0 26px 0 rgba(0, 0, 0, 0.02) inset;
   display: flex;
   flex-direction: column;
-  min-height: 0; /* allow children to shrink and enable overflow */
+  min-height: 0;             /* allow children to shrink and enable overflow */
   position: relative;
+  overflow: hidden;          /* child scroller below */
 }
 
 /* AI tip callout (orange card on the right) */
@@ -156,8 +176,8 @@ background: var(--grey06, #F7F7F7);
 
 /* chat list & bubbles */
 .chat-history {
-  flex: 1 1 auto;
-  min-height: 0;            /* critical for flex overflow */
+  flex: 1 1 auto;            /* fill remaining height */
+  min-height: 0;             /* critical for flex overflow */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   margin-bottom: 12px;
@@ -167,7 +187,6 @@ background: var(--grey06, #F7F7F7);
   padding-right: 6px;
   padding-left: 6px;
   padding-top: 10px;
-  height: 962px;
 }
 .chat-history::-webkit-scrollbar { width: 8px; }
 .chat-history::-webkit-scrollbar-thumb { background:#e0e0e0; border-radius: 6px; }
@@ -212,6 +231,10 @@ background: var(--grey06, #F7F7F7);
   border-top: 1px solid var(--grey04, #D9D9D9);
   background: var(--grey07, #FAFAFA);
   gap: 16px;
+}
+
+@media (max-height: 760px){
+  .chat-input-wrapper{ height: 120px; }
 }
 
 /* 실제 입력 필드 */
@@ -323,29 +346,11 @@ box-sizing: border-box;
   color: #3146a7;
   border: 1px solid #d9e1ff;
 }
-
-@media (max-width: 992px) {
-  .cake { width: 96px; }
-  .hex-btn { width: 62px; height: 72px; font-size:13px; }
-  .timer-face { width:64px; height:64px; }
-  .timer-card { grid-template-columns: 64px auto; }
-  .principle-icon { min-height: 160px; width: 72px; }
-  .principle-icon .cake { width: 60px; border-radius: 12px; }
-  .principle-icon .hex { width: 66px; height: 74px; }
-}
-@media (max-width: 576px) {
-  .timer-card { grid-template-columns: 48px auto; }
-  .timer-ring { width:48px; height:48px; }
-  .stat-pill { font-size:12px; padding:6px 8px; }
-  .chat-bubble { max-width: 86%; }
-  .timer-face { width:48px; height:48px; }
-  .stat-pills.compact .stat-pill { padding:5px 7px; font-size:11px; }
-  .principle-icon { min-height: 140px; width: 64px; }
-  .principle-icon .cake { width: 54px; }
-}
-
-@media (max-width: 640px) {
-  .summary-box { grid-template-columns: repeat(2, max-content); }
-}
 .chat-header { flex: 0 0 auto; }
 .chat-input-area { flex: 0 0 auto; }
+
+@media (max-width: 1200px){
+  .ai-discussion-main{ flex-direction: column; height: auto; }
+  .chat-overview{ width: 100%; height: auto; max-height: 50vh; }
+  .chat-container{ width: 100%; height: calc(100vh - 16px - 16px); }
+}

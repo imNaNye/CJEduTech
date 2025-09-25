@@ -30,6 +30,8 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+    justify-content: center;   /* horizontally center child panels */
+  align-items: center;       /* vertically center child panels */
 }
 
 h1 {

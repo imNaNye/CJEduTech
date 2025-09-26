@@ -1,9 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 
-export default function StartButton() {
+export default function StartButton(onSelect = () => {}) {
   const navigate = useNavigate();
 
-  const handleClick = () => {
+  const handleClick = async () => {
+    await onSelect();
     navigate('/user/onboarding');
   };
 

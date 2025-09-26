@@ -63,7 +63,10 @@ export default function AvatarSelector() {
 
       {msg && <p className="avatar-msg" role="alert">{msg}</p>}
 
-      <ActionButtons />
+              <div className="action-buttons">
+                  <BackButton/>
+                  <StartButton onSelect={saveAvatar} />
+              </div>
     </div>
   );
 }

@@ -116,6 +116,7 @@ export default function DiscussionResultMain() {
     ];
   function findAvatarById(id) {
     const found = avatars.find(a => a.id === id);
+    console.log("found:",id);
     return found ? found.src : avatar1;
   }
   const { nickname, avatarUrl } = useUser();

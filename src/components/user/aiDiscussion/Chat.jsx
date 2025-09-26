@@ -39,6 +39,7 @@ export default function Chat({ isMine, nickname, text, createdAt, reactionsCount
   const labels = Array.isArray(aiLabels) && aiLabels.length ? aiLabels : (aiLabel ? [aiLabel] : []);
   function findAvatarById(id) {
     const found = avatars.find(a => a.id === id);
+    console.log("findAvatar:",id);
     return found ? found.src : avatar1;
   }
   return (

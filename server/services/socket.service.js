@@ -885,7 +885,7 @@ export function initChatSocket(io) {
         const msg = {
           id: randomUUID(),
           roomId,
-          avatar,
+          avatar : avatar ||"2",
           nickname: nickname || "익명",
           text: trimmed,
           createdAt: new Date().toISOString()

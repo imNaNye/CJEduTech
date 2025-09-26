@@ -136,7 +136,7 @@ export default function ChatHistory({ onTopicChange = () => {} }) {
             aiScores={msg.aiScores}
             aiLabel={msg.aiLabel}
             aiScore={msg.aiScore}
-            avatarUrl={msg.avatarUrl}
+            avatarUrl={msg.avatar}
           />
         </div>
       ))}

@@ -16,20 +16,20 @@ import avatar12 from "@/assets/images/avatar/avatar12.png";
 
 export default function Chat({ isMine, nickname, text, createdAt, reactionsCount = 0, didReact = false, aiLabel, aiScore, aiLabels, aiScores ,avatarUrl}) {
   
-  const avatars = [
-      { id: 'avatar1', src: avatar1 },
-      { id: 'avatar2', src: avatar2 },
-      { id: 'avatar3', src: avatar3 },
-      { id: 'avatar4', src: avatar4 },
-      { id: 'avatar5', src: avatar5 },
-      { id: 'avatar6', src: avatar6 },
-      { id: 'avatar7', src: avatar7 },
-      { id: 'avatar8', src: avatar8 },
-      { id: 'avatar9', src: avatar9 },
-      { id: 'avatar10', src: avatar10 },
-      { id: 'avatar11', src: avatar11 },
-      { id: 'avatar12', src: avatar12 },
-    ];
+      const avatars = [
+        { id: '1', src: avatar1 },
+        { id: '2', src: avatar2 },
+        { id: '3', src: avatar3 },
+        { id: '4', src: avatar4 },
+        { id: '5', src: avatar5 },
+        { id: '6', src: avatar6 },
+        { id: '7', src: avatar7 },
+        { id: '8', src: avatar8 },
+        { id: '9', src: avatar9 },
+        { id: '10', src: avatar10 },
+        { id: '11', src: avatar11 },
+        { id: '12', src: avatar12 },
+      ];
 
   const time = createdAt ? new Date(createdAt) : new Date();
   const hh = time.getHours().toString().padStart(2, '0');

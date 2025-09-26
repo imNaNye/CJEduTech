@@ -5,11 +5,10 @@
   /* compute scale: fit to viewport, never scale up beyond 1 */
   --sx: calc(100vw / var(--design-w));
   --sy: calc(100vh / var(--design-h));
-  --page-scale: min(1, min(var(--sx), var(--sy)));
+  --page-scale: min(1, var(--sx));
 
   background: var(--grey06, #F7F7F7);
   width: 100vw;
-  height: 100vh;
   overflow: auto;                 /* allow scroll if we clamp scale later */
   display: flex;
   align-items: center;            /* center the scaled stage vertically */
@@ -36,15 +35,13 @@
   gap: 24px;                     /* breathing space between panels */
 
   /* scale from the page viewport */
-  transform: scale(calc(var(--page-scale) * 0.75));
-  transform-origin: center center;
-  zoom: 0.75;;
+  zoom: 0.75;
   will-change: transform;
 }
 
 /* 왼쪽 개요 영역 */
 .chat-overview {
-  width: clamp(320px, 36vw, 680px); /* fluid width, caps at original */
+  width:682px; /*clamp(320px, 36vw, 682px);*/ /* fluid width, caps at original */
   height: 100%;                     /* match stage height */
   flex: 0 0 auto;
   overflow: hidden; /* delegate scrolling to inner sections */
@@ -376,7 +373,7 @@ box-sizing: border-box;
 .chat-header { flex: 0 0 auto; }
 .chat-input-area { flex: 0 0 auto; }
 
-@media (max-width: 1200px){
+@media (max-width: 1000px){
   .ai-discussion-main{ flex-direction: column; height: auto; }
   .chat-overview{ width: 100%; height: auto; max-height: 50vh; }
   .chat-container{ width: 100%; height: calc(100vh - 16px - 16px); }

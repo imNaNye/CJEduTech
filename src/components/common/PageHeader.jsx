@@ -11,8 +11,6 @@ function getAvatarSrc(avatarNumber) {
 
 export default function PageHeader({ title, isShort }) {
   const { nickname, avatarUrl } = useUser();
-  console.log('header user', { nickname, avatarUrl });
-  console.log('header user', { nickname, avatarUrl });
 
   return (
     <div className={isShort ? 'page-header-short' : 'page-header'}>

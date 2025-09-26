@@ -45,7 +45,7 @@ export default function LoginBox() {
       const status = err?.status ?? err?.response?.status;
       const serverMsg = err?.payload?.message || err?.message;
 
-      if (status === 401) showToast('닉네임 또는 비밀번호가 올바르지 않습니다.', 'error');
+      if (status === 401) showToast('닉네임 또는 비밀번호가 올바르지 않습니다.(이미 사용 중인 닉네임입니다.)', 'error');
       else if (status === 409) showToast('이미 사용 중인 닉네임입니다.', 'error');
       else if (status === 400) showToast(serverMsg || '입력값을 확인해주세요.', 'error');
       else showToast(serverMsg || '로그인 실패', 'error');

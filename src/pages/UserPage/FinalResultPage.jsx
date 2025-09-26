@@ -211,7 +211,7 @@ export default function FinalResultPage() {
       }
       try{
         // 1) 최종 결과 조회 (GET)
-        const res = await http.get(`/api/review/${encodeURIComponent(roomId)}/final-result?nickname=${encodeURIComponent(nickname||'')}`);
+        const res = await http.get(`/api/review/ggg/final-result?nickname=${encodeURIComponent(nickname||'')}`);
         const json = res;
         console.log('[FinalResultPage] GET final-result:', json);
         if (aborted) return;

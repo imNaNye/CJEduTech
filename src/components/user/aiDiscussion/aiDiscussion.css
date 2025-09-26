@@ -24,6 +24,8 @@
   background-color: #F7F7F7;
 }
 
+
+
 .ai-discussion-main {
   /* Design-size stage (will be scaled by parent) */
   width: calc(var(--design-w) * 1px);
@@ -35,10 +37,13 @@
   gap: 24px;                     /* breathing space between panels */
 
   /* scale from the page viewport */
-  zoom: 0.65;
+  zoom: 0.75;
   will-change: transform;
 }
+@media (max-height: 800px){
+  .ai-discussion-main{ zoom: 0.65;}
 
+}
 /* 왼쪽 개요 영역 */
 .chat-overview {
   width:682px; /*clamp(320px, 36vw, 682px);*/ /* fluid width, caps at original */

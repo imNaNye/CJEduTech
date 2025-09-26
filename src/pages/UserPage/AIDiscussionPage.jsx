@@ -57,14 +57,7 @@ export default function AIDiscussionPage(){
             ) : (
                 <>
 
-                                       <div style={{ display: "flex", justifyContent: "flex-end"}}>
-                        <button className="skip-button" onClick={handleSkip}>
-                            스킵
-                        </button>
-                        <button className="request-ment-button" onClick={handleRequestMent}>
-                            AI 멘트 요청
-                        </button>
-                    </div>
+                                       
                     <AiDiscussionMain/>
 
                 </>

@@ -1,8 +1,7 @@
 /* src/components/common/PageHeader.css */
 
 /* ===== Page Header ===== */
-.page-header,
-.page-header-short {
+.page-header {
   display: flex;
   align-items: center;
   justify-content: space-between; /* title ←→ user-info */
@@ -11,6 +10,15 @@
   box-sizing: border-box;
   background: #FAFAFA;
   height: 6vh;
+}
+.page-header-short {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* title ←→ user-info */
+  gap: 12px;
+  padding: 12px 20px;            /* 여백 */
+  box-sizing: border-box;
+  background: #FAFAFA;
 }
 
 /* 제목(좌측) */
@@ -22,7 +30,7 @@
   color: var(--ink, #222);
 }
 .page-header-short .title {
-  margin-left: 64px;
+  margin-left: 10px;
   font-weight: 800;
   font-size: 32px;
   line-height: 1.2;
@@ -32,7 +40,7 @@
 .user-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  min-width: 10rem;
 }
 
 /* 아바타 아이콘: 원형, 작게 */
@@ -51,8 +59,6 @@
   font-weight: 600;
   font-size: 18px;
   color: #666;
-  margin-left: 15px;
-  margin-right: 64px;
 }
 
 /* 작은 화면에서 살짝 압축 */

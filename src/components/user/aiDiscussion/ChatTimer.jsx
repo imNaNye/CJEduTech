@@ -16,7 +16,7 @@ export default function ChatTimer(){
     };
     socket.on('room:time', handleTime);
     // 초기 요청 (방 id는 상황에 맞게 교체)
-    socket.emit('room:time:request', { roomId: 'general' });
+    socket.emit('room:time:request', {  });
 
     return () => {
       socket.off('room:time', handleTime);
@@ -34,7 +34,7 @@ export default function ChatTimer(){
   // 5초마다 서버 동기화 요청
   useEffect(() => {
     syncRef.current = setInterval(() => {
-      socket.emit('room:time:request', { roomId: 'general' });
+      socket.emit('room:time:request', {});
     }, 5000);
     return () => clearInterval(syncRef.current);
   }, []);

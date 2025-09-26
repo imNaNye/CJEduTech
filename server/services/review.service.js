@@ -25,8 +25,28 @@ export async function generateFinalResult(roomId, nickname, opts = {}){
     return { roomId: baseId, nickname, cached: true, ...cached };
   }
 
-  // 1) Load all round archives for the base room
-  const rounds = await listRoomArchives(baseId);
+  let rounds = await listRoomArchives(baseId);
+  // Use only the latest archive per round_number
+  const timeOf = (a) => {
+    const t = a?.archivedAt || a?.createdAt || a?.updatedAt || a?.endedAt || a?.timestamp;
+    const n = t ? Date.parse(t) : NaN;
+    return Number.isFinite(n) ? n : 0;
+  };
+  const latestByRound = new Map(); // key: round_number (number | undefined) -> archive
+  for (const a of rounds){
+    const rkey = (typeof a?.round_number === 'number') ? a.round_number : undefined;
+    const prev = latestByRound.get(rkey);
+    if (!prev || timeOf(a) > timeOf(prev)){
+      latestByRound.set(rkey, a);
+    }
+  }
+  rounds = Array.from(latestByRound.values())
+    .sort((x,y) => {
+      const rx = (typeof x?.round_number === 'number') ? x.round_number : 0;
+      const ry = (typeof y?.round_number === 'number') ? y.round_number : 0;
+      return rx - ry;
+    });
+
   if (!rounds.length){
     const empty = {
       createdAt: new Date().toISOString(),

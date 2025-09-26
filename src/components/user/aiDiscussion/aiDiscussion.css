@@ -1,6 +1,19 @@
 .ai-discussion-page{
+  /* Viewport container */
+  --design-w: 2000; /* design width in px */
+  --design-h: 1200; /* design height in px */
+  /* compute scale: fit to viewport, never scale up beyond 1 */
+  --sx: calc(100vw / var(--design-w));
+  --sy: calc(100vh / var(--design-h));
+  --page-scale: min(1, min(var(--sx), var(--sy)));
+
   background: var(--grey06, #F7F7F7);
-  min-height: 100vh; /* fill viewport height */
+  width: 100vw;
+  height: 100vh;
+  overflow: auto;                 /* allow scroll if we clamp scale later */
+  display: flex;
+  align-items: center;            /* center the scaled stage vertically */
+  justify-content: center;        /* center horizontally */
 }
 
 :root{
@@ -13,20 +26,26 @@
 }
 
 .ai-discussion-main {
+  /* Design-size stage (will be scaled by parent) */
+  width: calc(var(--design-w) * 1px);
+  height: calc(var(--design-h) * 1px);
+  box-sizing: border-box;
+  padding: 16px;                 /* keep design padding */
   display: flex;
   flex-direction: row;
-  height: 100vh;            /* fit browser height */
-  box-sizing: border-box;
-                   /* breathing space between panels */
-  padding: 16px;             /* optional safe padding */
-  justify-content: center;   /* horizontally center child panels */
-  align-items: center;       /* vertically center child panels */
+  gap: 24px;                     /* breathing space between panels */
+
+  /* scale from the page viewport */
+  transform: scale(calc(var(--page-scale) * 0.75));
+  transform-origin: center center;
+  zoom: 0.75;;
+  will-change: transform;
 }
 
 /* 왼쪽 개요 영역 */
 .chat-overview {
-  width: clamp(320px, 34vw, 680px); /* fluid width, caps at original */
-  height: 100vh;                    /* match viewport */
+  width: clamp(320px, 36vw, 680px); /* fluid width, caps at original */
+  height: 100%;                     /* match stage height */
   flex: 0 0 auto;
   overflow: hidden; /* delegate scrolling to inner sections */
   background: linear-gradient(343deg, rgba(246, 242, 222, 1) 0.63%, rgba(251, 238, 214, 1) 100%);
@@ -144,8 +163,8 @@ letter-spacing: 0.379px;
 /* 오른쪽 채팅 영역 */
 .chat-container {
   flex: 1 1 auto;            /* take remaining width */
-  min-width: 1200px;          /* ensure a comfortable minimum width */
-  height: 100vh;             /* match viewport */
+  min-width: 0;              /* allow shrinking to stage width */
+  height: 100%;              /* match stage height */
   box-shadow: 0 0 26px 0 rgba(0, 0, 0, 0.02) inset;
   display: flex;
   flex-direction: column;
@@ -157,8 +176,7 @@ letter-spacing: 0.379px;
 /* AI tip callout (orange card on the right) */
 .ai-chat {
   position: absolute;
-  right: 1rem;
-  top: 3rem; /* keep above input area */
+  right: 0rem;
   z-index: 10;
 
   display: flex;

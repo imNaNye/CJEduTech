@@ -22,6 +22,12 @@ export default function ChatContainer({ nickname, topic }) {
       }
     }, [nickname, topic]);
 
+    const handleTopicChange = (nextTopic) => {
+      if (!nextTopic) return;
+      setLocalTopic(nextTopic);
+      try { localStorage.setItem('topic', nextTopic); } catch {}
+    };
+
     return (
         <div className="chat-container">
             <div className="page-header-short">
@@ -32,8 +38,9 @@ export default function ChatContainer({ nickname, topic }) {
                 {localNickname && <span className="nickname">{localNickname}</span>}
             </div>
             </div>
-            <AIChat/>
+            
             <ChatHistory/>
+            
             <div className="chat-input-area">
                 <ChatInput/>
             </div>

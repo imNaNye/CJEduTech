@@ -17,7 +17,7 @@ function formatTime(iso) {
 }
 
 // phase: idle → thinking → message
-export default function AIChat() {
+export default function AIChat({ onTopicChange = () => {} }) {
   const [phase, setPhase] = useState("idle");
   const [currentMent, setCurrentMent] = useState(null); // { id, type, text, createdAt }
   const [dots, setDots] = useState(".");
@@ -71,6 +71,14 @@ export default function AIChat() {
         setCurrentMent(next);
         setPhase("message");
 
+        // 토론 주제 관련 멘트면 상위로 전달하여 주제 업데이트
+        if (next?.type === 'topic_comment'){
+          const newTopic = next?.topic || next?.text || '';
+          if (newTopic) {
+            try { onTopicChange(newTopic); } catch {}
+          }
+        }
+
         // 효과음 재생 (브라우저 정책상 play가 막히면 조용히 실패)
         const playSafe = (audio) => {
           try { audio && audio.currentTime && (audio.currentTime = 0); } catch {}
@@ -90,7 +98,7 @@ export default function AIChat() {
       clearTimeout(thinkTimerRef.current);
       clearInterval(dotsTimerRef.current);
     };
-  }, [myNick]);
+  }, [myNick, onTopicChange]);
 
   // 항상 상주: idle일 때도 배지와 말풍선 프레임은 보여줌
   return (

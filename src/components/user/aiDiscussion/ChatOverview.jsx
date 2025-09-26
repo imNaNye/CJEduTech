@@ -220,7 +220,7 @@ export default function ChatOverView(){
   const renderCakes = (count, variant) => {
     const imgs = [];
 
-    const render_count = count>20 ? 20 : count;
+    const render_count = count;
 
     if (count && count > 0) {
       const layers = Math.floor(render_count / 4); // full cake_4 layers to stack

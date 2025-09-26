@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { socket } from "@/api/chat";
 import Chat from "./Chat";
 import { useRoundStep } from '@/contexts/RoundStepContext';
-
+import AIChat from "./AIChat";
 function generateRandomNickname() {
   const adjectives = ["빠른", "멋진", "똑똑한", "용감한", "행복한"];
   const animals = ["호랑이", "토끼", "독수리", "사자", "여우"];
@@ -11,7 +11,7 @@ function generateRandomNickname() {
   return `${adjective}${animal}${Math.floor(Math.random() * 1000)}`;
 }
 
-export default function ChatHistory() {
+export default function ChatHistory({ onTopicChange = () => {} }) {
   const [myNick] = useState(() => {
     let storedNick = localStorage.getItem("nickname");
     if (!storedNick) {
@@ -67,6 +67,7 @@ export default function ChatHistory() {
   }, [messages, autoScroll]);
 
   useEffect(() => {
+    console.log("채팅방 입장 : ",roomId," 라운드 : ",round);
     socket.emit("room:join", { roomId,round});
 
     socket.on("room:recent", (payload) => {
@@ -113,6 +114,7 @@ export default function ChatHistory() {
 
   return (
     <div className="chat-history" ref={historyRef}>
+      <AIChat onTopicChange={onTopicChange}/>
       {messages.map((msg) => (
         <div
           key={msg.id}

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 
-export default function StartButton(onSelect = () => {}) {
+export default function StartButton({onSelect = () => {}}) {
   const navigate = useNavigate();
 
   const handleClick = async () => {

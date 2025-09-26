@@ -3,6 +3,9 @@ import { useEffect, useState } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import ActionButtons from './ActionButtons.jsx';
 import AvatarButtons from './AvatarButtons.jsx';
+import BackButton from "./BackButton";
+import StartButton from "./StartButton";
+
 import './selectAvatar.css';
 
 // API 유틸 (http.js 기반)

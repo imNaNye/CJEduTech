@@ -222,7 +222,7 @@ export default function FinalResultPage() {
         if (status === 404) {
           // 2) 없으면 생성 (POST)
           try{
-            const created = await http.post(`/api/review/${encodeURIComponent(roomId)}/final-result`, { nickname: nickname || '' ,force:"true"});
+            const created = await http.post(`/api/review/${encodeURIComponent(roomId)}/final-result?force=true`, { nickname: nickname || '' ,force:"true"});
             console.log('[FinalResultPage] POST final-result (created):', created);
             if (!aborted) setData(fillSectionsWithMockIfSparse(created, nickname));
           }catch(e2){

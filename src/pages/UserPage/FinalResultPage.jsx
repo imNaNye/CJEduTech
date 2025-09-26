@@ -6,12 +6,43 @@ import '../../components/user/finalResult/finalResult.css';
 import PageHeader from '../../components/common/PageHeader';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useUser } from '@/contexts/UserContext';
 import myAvatar from "@/assets/images/avatar/avatar2.png";
 import aiIcon from "@/assets/images/discussion/AI_icon.png";
+import avatar1 from "@/assets/images/avatar/avatar1.png";
+import avatar2 from "@/assets/images/avatar/avatar2.png";
+import avatar3 from "@/assets/images/avatar/avatar3.png";
+import avatar4 from "@/assets/images/avatar/avatar4.png";
+import avatar5 from "@/assets/images/avatar/avatar5.png";
+import avatar6 from "@/assets/images/avatar/avatar6.png";
+import avatar7 from "@/assets/images/avatar/avatar7.png";
+import avatar8 from "@/assets/images/avatar/avatar8.png";
+import avatar9 from "@/assets/images/avatar/avatar9.png";
+import avatar10 from "@/assets/images/avatar/avatar10.png";
+import avatar11 from "@/assets/images/avatar/avatar11.png";
+import avatar12 from "@/assets/images/avatar/avatar12.png";
 
 import { http } from '@/lib/http' ;
 import { quizApi } from '@/api/quiz' ;
 export default function FinalResultPage() {
+    const avatars = [
+      { id: 'avatar1', src: avatar1 },
+      { id: 'avatar2', src: avatar2 },
+      { id: 'avatar3', src: avatar3 },
+      { id: 'avatar4', src: avatar4 },
+      { id: 'avatar5', src: avatar5 },
+      { id: 'avatar6', src: avatar6 },
+      { id: 'avatar7', src: avatar7 },
+      { id: 'avatar8', src: avatar8 },
+      { id: 'avatar9', src: avatar9 },
+      { id: 'avatar10', src: avatar10 },
+      { id: 'avatar11', src: avatar11 },
+      { id: 'avatar12', src: avatar12 },
+    ];
+      function findAvatarById(id) {
+    const found = avatars.find(a => a.id === id);
+    return found ? found.src : avatar1;
+  }
   const location = useLocation();
   const search = new URLSearchParams(location.search);
   const roomId = useMemo(() => search.get('roomId') || location.state?.roomId || localStorage.getItem('roomId') || 'general', [location.search, location.state]);
@@ -72,13 +103,99 @@ export default function FinalResultPage() {
         { nickname:'이몽룡', text:'팀 합의를 이끌어낸 포인트를 정리했습니다.', reactionsCount:24, createdAt:Date.now(), round_number:2 },
         { nickname:'성춘향', text:'반박에 대한 명확한 근거를 제시했습니다.', reactionsCount:20, createdAt:Date.now(), round_number:3 },
       ],
-      ranking: []
+      ranking: Array.from({length: 10}).map((_,i)=>({ nickname:`사용자${i+1}`, score: 100 - i*3, rank: i+1 }))
     };
   }
 
   function buildMockQuiz(){
     // 3라운드 기준 임시 퀴즈 데이터
     return [1,2,3].map((r)=>({ round_number:r, totalQuestions:10, correctCount: 6 + ((r%3)), correctRate: 60 + (r*8) }));
+  }
+
+  // Helper: fill API data's sections with mock if sparse or missing
+  function fillSectionsWithMockIfSparse(apiData, nick){
+    const mock = buildMockSections();
+    const api = apiData && apiData.sections ? apiData.sections : {};
+
+    const isEmptyObj = (o) => !o || (typeof o === 'object' && Object.keys(o).length === 0);
+    const isEmptyArr = (a) => !Array.isArray(a) || a.length === 0;
+
+    // Decide each field with mock fallback + record what was filled
+    const filled = {
+      overall: false,
+      aiSummary: false,
+      personaIntegrated: false,
+      personaByRound: false,
+      participationByRound: false,
+      top3Statements: false,
+      ranking: false,
+    };
+
+    // overall
+    const overall = api.overall ? api.overall : (filled.overall = true, mock.overall);
+    // aiSummary
+    const aiSummary = api.aiSummary ? api.aiSummary : (filled.aiSummary = true, mock.aiSummary);
+
+    // personaIntegrated (treat empty, or all-zero, as needing mock)
+    const pi = api.personaIntegrated;
+    let personaIntegrated;
+    if (!pi) {
+      personaIntegrated = mock.personaIntegrated; filled.personaIntegrated = true;
+    } else {
+      const counts = pi.counts || {};
+      const percents = pi.percentages || {};
+      const countsEmpty = isEmptyObj(counts);
+      const percentEmpty = isEmptyObj(percents);
+      const countsSum = Object.values(counts).reduce((a,b)=> a + (Number(b)||0), 0);
+      const percentsSum = Object.values(percents).reduce((a,b)=> a + (Number(b)||0), 0);
+      const allZero = (!countsEmpty && countsSum === 0) && (!percentEmpty && percentsSum === 0);
+      if ((countsEmpty && percentEmpty) || allZero){
+        personaIntegrated = mock.personaIntegrated; filled.personaIntegrated = true;
+      } else {
+        personaIntegrated = pi;
+      }
+    }
+
+    // personaByRound
+    const personaByRound = !isEmptyArr(api.personaByRound) ? api.personaByRound : (filled.personaByRound = true, mock.personaByRound);
+    // participationByRound
+    const participationByRound = !isEmptyArr(api.participationByRound) ? api.participationByRound : (filled.participationByRound = true, mock.participationByRound);
+    // top3Statements
+    const top3Statements = !isEmptyArr(api.top3Statements) ? api.top3Statements : (filled.top3Statements = true, mock.top3Statements);
+    // ranking (treat empty array as needing mock)
+    let ranking;
+    if (Array.isArray(api.ranking) && api.ranking.length > 0){
+      ranking = api.ranking;
+    } else {
+      filled.ranking = true;
+      ranking = mock.ranking;
+    }
+
+    const merged = { overall, aiSummary, personaIntegrated, personaByRound, participationByRound, top3Statements, ranking };
+
+    // Backfill overall (통합 등수 및 점수) from ranking if missing
+    try {
+      const ov = { ...(merged.overall || {}) };
+      const rk = Array.isArray(merged.ranking) ? merged.ranking : [];
+      let patched = false;
+      if (rk.length){
+        const me = nick ? rk.find((r)=> r && r.nickname === nick) : null;
+        const pick = me || rk[0];
+        if (ov.rank == null){ ov.rank = pick?.rank ?? (rk.indexOf(pick) + 1); patched = true; }
+        if (ov.score == null && pick?.score != null){ ov.score = pick.score; patched = true; }
+      }
+      if (patched){ merged.overall = ov; }
+    } catch {}
+
+    // Log which fields were filled with mock (if any)
+    try {
+      const filledKeys = Object.entries(filled).filter(([,v]) => v).map(([k]) => k);
+      if (filledKeys.length){
+        console.info('[FinalResultPage] sparse API data → filled with mock for:', filledKeys.join(', '));
+      }
+    } catch {}
+
+    return { sections: merged };
   }
 
   useEffect(() => {
@@ -98,7 +215,7 @@ export default function FinalResultPage() {
         const json = res;
         console.log('[FinalResultPage] GET final-result:', json);
         if (aborted) return;
-        setData(json);
+        setData(fillSectionsWithMockIfSparse(json, nickname));
       }catch(e){
         if (aborted) return;
         const status = e?.status || e?.response?.status;
@@ -107,19 +224,19 @@ export default function FinalResultPage() {
           try{
             const created = await http.post(`/api/review/${encodeURIComponent(roomId)}/final-result`, { nickname: nickname || '' });
             console.log('[FinalResultPage] POST final-result (created):', created);
-            if (!aborted) setData(created);
+            if (!aborted) setData(fillSectionsWithMockIfSparse(created, nickname));
           }catch(e2){
             console.error('[FinalResultPage] POST final-result failed', e2);
             if (!aborted){
               setData({ sections: buildMockSections() });
-              setError('최종결과 생성 실패: 임시 데이터로 표시합니다.');
+              //setError('최종결과 생성 실패: 임시 데이터로 표시합니다.');
             }
           }
         } else {
           console.error('[FinalResultPage] GET final-result failed', e);
           // 기타 실패: 임시 데이터 폴백
           setData({ sections: buildMockSections() });
-          setError('서버 조회 실패: 임시 데이터로 표시합니다.');
+          //setError('서버 조회 실패: 임시 데이터로 표시합니다.');
         }
       } finally {
         // 3) 퀴즈 결과는 GET/POST 결과와 무관하게 시도
@@ -159,7 +276,7 @@ export default function FinalResultPage() {
   const participation = sections?.participationByRound || [];
   const top3 = sections?.top3Statements || [];
   const aiSummary = sections?.aiSummary || '';
-
+  const { avatarUrl } = useUser();
   // 유틸
   const pct = (v) => typeof v === 'number' ? `${v}%` : (Number(v)||0)+"%";
   const p = personaIntegrated.percentages;
@@ -501,7 +618,7 @@ export default function FinalResultPage() {
       const barsCtx = barsRef.current?.getContext('2d');
       if (barsCtx){
         barsChartRef.current?.destroy?.();
-        const labels = (participation || []).map(r => `R${r.round_number ?? ''}`);
+        const labels = (participation || []).map((r, idx) => `R${(r && r.round_number != null) ? r.round_number : (idx + 1)}`);
         const mine = (participation || []).map(r => r.myMessages || 0);
         const qRates = (quiz?.rounds || []).map(r => r.correctRate || 0);
         barsChartRef.current = new Chart(barsCtx, {
@@ -578,7 +695,7 @@ export default function FinalResultPage() {
             <div className="frp-avatarWrap">
               <div className={`frp-avatar ${avatarTierClass}`} aria-label={overall.rank ? `${overall.rank}위 아바타` : '아바타'}>
 
-              <img className="avatar-small" src={myAvatar} alt="내 프로필" />
+              <img className="avatar-small" src={findAvatarById(avatarUrl)} alt="내 프로필" />
               </div>
               {overall.rank ? (
                 <div className={`frp-rank-badge ${rankBadgeClass}`} title={`순위 ${overall.rank}위`}>
@@ -589,7 +706,7 @@ export default function FinalResultPage() {
             <div className="frp-avatar__footer">
               <div className="frp-avatar__score">
                 <strong>{overall.score != null ? `${Math.round(overall.score*10)/10} 점` : '—'}</strong>
-                {topPercent != null && <span className="frp-avatar__percent">상위 {topPercent}%</span>}
+                {/*topPercent != null && <span className="frp-avatar__percent">상위 {topPercent}%</span>*/}
               </div>
             </div>
           </div>
@@ -655,10 +772,7 @@ export default function FinalResultPage() {
             <canvas ref={lineRef} style={{width:'100%', height:'100%'}} />
           </div>
           <footer className="frp-card__footer frp-legend--inline">
-            {personaByRound.length ? personaByRound.map((r, i) => (
-              <span key={r.round_number ?? i} className={`dot ${i===0?'dot--r1': i===1?'dot--r2':'dot--r3'}`}></span>
-            )) : <span className="frp-muted">데이터 없음</span>}
-            <span style={{marginLeft:6}}>라운드별 시리즈</span>
+            {personaByRound.length ? "": <span className="frp-muted">데이터 없음</span>}
           </footer>
         </article>
       </section>
@@ -672,8 +786,6 @@ export default function FinalResultPage() {
               <canvas ref={barsRef} style={{width:'100%', height:'100%'}} />
             </div>
             <footer className="frp-card__footer frp-legend--inline">
-              <span className="dot dot--quiz" /> 나의 메시지 수
-              <span className="dot dot--participation" /> 퀴즈 정답률(%)
             </footer>
           </article>
         </div>

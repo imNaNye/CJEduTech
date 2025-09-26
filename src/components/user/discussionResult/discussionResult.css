@@ -6,46 +6,7 @@ background: var(--grey06, #F7F7F7);
   background-image: url('../../../assets/images/login/loginBackground.png');
 }
 
-.discussion-result-main {
 
-  transform: scale(0.75);
-  transform-origin:  center center;
-
-  padding-top: 20px;
-  padding-left: 100px;
-}
-
-/* 메인 레이아웃: 왼쪽 FoodView, 오른쪽 Summary */
-.result-body {
-  display: flex;
-  justify-content: left;
-  align-items: flex-start;
-  gap: 48px;
-  width: 100%;
-}
-
-/* 왼쪽: FoodView */
-.food-view {
-  text-align: center;
-  max-width: 300px;
-}
-
-.food-view-title {
-color: var(--grey01, #555);
-font-family: "CJ ONLYONE NEW title";
-font-size: 35px;
-font-style: normal;
-font-weight: 700;
-line-height: 150%; /* 52.5px */
-}
-
-.food-image {
-  width: 521px;
-height: 521px;
-flex-shrink: 0;
-aspect-ratio: 1/1;
-
-}
 
 /* 오른쪽: Summary 박스 */
 .result-summary {
@@ -141,6 +102,12 @@ letter-spacing: 0.769px;
 .discussion-result-main {
   /* layout is defined inline in JSX; here we normalize spacing */
   gap: 24px;
+  zoom: 0.7;
+  display: flex;
+  flex-direction:row;
+  align-items:flex-start;
+  justify-content: center;
+  padding-top: 10vh;
 }
 
 /* --- Hero (left, non-scroll) --- */
@@ -209,7 +176,6 @@ letter-spacing: 0.354px;
 /* --- Scroll area (right) : my report + ranking --- */
 .dr-scroll-area {
   margin-left: 100px;
-  flex: 1;
   display: flex;
   align-items: stretch;
   gap: 24px;

@@ -1,6 +1,16 @@
 // server/repositories/users.repo.js
 import { pool } from '../db.js';
 
+/** 닉네임으로 유저 아바타 조회 */
+export async function findAvatarByNickname(nickname) {
+  const [rows] = await pool.query(
+    'SELECT avatar FROM users WHERE nickname = ? LIMIT 1',
+    [nickname]
+  );
+  return rows[0]?.avatar ?? null;
+}
+
+
 export async function findUserByNickname(nickname) {
   const [rows] = await pool.query(
     'SELECT user_id, nickname, password_hash FROM users WHERE nickname = ? LIMIT 1',

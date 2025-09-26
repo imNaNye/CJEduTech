@@ -4,7 +4,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { authRequired } from '../middlewares/auth.js';
-import { updateUserAvatar, findUserById } from '../repositories/users.repo.js';
+import { updateUserAvatar, findUserById, findAvatarByNickname } from '../repositories/users.repo.js';
 
 const router = Router();
 
@@ -23,6 +23,17 @@ router.get('/me', async (req, res, next) => {
         avatar: me.avatar ?? null,
       },
     });
+  } catch (e) {
+    next(e);
+  }
+});
+
+// GET /api/user/avatar/:nickname -> 특정 닉네임의 아바타 조회
+router.get('/avatar/:nickname', async (req, res, next) => {
+  try {
+    const avatar = await findAvatarByNickname(req.params.nickname);
+    if (!avatar) return res.status(404).json({ message: '아바타를 찾을 수 없습니다.' });
+    res.json({ nickname: req.params.nickname, avatar });
   } catch (e) {
     next(e);
   }

@@ -845,10 +845,37 @@ export function initChatSocket(io) {
 
     socket.on("message:send", (payload, cb) => {
       try {
-        const { roomId: baseId, round, text, nickname } = payload || {};
+        const { roomId: baseId, round, text, nickname,avatar } = payload || {};
         const roomId = baseId ? composeRoomId(baseId, round) : joinedRoomId;
         const trimmed = (text || "").trim();
         if (!roomId || !trimmed) { cb?.({ ok:false }); return; }
+
+        // === Command shortcuts for testing ===
+        // 1) /종료 : expire room immediately
+        // 2) /멘트 : send next topic-related AI ment from prebuilt queue
+        // 3) /참여 : request encourage AI ment(s) for silent users
+        if (trimmed.startsWith('/')){
+          const cmd = trimmed.replace(/^\s*\/(.*)$/,'$1').trim();
+          if (cmd === '종료' || cmd.toLowerCase() === 'end'){
+            expireRoom(io, roomId);
+            cb?.({ ok: true, command: 'end' });
+            return;
+          }
+          if (cmd === '멘트' || cmd.toLowerCase() === 'next' || cmd.toLowerCase() === 'ment'){
+            generateTopicMentAndBroadcast(io, roomId).then(sent => {
+              cb?.({ ok: true, command: 'topic', sent: Boolean(sent) });
+            }).catch(() => cb?.({ ok: false, command: 'topic' }));
+            return;
+          }
+          if (cmd === '참여' || cmd.toLowerCase() === 'enc' || cmd.toLowerCase() === 'encourage'){
+            generateEncouragesAndBroadcast(io, roomId).then(count => {
+              cb?.({ ok: true, command: 'encourage', count: Number(count)||0 });
+            }).catch(() => cb?.({ ok: false, command: 'encourage' }));
+            return;
+          }
+          // unknown slash command -> ignore as command and continue to post as normal message
+        }
+
         // guard if room is expired
         const stGuard = roomStates.get(roomId);
         if (stGuard && stGuard.expireAt && Date.now() >= stGuard.expireAt) {
@@ -858,6 +885,7 @@ export function initChatSocket(io) {
         const msg = {
           id: randomUUID(),
           roomId,
+          avatar,
           nickname: nickname || "익명",
           text: trimmed,
           createdAt: new Date().toISOString()

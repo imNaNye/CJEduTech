@@ -3,7 +3,8 @@ import SavePDFButton from "./SavePDFButton";
 import NextSessionButton from "./NextSessionButton";
 import "./discussionResult.css";
 import { http } from '@/lib/http' ;
-
+import { useUser } from '@/contexts/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 // Dynamically load Chart.js from CDN (no static import)
 async function ensureChartJS(){
@@ -48,6 +49,19 @@ import badgeRespect from "@/assets/images/discussion/badge_4.png";
 import user1Avatar from "@/assets/images/avatar/avatar1.png";
 import aiIcon from "@/assets/images/discussion/AI_icon.png";
 
+import avatar1 from "@/assets/images/avatar/avatar1.png";
+import avatar2 from "@/assets/images/avatar/avatar2.png";
+import avatar3 from "@/assets/images/avatar/avatar3.png";
+import avatar4 from "@/assets/images/avatar/avatar4.png";
+import avatar5 from "@/assets/images/avatar/avatar5.png";
+import avatar6 from "@/assets/images/avatar/avatar6.png";
+import avatar7 from "@/assets/images/avatar/avatar7.png";
+import avatar8 from "@/assets/images/avatar/avatar8.png";
+import avatar9 from "@/assets/images/avatar/avatar9.png";
+import avatar10 from "@/assets/images/avatar/avatar10.png";
+import avatar11 from "@/assets/images/avatar/avatar11.png";
+import avatar12 from "@/assets/images/avatar/avatar12.png";
+
 function buildMockRoomResult(nickname = '나'){
   const createdAt = new Date().toISOString();
   const perUser = {
@@ -86,6 +100,26 @@ function buildMockMyResult(nickname = '나', room){
 }
 
 export default function DiscussionResultMain() {
+    const avatars = [
+      { id: 'avatar1', src: avatar1 },
+      { id: 'avatar2', src: avatar2 },
+      { id: 'avatar3', src: avatar3 },
+      { id: 'avatar4', src: avatar4 },
+      { id: 'avatar5', src: avatar5 },
+      { id: 'avatar6', src: avatar6 },
+      { id: 'avatar7', src: avatar7 },
+      { id: 'avatar8', src: avatar8 },
+      { id: 'avatar9', src: avatar9 },
+      { id: 'avatar10', src: avatar10 },
+      { id: 'avatar11', src: avatar11 },
+      { id: 'avatar12', src: avatar12 },
+    ];
+  function findAvatarById(id) {
+    const found = avatars.find(a => a.id === id);
+    return found ? found.src : avatar1;
+  }
+  const { nickname, avatarUrl } = useUser();
+  const navigate = useNavigate();
   const [roomId, setRoomId] = useState("");
   const [myNickname, setMyNickname] = useState("");
   const [roomResult, setRoomResult] = useState(null); // { perUser, ranking, createdAt }
@@ -457,7 +491,7 @@ export default function DiscussionResultMain() {
   }
 
   return (
-    <div className="discussion-result-main" style={{ display:"flex", flexDirection:"row", alignItems:"flex-start", gap:"24px" }}>
+    <div className="discussion-result-main">
       {/* 좌측 히어로 섹션 (고정, 비스크롤) */}
       <section className="dr-hero">
         <div className="dr-hero-body">
@@ -485,6 +519,13 @@ export default function DiscussionResultMain() {
             <div className="dr-hero-actions">
               <SavePDFButton/>
               <NextSessionButton/>
+              <button
+                type="button"
+                className="next-session-button"
+                onClick={() => navigate('/user/loadResult')}
+              >
+                최종 결과
+              </button>
             </div>
           </div>
         </div>
@@ -505,7 +546,7 @@ export default function DiscussionResultMain() {
                 <span>나의 등수</span>
               </div>
 <div className="my-avatar-wrap">
-  <img className="avatar avatar--lg" src={myAvatar} alt="내 프로필" />
+  <img className="avatar avatar--lg" src={findAvatarById(avatarUrl)} alt="내 프로필" />
   <div className="badge badge--overlay-lg">{rankLabel(myResult?.rank)}</div>
 </div>
             </div>

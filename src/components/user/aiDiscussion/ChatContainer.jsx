@@ -32,8 +32,7 @@ export default function ChatContainer({ nickname, topic }) {
     return (
         <div className="chat-container">
           <PageHeader isShort={true} title={`Round ${round} : ${localTopic || '토론 주제'}`}/>
-            <ChatHistory/>
-            
+            <ChatHistory onTopicChange={handleTopicChange}/>
             <div className="chat-input-area">
                 <ChatInput/>
             </div>

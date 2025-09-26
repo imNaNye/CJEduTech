@@ -10,8 +10,10 @@ export default function ChatInput() {
   const send = () => {
     if (!text.trim()) return;
     const nickname = localStorage.getItem("nickname") || "익명";
+    const avatar = localStorage.getItem("avatarUrl");
     socket.emit("message:send", {
       roomId: "general",
+      avatar,
       text,
       nickname,
       round,

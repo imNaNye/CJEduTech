@@ -3,7 +3,7 @@ import ClickableTarget from './ClickableTarget'
 import './slide.css'
 
 export default function SkillSlide() {
-  const { page } = useSlides()
+  const { page, pageIndex, config } = useSlides()
   const title = page?.data?.title || ''
   const text = page?.data?.text || ''
   const targetIds = Object.keys(page?.targets || {})
@@ -11,6 +11,9 @@ export default function SkillSlide() {
   return (
     <div className="slide-page">
       <div className="slide-card">
+        <div className="slide-indicator">
+          슬라이드 {pageIndex + 1} / {config.length}
+        </div>
         {text && (
           <p className="slide-subtitle" dangerouslySetInnerHTML={{ __html: text }} />
         )}

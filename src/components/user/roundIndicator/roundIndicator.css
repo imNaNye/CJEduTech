@@ -29,10 +29,20 @@
   box-shadow: 0 12px 32px rgba(0,0,0,.06);
 }
 
+.explanation {
+  color: var(--grey02, #818181);
+  text-align: center;
+  font-family: "Pretendard Variable";
+  font-size: 1.3rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%; /* 30px */
+  margin-top: 25vh;
+}
 /* 메인 컨텐츠 래퍼 */
 .round-indicator {
   width: 100vw;
-  height: 100vh;
+  height: 90vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -40,11 +50,13 @@
   transform: scale(var(--ui-scale));
   transform-origin: center center;
   will-change: transform;
+  margin-top: -5vh;
 }
 
 /* 큰 타이틀: ROUND 1 */
 .round-indicator h3 {
   margin: 0 0 0px;
+  padding-top: 0px;
   font-weight: 800;
   font-size: 6vw;
   letter-spacing: 2px;

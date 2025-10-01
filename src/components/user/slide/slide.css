@@ -29,6 +29,12 @@
   margin-bottom: 2vh;
 }
 
+.slide-indicator {
+  color: #FF6E37;
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
 .slide-title {
   text-align: center;
   color: #FF6E37;

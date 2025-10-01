@@ -22,7 +22,7 @@ export default function RoundIndicatorPage(){
             } else if(step === 3){
                 navigate('/user/aiDiscussion');
             }
-        }, 6000);
+        }, 60000);
 
         return () => clearTimeout(timeout);
     }, [step, navigate]);
@@ -47,7 +47,8 @@ export default function RoundIndicatorPage(){
                         AI 토론
                     </div>
                 </div>
-                </div>
+                <div className="explanation">몇 초 뒤, 다음 화면으로 자동 전환됩니다.</div>
             </div>
+        </div>
     );
 }

@@ -29,7 +29,7 @@ export default function ChatHistory({ onTopicChange = () => {} }) {
   const historyRef = useRef(null);
   const prevScrollHeightRef = useRef(0);
 
-  const { round, setRound, step, setStep } = useRoundStep();
+  const { round, setRound, step, setStep,videoId, setVideoId } = useRoundStep();
 
   const isNearBottom = () => {
     if (!historyRef.current) return false;
@@ -68,7 +68,7 @@ export default function ChatHistory({ onTopicChange = () => {} }) {
 
   useEffect(() => {
     console.log("채팅방 입장 : ",roomId," 라운드 : ",round);
-    socket.emit("room:join", { roomId,round});
+    socket.emit("room:join", { roomId,round,videoId});
 
     socket.on("room:recent", (payload) => {
       setMessages(payload.messages || []);

@@ -6,9 +6,10 @@ const RoundStepContext = createContext();
 export function RoundStepProvider({ children }) {
     const [round, setRound] = useState(1);
     const [step, setStep] = useState(1);
+    const [videoId, setVideoId] = useState("video_tous_1");
 
     return (
-        <RoundStepContext.Provider value={{ round, setRound, step, setStep }}>
+        <RoundStepContext.Provider value={{ round, setRound, step, setStep,videoId,setVideoId }}>
             {children}
         </RoundStepContext.Provider>
     );

@@ -551,49 +551,77 @@ function simulateEncourageMent(context, targetNick) {
 
 // --- Split mentor generators ---
 async function generateTopicMentAndBroadcast(io, roomId) {
-  // Load prebuilt questions for this room's baseId + round, send in order
-  const st = getRoomState(roomId);
-  const { baseId, round } = decomposeRoomId(roomId);
+  // AI 서버에 /question 요청하여 생성
+const state = getRoomState(roomId);
+const context = buildMentContext(roomId);
+const discussion_topic = context.topic || '';
+const video_id = state.videoId || '';
+const target_user = (context.silentUsers && context.silentUsers[0]?.nickname) || 'All'; // 침묵자 우선
+const chat_history = (context.recent || []).map(m => ({ nickname: m.nickname, text: m.text }));
 
-  // Initialize queue if not loaded or room/round changed
-  if (!st.topicQueue || st.topicQueueBase !== baseId || st.topicQueueRound !== round) {
-    const qs = await loadRoundQuestions(baseId, round);
-    st.topicQueue = qs;            // Array<{text,type?,targets?}>
-    st.topicQueueIdx = 0;
-    st.topicQueueBase = baseId;
-    st.topicQueueRound = round;
+let q;
+if (AI_ENDPOINT) {
+  try {
+    const payload = {
+        nickname: target_user,
+        discussion_topic,
+        video_id,
+        chat_history
+      };
+      console.log("멘트 :",payload);
+    const res = await fetch(AI_ENDPOINT + "/question", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(AI_API_KEY ? { "Authorization": `Bearer ${AI_API_KEY}` } : {})
+      },
+      body: JSON.stringify(
+        payload
+      )
+    });
+    if (!res.ok) throw new Error(`AI question http ${res.status}`);
+    const data = await res.json();
+    q = {
+      question: data?.question || '',
+      target_user: data?.target_user ?? target_user,
+      video_id: data?.video_id ?? video_id,
+      discussion_topic: data?.discussion_topic ?? discussion_topic
+    };
+  } catch (e) {
+    // 폴백(서버 불가 시 기본 멘트)
+    q = {
+      question: `${discussion_topic ? `“${discussion_topic}” 관련해 ` : ''}다음 논의를 진전시키기 위한 질문을 제안해 주세요.`,
+      target_user,
+      video_id,
+      discussion_topic
+    };
   }
-
-  const idx = st.topicQueueIdx || 0;
-  const item = Array.isArray(st.topicQueue) ? st.topicQueue[idx] : null;
-  if (!item) {
-    // No more questions to send for this round
-    return false;
-  }
-
-  // Advance pointer for next tick
-  st.topicQueueIdx = idx + 1;
-
-  const text = (typeof item === 'string') ? item : (item?.text || '');
-  const type = (typeof item === 'object' && item?.type) ? item.type : 'topic_comment';
-  const targets = (typeof item === 'object' && Array.isArray(item?.targets)) ? item.targets : [];
-
-  const topicMent = {
-    id: randomUUID(),
-    type,
-    text: text || '논의를 이어가기 위한 질문을 제안합니다.',
-    targets,
-    createdAt: new Date().toISOString()
+} else {
+  // AI 서버 미구성 시 폴백
+  q = {
+    question: `${discussion_topic ? `“${discussion_topic}” 관련해 ` : ''}어떤 선택지가 가능한가요? 근거를 함께 들어주세요.`,
+    target_user,
+    video_id,
+    discussion_topic
   };
+}
 
-  io.of('/chat').to(`room:${roomId}`).emit('ai:ment', { roomId, ...topicMent });
-  return true;
+if (!q || !q.question) return false;
+const payload = {
+  id: randomUUID(),
+  type: 'topic_comment',
+  text: q.question,
+  targets: q.target_user ? [q.target_user] : [],
+  createdAt: new Date().toISOString()
+};
+io.of('/chat').to(`room:${roomId}`).emit('ai:ment', { roomId, ...payload });
+return true;
 }
 
 async function generateEncouragesAndBroadcast(io, roomId) {
   const state = getRoomState(roomId);
   const now = Date.now();
-  const ENCOURAGE_COOLDOWN_MS = 300000; // per-user cooldown
+  const ENCOURAGE_COOLDOWN_MS = 1000 * 60; // per-user cooldown
   const byUser = state.encourageCooldownByUser || new Map();
 
   if (!state.encourageCooldownByUser) state.encourageCooldownByUser = byUser;
@@ -611,35 +639,35 @@ async function generateEncouragesAndBroadcast(io, roomId) {
     }
     let enc;
     if (AI_ENDPOINT) {
-
-      console.log("침묵자")
-      try {
-        const res = await fetch(AI_ENDPOINT + "/question", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(AI_API_KEY ? { "Authorization": `Bearer ${AI_API_KEY}` } : {})
-          },
-          body: JSON.stringify({
+      const payload = {
             intent: "ai_mentor_encourage",
             roomId: context.roomId,
             topic: context.topic,
             target: su.nickname,
             silenceSec: su.silenceSec,
-            recentMessages: context.recent.map(m => ({ nickname: m.nickname, text: m.text, aiLabel: (aiByMsg.get(m.id) || {}).label })),
+            chat_history: context.recent.map(m => ({ nickname: m.nickname, text: m.text, aiLabel: (aiByMsg.get(m.id) || {}).label })),
             maxTokens: 80,
             style: "encouraging",
             nickname: su.nickname,
             user_id: "test_id",
             idle_time: su.silenceSec,
-          })
+          };
+          console.log("참여 :",payload);
+      try {
+        const res = await fetch(AI_ENDPOINT + "/encouragement", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(AI_API_KEY ? { "Authorization": `Bearer ${AI_API_KEY}` } : {})
+          },
+          body: JSON.stringify(payload)
         });
         if (!res.ok) throw new Error(`AI mentor(encourage) http ${res.status}`);
         const data = await res.json();
         enc = {
           id: randomUUID(),
           type: data?.type || "encourage",
-          text: data?.question || `@${su.nickname} 님, 의견을 들려주실 수 있을까요?`,
+          text: data?.message || `@${su.nickname} 님, 의견을 들려주실 수 있을까요?`,
           targets: Array.isArray(data?.targets) && data.targets.length ? data.targets : [su.nickname],
           createdAt: new Date().toISOString()
         };
@@ -797,18 +825,19 @@ export function initChatSocket(io) {
   io.of("/chat").on("connection", (socket) => {
     let joinedRoomId = null;
 
-    socket.on("room:join", ({ roomId, round }) => {
-      if (!roomId) return;
-      const composed = composeRoomId(roomId, round);
-      let prevRoom = joinedRoomId;
-      if (prevRoom) socket.leave(`room:${prevRoom}`);
-      joinedRoomId = composed;
-      socket.join(`room:${composed}`);
-      if (prevRoom) setTimeout(() => cleanupRoomIfEmpty(io, prevRoom), 0);
+    socket.on("room:join", ({ roomId, round, videoId }) => {
+    if (!roomId) return;
+      
+       const composed = composeRoomId(roomId, round);
+       let prevRoom = joinedRoomId;
+       if (prevRoom) socket.leave(`room:${prevRoom}`);
+       joinedRoomId = composed;
+       socket.join(`room:${composed}`);
+       if (prevRoom) setTimeout(() => cleanupRoomIfEmpty(io, prevRoom), 0);
 
-      // ensure room state exists
-      getRoomState(composed);
-      console.log(roomStates,composed);
+      // ensure room state exists & save current video id
+      const stForJoin = getRoomState(composed);
+      if (videoId) stForJoin.videoId = videoId; // 방 생성 시 전달된 영상 ID 저장
 
       // start per-room test bot
       ensureRoomBot(io, composed);
@@ -973,8 +1002,8 @@ function startMentorScheduler(io) {
         continue;
       }
       // 1) 3분 주기 토론 멘트: 방 생성 시 즉시 한 번, 이후 5분마다
-      if (!st.topicNextAt) st.topicNextAt = now; // 안전장치
-      if (!st.topicIntervalMs) st.topicIntervalMs = 300000; // 5분
+      if (!st.topicNextAt) st.topicNextAt = now+1000 * 10; // 안전장치
+      if (!st.topicIntervalMs) st.topicIntervalMs = 1000*60*5; // 5분
       if (now >= st.topicNextAt) {
         generateTopicMentAndBroadcast(io, roomId);
         st.topicNextAt = now + st.topicIntervalMs;

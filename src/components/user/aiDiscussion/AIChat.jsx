@@ -117,7 +117,7 @@ export default function AIChat({ onTopicChange = () => {} }) {
 
       {/* 아직 받은 메시지가 없을 때만 idle 문구 */}
       {!currentMent && phase === 'idle' && (
-        <div className="ai-chat-text ai-chat-text--idle">AI가 함께 보고 있어요</div>
+        <div className="ai-chat-text ai-chat-text--idle">환영합니다! 원활한 토론 진행을 위해 고라AI가 함께 참여할게요!</div>
       )}
 
       {/* 초기/특수한 경우: 메시지는 없지만 thinking 상태일 때 */}

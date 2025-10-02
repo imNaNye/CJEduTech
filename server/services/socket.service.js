@@ -556,7 +556,11 @@ const state = getRoomState(roomId);
 const context = buildMentContext(roomId);
 const discussion_topic = context.topic || '';
 const video_id = state.videoId || '';
-const target_user = (context.silentUsers && context.silentUsers[0]?.nickname) || 'All'; // 침묵자 우선
+// 가장 최근 대화 전송자를 타겟으로 지정
+const lastSender = (Array.isArray(context.recent) && context.recent.length)
+  ? context.recent[context.recent.length - 1].nickname
+  : '';
+const target_user = lastSender || '';
 const chat_history = (context.recent || []).map(m => ({ nickname: m.nickname, text: m.text }));
 
 let q;
@@ -566,6 +570,7 @@ if (AI_ENDPOINT) {
         nickname: target_user,
         discussion_topic,
         video_id,
+        questionText:"",
         chat_history
       };
       console.log("멘트 :",payload);
@@ -879,6 +884,80 @@ export function initChatSocket(io) {
         const trimmed = (text || "").trim();
         if (!roomId || !trimmed) { cb?.({ ok:false }); return; }
 
+        // === Direct AI Q&A (DM) ===
+        // 사용자가 메시지에 '@아이고라'를 포함하면, 해당 사용자에게만 답변을 보내고
+        // 대화 내역(recent/push/broadcast)에는 기록하지 않는다.
+        if (/@아이고라/.test(trimmed)) {
+          const questionText = trimmed.replace(/@아이고라/g, '').trim();
+          // 빈 질문은 무시
+          if (!questionText) { cb?.({ ok:false, reason: 'empty_ai_question' }); return; }
+                    // 사용자 DM 질문을 본인에게만 메시지처럼 표시(기록/브로드캐스트/아카이브 X)
+          const dmUserMsg = {
+            id: randomUUID(),
+            roomId,
+            nickname: payload?.nickname || '나',
+            text: trimmed,
+            createdAt: new Date().toISOString(),
+            private: true,
+            type: 'user_dm'
+          };
+          // 개별 소켓에만 표시
+          socket.emit('message:new', { ...dmUserMsg, reactedUsers: [], reactionsCount: 0 });
+          // 컨텍스트 구성
+          const stForRoom = getRoomState(roomId);
+          const context = buildMentContext(roomId);
+          const discussion_topic = context.topic || '';
+          const video_id = stForRoom.videoId || '';
+          const chat_history = (context.recent || []).map(m => ({ nickname: m.nickname, text: m.text }));
+
+          (async () => {
+            let answer = '';
+            if (AI_ENDPOINT) {
+              try {
+                const res = await fetch(AI_ENDPOINT + '/qa', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    ...(AI_API_KEY ? { 'Authorization': `Bearer ${AI_API_KEY}` } : {})
+                  },
+                  body: JSON.stringify({
+                    nickname: payload?.nickname || '',
+                    questionText: questionText,
+                    discussion_topic,
+                    video_id,
+                    chat_history
+                  })
+                });
+                if (!res.ok) throw new Error(`AI qa http ${res.status}`);
+                const data = await res.json();
+                // 기대 포맷이 없다면 최대한 유연하게 추출
+                answer = data?.question || data?.message || data?.text || '';
+              } catch (e) {
+                // 폴백 답변
+                answer = `질문 감사합니다. ${discussion_topic ? `주제 "${discussion_topic}" 기준으로 ` : ''}간단히 정리해 보자면: ${questionText}`;
+              }
+            } else {
+              // AI 서버 미구성 폴백
+              answer = `(${discussion_topic || '일반'})에 대한 간단 응답: ${questionText}`;
+            }
+
+            // 개인에게만 전송(방출 X, 기록 X)
+            const dm = {
+              id: randomUUID(),
+              type: 'ai_dm',
+              text: answer,
+              targets: [payload?.nickname || ''],
+              createdAt: new Date().toISOString(),
+              private: true
+            };
+            // 해당 소켓에만 전송
+            socket.emit('ai:ment', { roomId, ...dm });
+            cb?.({ ok: true, private: true });
+          })();
+
+          return; // 일반 메시지 흐름 중단
+        }
+
         // === Command shortcuts for testing ===
         // 1) /종료 : expire room immediately
         // 2) /멘트 : send next topic-related AI ment from prebuilt queue
@@ -924,6 +1003,7 @@ export function initChatSocket(io) {
         st.lastMessageAt = now;
         st.userLastAt.set(msg.nickname, now);
         pushRecent(roomId, msg);
+        generateTopicMentAndBroadcast(io,roomId);
         cb?.({ ok: true, serverId: msg.id, createdAt: msg.createdAt });
         io.of("/chat").to(`room:${roomId}`).emit("message:new", { ...msg, reactedUsers: [], reactionsCount: 0 });
         classifyAndBroadcast(io, msg);

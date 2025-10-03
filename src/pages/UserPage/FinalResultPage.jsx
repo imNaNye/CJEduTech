@@ -3,6 +3,8 @@ import badgePassion from '@/assets/badges/passion.png';
 import badgeRespect from '@/assets/badges/respect.png';
 import badgeCreativity from '@/assets/badges/creativity.png';
 import '../../components/user/finalResult/finalResult.css';
+import NextSessionButton from '../../components/user/finalResult/NextSessionButton.jsx';
+import SavePDFButton from '../../components/user/finalResult/SavePDFButton.jsx';
 import PageHeader from '../../components/common/PageHeader';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -21,6 +23,7 @@ import avatar9 from "@/assets/images/avatar/avatar9.png";
 import avatar10 from "@/assets/images/avatar/avatar10.png";
 import avatar11 from "@/assets/images/avatar/avatar11.png";
 import avatar12 from "@/assets/images/avatar/avatar12.png";
+import { useNavigate } from "react-router-dom";
 
 import { http } from '@/lib/http' ;
 import { quizApi } from '@/api/quiz' ;
@@ -308,6 +311,11 @@ export default function FinalResultPage() {
     { key: 'video', label: '영상 시청', value: 100 },
     { key: 'discussion', label: '토론 진행', value: 100 },
   ];
+    const navigate = useNavigate();
+    const handleClick = () => {
+    // PDF 저장 기능은 별도 구현 필요
+    alert("PDF 저장 기능은 추후 구현됩니다.");
+  };
 
   useEffect(() => {
     if (!sections) return;
@@ -813,8 +821,21 @@ export default function FinalResultPage() {
             </ol>
           </article>
         </aside>
+        
       </section>
+          <button
+      className="save-pdf-button"
+      onClick={() => {
+          navigate("/user/end");
+      }}
+    >
+      종료하기
+    </button>
+        <button className="next-session-button" onClick={handleClick}>
+      PDF 저장
+    </button>
       </div>
+
     </div>
   );
 }

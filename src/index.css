@@ -70,3 +70,32 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+@font-face {
+    font-family: 'cj_title_bold';
+    src: url('@/assets/fonts/cj_title_bold.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'cj_title';
+    src: url('@/assets/fonts/cj_title.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'cj_body';
+    src: url('@/assets/fonts/cj_body.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'cj_body_light';
+    src: url('@/assets/fonts/cj_body_light.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'cj';
+    src: url('@/assets/fonts/cj.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'cj_bold';
+    src: url('@/assets/fonts/cj_bold.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'cj_logo';
+    src: url('@/assets/fonts/cj_logo.ttf') format('truetype');
+}

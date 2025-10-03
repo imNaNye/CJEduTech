@@ -1,3 +1,29 @@
+@font-face {
+    font-family: 'cj_title_bold';
+    src: url('@/assets/fonts/cj_title_bold.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'cj_title';
+    src: url('@/assets/fonts/cj_title.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'cj_body_light';
+    src: url('@/assets/fonts/cj_body_light.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'cj';
+    src: url('@/assets/fonts/cj.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'cj_bold';
+    src: url('@/assets/fonts/cj_bold.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'cj_logo';
+    src: url('@/assets/fonts/cj_logo.ttf') format('truetype');
+}
+
+
 .login-page {
   /* 16:9 프레임 계산 */
   --ui-scale: 0.67; /* can be tuned later */
@@ -79,7 +105,7 @@
   margin-top: 20px;
   color: var(--grey01, #555);
 text-align: center;
-font-family: "CJ ONLYONE NEW title";
+font-family: "cj_title_bold";
 font-size: 1.8125rem;
 font-style: normal;
 font-weight: 700;
@@ -135,6 +161,7 @@ border-radius: 3.75rem;
 background: linear-gradient(315deg, #FFAF2F 0%, #FF6620 100%);
 
 font-size : 1.75rem;
+font-family: 'cj_title';
 }
 
 .login-submit:hover {

@@ -1,0 +1,125 @@
+.overall-ranking-card{ min-width: 500px; width:100%; display:flex; flex-direction:column; align-items:center; }
+.orc-header h3{
+  margin:0 0 14px 0;
+  font-family: "CJ ONLYONE NEW title";
+  font-weight:800;
+  text-align:left;
+}
+
+/* 좌: 탑 이미지 / 우: 목록 */
+.orc-body{
+  display:grid;
+  grid-template-columns: 320px 1fr;
+  gap: 0 28px;
+  align-items: stretch;
+  position: relative;
+  max-width: 1100px;        /* constrain and center */
+  width: 100%;
+  margin: 0 auto;           /* center inside card */
+  justify-items: stretch;   /* fill grid cells */
+}
+.orc-tower{
+  position: relative;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+}
+.orc-tower img{
+  width: 100%;
+  max-width: 100%;
+  height:auto;
+  display:block;
+  filter: drop-shadow(0 10px 24px rgba(0,0,0,0.14));
+}
+
+/* 우측 랭킹 목록(지그재그) */
+.orc-list{
+  list-style:none;
+  margin:0;
+  padding:10px 0;
+  position:relative;
+  width: 250px;           /* constrain list width */
+  max-width: 100%;
+  height: 100%;           /* will be overridden inline to match tower image */
+  align-content: stretch;  /* distribute rows evenly */
+}
+.orc-item{ position:relative; min-height: 36px; display:flex; align-items:center; }
+.orc-item.left{ justify-content:flex-start; padding-left: 24px; }
+.orc-item.right{ justify-content:flex-end; padding-right: 24px; }
+
+/* 탑과의 연결 점 & 선 */
+.rank-dot{
+  position:absolute; left:-12px; top:50%; transform:translateY(-50%);
+  width:8px; height:8px; border-radius:50%;
+  background:#FF6E37; box-shadow:0 0 0 3px #FFE3B3;
+}
+.orc-item.left .rank-line{
+  position:absolute;
+  top:50%;
+  left:-8px; right: calc(50% + 64px);
+  height:2px; background:#FF6E37;
+  transform:translateY(-50%);
+}
+.orc-item.right .rank-line{
+  position:absolute;
+  top:50%;
+  left: -8px;                 /* start from center spine */
+  right: calc(50%);    /* extend toward right pill */
+  height:2px;
+  background:#FF6E37;
+  transform:translateY(-50%);
+}
+
+/* 랭킹 필 (순위+아바타) */
+.rank-pill{
+  display:flex; align-items:center; gap:8px;
+  background:#fff; border:1px solid #FFD0B7;
+  box-shadow:0 4px 12px rgba(0,0,0,0.06);
+  border-radius:999px; padding:6px 10px; z-index:1;
+}
+.rank-avatar{
+  width:34px; height:34px; border-radius:50%;
+  border:2px solid #FF6E37; object-fit:cover;
+}
+.rank-num{
+  display:inline-flex; align-items:baseline; gap:3px;
+  font-weight:900; color:#FF6E37; font-family:"CJ ONLYONE NEW title";
+}
+.rank-num small{ font-size:10px; letter-spacing:0.5px; }
+
+/* 지그재그 오프셋 */
+.orc-item.left .rank-pill{ margin-left: 8%; }
+.orc-item.right .rank-pill{ margin-right: 2%; }
+
+/* 호버 툴팁 카드 */
+.rank-tooltip{
+  position:absolute; top:50%; transform:translateY(-50%);
+  opacity:0; pointer-events:none; transition:opacity .18s ease;
+  background:#FFE3B3; border:2px solid #FFCE7B;
+  border-radius:12px; padding:14px 16px; min-width:260px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.12);
+}
+.orc-item.left .rank-tooltip{ left: -260px; }
+.orc-item.right .rank-tooltip{ left: -260px; }
+.orc-item:hover .rank-tooltip{ opacity:1; }
+
+/* 툴팁 내용 */
+.rt-title{
+  font-family:"CJ ONLYONE NEW title"; font-weight:700; color:#333;
+  margin-bottom:8px; display:flex; align-items:center; gap:8px;
+}
+.rt-title .rt-rank{ color:#FF6E37; }
+.rt-stats{ display:grid; gap:6px; color:#333; font-family:"CJ ONLYONE NEW body"; font-size:14px; }
+.rt-row{ display:flex; align-items:center; gap:10px; }
+
+/* 작은 아이콘 — 기존 자산을 그대로 사용 */
+.rt-row .ico{
+  display:inline-block; width:18px; height:18px;
+  background-size:contain; background-position:center; background-repeat:no-repeat;
+}
+.ico-j{ background-image:url('../../../assets/images/discussion/badge_1.png'); }
+.ico-p{ background-image:url('../../../assets/images/discussion/badge_2.png'); }
+.ico-c{ background-image:url('../../../assets/images/discussion/badge_3.png'); }
+.ico-r{ background-image:url('../../../assets/images/discussion/badge_4.png'); }
+.ico-like{ background-image:url('../../../assets/images/discussion/like.svg'); }
+.ico-msg{ background-image:url('../../../assets/images/discussion/Send.svg'); }

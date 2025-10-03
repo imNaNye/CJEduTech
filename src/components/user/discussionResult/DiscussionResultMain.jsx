@@ -5,7 +5,9 @@ import "./discussionResult.css";
 import { http } from '@/lib/http' ;
 import { useUser } from '@/contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
+import TalentGroupCard from './TalentGroupCard';
 
+import OverallRankingCard from './OverallRankingCard';
 // Dynamically load Chart.js from CDN (no static import)
 async function ensureChartJS(){
   if (typeof window !== 'undefined' && window.Chart) return window.Chart;
@@ -69,7 +71,7 @@ function buildMockRoomResult(nickname = '나'){
       totalMessages: 18,
       totalReactions: 27,
       labels: { '정직': 8, '열정': 5, '창의': 3, '존중': 2 },
-      topReacted: { text: '데이터 기반으로 의사결정하면 설득력이 높아집니다.', reactionsCount: 12 }
+      topReacted: { text: '가장 공감을 많이 받은 발언입니다. 데이터 기반으로 의사결정하면 설득력이 높아집니다.', reactionsCount: 12 }
     },
     '동료A': { totalMessages: 14, totalReactions: 21, labels: { '정직': 4, '열정': 6, '창의': 2, '존중': 2 }, topReacted: { text: '고객 관점을 더 녹이면 좋겠어요.', reactionsCount: 9 } },
     '동료B': { totalMessages: 9,  totalReactions: 13, labels: { '정직': 2, '열정': 2, '창의': 4, '존중': 1 }, topReacted: { text: '실험을 작게 자주 해보죠.', reactionsCount: 6 } },
@@ -472,6 +474,29 @@ export default function DiscussionResultMain() {
   const ranking = roomResult?.ranking || [];
   const topN = ranking.slice(0, 10);
 
+  // --- 임시 인재상 그룹핑: 닉네임 해시로 4개 그룹에 균등 분산(재현 가능) ---
+const TRAIT_KEYS = ['정직','열정','창의','존중'];
+function hashToUInt(str){
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+  return h >>> 0; // unsigned
+}
+const groupedMembers = useMemo(() => {
+  const groups = { '정직': [], '열정': [], '창의': [], '존중': [] };
+  const perUser = roomResult?.perUser || {};
+  const nicks = Object.keys(perUser);
+  nicks.forEach(nick => {
+    const idx = hashToUInt(nick) % 4; // 닉네임 기반 의사난수 → 4개 그룹
+    const trait = TRAIT_KEYS[idx];
+    groups[trait].push({
+      nickname: nick,
+      avatar: undefined, // 서버 연동 전이므로 폴백(내부 컴포넌트에서 처리)
+      topReacted: perUser[nick]?.topReacted
+    });
+  });
+  return groups;
+}, [roomResult]);
+
   if (loading) {
     return (
       <div className="discussion-result-main" style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"80vh" }}>
@@ -533,6 +558,45 @@ export default function DiscussionResultMain() {
 
       {/* 우측 스크롤 영역: 나의 레포트 + 랭킹 */}
       <div className="dr-scroll-area">
+        {/* 전체 랭킹 */}
+        <OverallRankingCard ranking={roomResult?.ranking || []} />
+        {/* 인재상 그룹 */}
+          <TalentGroupCard
+    trait="정직"
+    members={(roomResult?.ranking || []).map(r => ({
+      nickname: r.nickname,
+      // r.avatar가 있으면 매핑, 없으면 폴백
+      avatar: undefined,
+      topReacted: roomResult?.perUser?.[r.nickname]?.topReacted,
+    }))}
+  />
+    <TalentGroupCard
+    trait="열정"
+    members={(roomResult?.ranking || []).map(r => ({
+      nickname: r.nickname,
+      // r.avatar가 있으면 매핑, 없으면 폴백
+      avatar: undefined,
+      topReacted: roomResult?.perUser?.[r.nickname]?.topReacted,
+    }))}
+  />
+    <TalentGroupCard
+    trait="창의"
+    members={(roomResult?.ranking || []).map(r => ({
+      nickname: r.nickname,
+      // r.avatar가 있으면 매핑, 없으면 폴백
+      avatar: undefined,
+      topReacted: roomResult?.perUser?.[r.nickname]?.topReacted,
+    }))}
+  />
+    <TalentGroupCard
+    trait="존중"
+    members={(roomResult?.ranking || []).map(r => ({
+      nickname: r.nickname,
+      // r.avatar가 있으면 매핑, 없으면 폴백
+      avatar: undefined,
+      topReacted: roomResult?.perUser?.[r.nickname]?.topReacted,
+    }))}
+  />
         {/* 나의 레포트 */}
         <section className="dr-my-report card">
           <div className="dr-card-header">
@@ -595,27 +659,6 @@ export default function DiscussionResultMain() {
             </div>
           </div>
         </section>
-
-        {/* 전체 랭킹 
-        <aside className="dr-ranking card">
-          <header className="dr-card-header">
-            <h3>전체 랭킹</h3>
-          </header>
-          <ol className="dr-ranking-list">
-            {topN.map((r, idx) => (
-              <li key={r.nickname} className={`dr-ranking-item ${rankClass(idx)}`}>
-                <div className="avatar-wrap">
-                  <img className="avatar" src={user1Avatar} alt={`${r.nickname}`} />
-                  <div className="badge badge--overlay">{rankLabel(r.rank)}</div>
-                </div>
-                <div className="meta">
-                  <div className="name">{r.nickname}</div>
-                  <div className="sub">❤️ {r.totalReactions} · 💬 {r.totalMessages}</div>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </aside>*/}
       </div>
     </div>
   );

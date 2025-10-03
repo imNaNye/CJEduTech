@@ -1,0 +1,109 @@
+/* 카드 프레임 */
+.tg-card{
+  width: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 상단 타이틀 */
+.tg-header{ display:flex; align-items:center; gap:10px; padding: 8px 4px 0; }
+.tg-badge{ width:34px; height:34px; object-fit:contain; }
+.tg-title{
+  margin:0;
+  font-family: "CJ ONLYONE NEW title";
+  font-weight:800;
+  color:#333;
+  font-size:24px;
+}
+
+.tg-divider{ height:1px; background:#E6E6E6; margin:12px 0; }
+
+/* 스크롤 가능한 리스트 */
+.tg-list{
+  list-style:none;
+  margin:0;
+  padding:0 6px 12px 6px;
+  overflow-y:auto;
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+.tg-list::-webkit-scrollbar{ width:10px; }
+.tg-list::-webkit-scrollbar-thumb{ background:#E7D4B9; border-radius:8px; }
+
+/* 각 멤버 행 */
+.tg-item{
+  display:grid;
+  grid-template-columns: 120px 350px;
+  align-items:center;
+  column-gap:16px;
+}
+
+/* 좌측: 순위 배지 + 아바타 */
+.tg-left{ display:flex; align-items:center; gap:12px; }
+.tg-rank{
+  width:64px; height:64px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  position:relative;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+.tg-rank--gold{ background:linear-gradient(180deg,#FFE3B3 0%, #FFCE7B 100%); color:#9A4800; }
+.tg-rank--plain{ background:#FFD7C6; color:#8c4a2f; }
+.tg-rank .n{ font-size:22px; font-weight:900; }
+.tg-rank .suf{ font-size:11px; margin-left:4px; font-weight:800; }
+
+.tg-avatar{
+  width:72px; height:72px;
+  border-radius:50%;
+  object-fit:cover;
+  border:3px solid #FF6E37;
+}
+
+/* 우측: 닉네임/공감/메시지 */
+.tg-right{ display:flex; flex-direction:column; gap:8px; }
+.tg-name-row{ display:flex; align-items:center; gap:10px; }
+.tg-name{
+  font-family:"CJ ONLYONE NEW title";
+  font-weight:700;
+  font-size:20px;
+  color:#333;
+}
+.tg-like-pill{
+  display:inline-flex; align-items:center; gap:6px;
+  background:#FFF1E7; color:#FF6E37;
+  padding:4px 8px; border-radius:999px;
+  font-weight:700; font-size:16px;
+}
+.tg-like-pill img{ width:18px; height:18px; }
+
+/* 말풍선 */
+.tg-bubble{
+  background:#FFEED8; border:1px solid #FFD19C;
+  border-radius:10px; padding:12px 14px;
+  color:#5a5550; font-family:"CJ ONLYONE NEW body";
+  font-size:15px; line-height:1.5; position:relative;
+
+  cursor: pointer;               /* clickable */
+  max-height: 68px;              /* roughly one-line height + padding */
+  overflow: hidden;
+  transition: max-height .22s ease;
+  white-space: nowrap;           /* one-line by default */
+  text-overflow: ellipsis;       /* show ... */
+}
+.tg-bubble.expanded{
+  white-space: normal;           /* allow wrapping */
+  max-height: 360px;             /* dropdown-like expand */
+}
+.tg-bubble:active{ filter: brightness(0.98); }
+
+.tg-bubble:after{
+  content:""; position:absolute; right:-10px; bottom:12px;
+  border-width:10px; border-style:solid;
+  border-color:transparent transparent transparent #FFD19C; /* right-pointing tail (outer) */
+}
+.tg-bubble:before{
+  content:""; position:absolute; right:-8px; bottom:12px;
+  border-width:10px; border-style:solid;
+  border-color:transparent transparent transparent #FFEED8; /* right-pointing tail (inner) */
+}

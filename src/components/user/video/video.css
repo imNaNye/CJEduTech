@@ -16,8 +16,8 @@
 
 .video-player {
   height: 80vh;
-  width: 80vw;
-  margin-left: 8vw;
+  width: 70vw;
+  margin-left: 13vw;
   flex: 1;
   display: flex;
   justify-content: center;
@@ -27,9 +27,9 @@
 
 .video-element {
   height: 70vh;
-  width: 100%;
+  width: 98%;
   max-width: 1600px;
-  border-radius: 12px;
+  border-radius: 20px;
   box-shadow: 0 0 10px rgba(0,0,0,0.15);
   display: block;
   aspect-ratio: 16 / 9;

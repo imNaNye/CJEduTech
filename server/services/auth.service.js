@@ -26,7 +26,7 @@ export async function loginOrSignup({ nickname, password }) {
   if (existing) {
     const ok = await bcrypt.compare(password, existing.password_hash);
     if (!ok) {
-      const err = new Error('닉네임 또는 비밀번호가 올바르지 않습니다.');
+      const err = new Error('중복된 닉네임입니다. 다른 닉네임을 시도해주세요.');
       err.status = 401; // Unauthorized
       throw err;
     }

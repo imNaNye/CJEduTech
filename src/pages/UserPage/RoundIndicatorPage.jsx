@@ -22,7 +22,7 @@ export default function RoundIndicatorPage(){
             } else if(step === 3){
                 navigate('/user/aiDiscussion');
             }
-        }, 60000);
+        }, 6000);
 
         return () => clearTimeout(timeout);
     }, [step, navigate]);

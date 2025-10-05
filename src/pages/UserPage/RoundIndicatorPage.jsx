@@ -16,9 +16,9 @@ export default function RoundIndicatorPage(){
 
         const timeout = setTimeout(() => {
             if(step === 1){
-                navigate('/user/quiz');
+                navigate('/user/slide');
             } else if(step === 2){
-                navigate('/user/video');
+                navigate('/user/quiz');
             } else if(step === 3){
                 navigate('/user/aiDiscussion');
             }

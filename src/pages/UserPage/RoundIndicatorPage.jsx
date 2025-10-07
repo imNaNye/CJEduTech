@@ -20,7 +20,9 @@ export default function RoundIndicatorPage(){
             } else if(step === 2){
                 navigate('/user/quiz');
             } else if(step === 3){
-                navigate('/user/aiDiscussion');
+                navigate('/user/game');
+            } else if(step === 4){
+                navigate('/user/video');
             }
         }, 6000);
 
@@ -36,15 +38,19 @@ export default function RoundIndicatorPage(){
                 <div className = "round-step-container">
                     <div className = {((step === 1) ? 'current-step' : 'step-indicator')}>
                         <h4>step 1</h4>
-                        퀴즈 풀이
+                        이론학습
                     </div>
                     <div className = {((step === 2) ? 'current-step' : 'step-indicator')}>
                         <h4>step 2</h4>
-                        영상 시청
+                        퀴즈풀이
                     </div>
                     <div className = {((step === 3) ? 'current-step' : 'step-indicator')}>
                         <h4>step 3</h4>
-                        AI 토론
+                        게임학습
+                    </div>
+                    <div className = {((step === 4) ? 'current-step' : 'step-indicator')}>
+                        <h4>step 4</h4>
+                        영상시청&토론
                     </div>
                 </div>
                 <div className="explanation">몇 초 뒤, 다음 화면으로 자동 전환됩니다.</div>

@@ -9,9 +9,9 @@ import { quizApi } from '@/api/quiz';
 import '@/components/user/quiz/quiz.css'
 import PageHeader from '@/components/common/PageHeader.jsx';
 
-const QUESTIONS_PER_ROUND = 3;
+const QUESTIONS_PER_ROUND = 9;
 const SECONDS_PER_QUESTION = 20;
-const FEEDBACK_MS = 12000; // 정답/오답 피드백 유지 시간 (ms)
+const FEEDBACK_MS = 10000; // 정답/오답 피드백 유지 시간 (ms)
 const REVEAL_MS = 600;    // 선택 → 공개 대기
 const RESULT_MS = 600;    // 공개 → 결과 대기
 const PREVIEW_MS = 4000;  // 최초 4초간 카드 앞면 미리보기(선택 불가)
@@ -185,14 +185,14 @@ export default function QuizPage() {
       } catch (e) {
         console.error('점수 저장 실패:', e);
       }
-      setStep(2);
+      setStep(3);
       navigate('/user/roundIndicator', { replace: true });
     }
   };
 
   const current = questions[idx];
   if (!current) {
-    setStep(2);
+    setStep(3);
     navigate('/user/roundIndicator', { replace: true });
     return <div>이 라운드의 퀴즈 데이터가 없습니다.</div>;
   }

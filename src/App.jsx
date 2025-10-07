@@ -19,6 +19,7 @@ import LoadResultPage from './pages/UserPage/LoadResultPage.jsx';
 import DonorsOnboardingPage from './pages/UserPage/DonorsOnboardingPage.jsx';
 
 import AdminSessionPage from './pages/AdminPage/SessionPage.jsx';
+import GamePage from './pages/UserPage/GamePage.jsx';
 
 function RoundStepLayout() {
   return (
@@ -34,22 +35,24 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/user/onboarding" element={<OnBoardingPage/>} />
-          <Route path="/user/donorsOnboarding" element={<DonorsOnboardingPage/>} />
           <Route path="/user/selectAvatar" element={<SelectAvatarPage />} />
           <Route element={<RoundStepLayout />}>
+            <Route path="/user/onboarding" element={<OnBoardingPage/>} />
+            <Route path="/user/donorsOnboarding" element={<DonorsOnboardingPage/>} />
             <Route path="/user/slide" element={<SlideRoute />} />
             <Route path="/user/roundIndicator" element={<RoundIndicatorPage />} />
             <Route path="/user/quiz" element={<QuizPage />} />
             <Route path="/user/quizResult" element={<QuizResultPage />} />
+            <Route path="/user/game" element={<GamePage/>}/>
             <Route path="/user/video" element={<VideoPage />} />
             <Route path="/user/aiDiscussion" element={<AIDiscussionPage />} />
             <Route path="/user/discussionResult" element={<DiscussionResultPage />} />
-          </Route>
-          <Route path="/user/finalResult" element={<FinalResultPage />} />
-          <Route path="/user/loadResult" element={<LoadResultPage />} />
+            <Route path="/user/finalResult" element={<FinalResultPage />} />
+            <Route path="/user/loadResult" element={<LoadResultPage />} />
 
-          <Route path="/user/end" element={<EndPage />} />
+            <Route path="/user/end" element={<EndPage />} />
+          </Route>
+          
           <Route path="/admin/session" element={<AdminSessionPage />} />
           <Route path="/test" element={<TestApi />} />
         </Routes>

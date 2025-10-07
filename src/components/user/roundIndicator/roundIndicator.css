@@ -76,11 +76,11 @@
 /* 하단의 3단 스텝 배지 */
 .round-step-container {
   display: grid;
-  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
   gap: clamp(18px, 3vw, 28px);
   align-items: start;
   margin: -15vh auto;
-  width: 60vw;
+  width: 80vw;
   transform-origin: center center; 
 }
 

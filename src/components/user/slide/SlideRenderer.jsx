@@ -20,12 +20,12 @@ export default function SlideRenderer() {
   useEffect(() => {
     if (pageIndex === lastIndex && allDone) {
       setRound(1)
-      setStep(1)
+      setStep(2)
       navigate('/user/roundIndicator')
     }
   }, [pageIndex, lastIndex, allDone, navigate, setRound, setStep])
 
-  setStep(1)
+  setStep(2)
   setRound(1)
 
   const PageComponent = pageComponentMap[page.id]
@@ -34,7 +34,7 @@ export default function SlideRenderer() {
     if (pageIndex === config.length - 1 && allDone) {
       // 모든 슬라이드 끝났으면 원하는 경로로 이동
       setRound(1)
-      setStep(1)
+      setStep(2)
       navigate('/user/roundIndicator') 
     } else {
       // 아직 마지막이 아니면 다음 슬라이드로

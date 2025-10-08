@@ -14,6 +14,13 @@ export const videoByRound = {
     { title: 'Round 1 - 갓 구운 빵의 비밀', src: r1_1 },
     { title: 'Round 1 - 할인율의 미로', src: r1_2 },
     { title: 'Round 1 - 마감할인 그 이상의 가치', src: r1_3 },
+    { title: 'Round 2 - 예약 시스템 오류와 고객의 분노', src: r2_1 },
+    { title: 'Round 2 - VIPS 단체 고객의 무리한 요구', src: r2_2 },
+    { title: 'Round 2 - SNS 대기불만폭주! 고객경험혁신', src: r2_3 },
+    { title: 'Round 3 - 시그니처 폭립의 화룡점정', src: r3_1 },
+    { title: 'Round 3 - VIPS 주방 내 갈등해결', src: r3_2 },
+    { title: 'Round 3 - VIPS 주방 막내의 스마트한 식자재관리', src: r3_3 },
+    { title: '임시 동영상', src: r3_2 },
   ],
   2: [
     { title: 'Round 2 - 예약 시스템 오류와 고객의 분노', src: r2_1 },

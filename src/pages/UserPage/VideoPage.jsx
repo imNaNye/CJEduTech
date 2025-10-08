@@ -7,7 +7,7 @@ import '../../components/user/video/video.css';
 import { useNavigate } from 'react-router-dom';
 
 export default function VideoPage({ onComplete }) {
-  const { round, step, setStep } = useRoundStep();
+  const { round, step, setStep, videoId, setVideoId } = useRoundStep();
   const [videoEnded, setVideoEnded] = useState(false);
   const [progress, setProgress] = useState(0); // 0 ~ 100 percent
   const [videoIdx, setVideoIdx] = useState(0);

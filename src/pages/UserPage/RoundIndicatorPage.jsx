@@ -31,9 +31,8 @@ export default function RoundIndicatorPage(){
 
     return(
         <div className="round-indicator-page">
-            <PageHeader title={`Round ${round}`} />
+            <PageHeader title={`Step ${step}`} />
             <div className="round-indicator">
-                <h3>Round {round}</h3>
                 <img className="logo-robot" src={logoRobot}></img>
                 <div className = "round-step-container">
                     <div className = {((step === 1) ? 'current-step' : 'step-indicator')}>

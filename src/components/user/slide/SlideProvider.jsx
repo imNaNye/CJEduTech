@@ -1,6 +1,7 @@
 // src/slides/SlideProvider.jsx
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
+
 const SlideCtx = createContext(null);
 
 export function SlideProvider({ children, config, defaultCooldownMs = 0, blockPolicy = 'global' }) {
@@ -73,6 +74,17 @@ export function SlideProvider({ children, config, defaultCooldownMs = 0, blockPo
     if (updated && blockPolicy === 'global') {
       const cd = getCooldownMs(id);
       if (cd > 0) setNextAllowedAt(Date.now() + cd);
+    }
+
+    if (updated) {
+      const audio = new Audio(`@/assets/sounds/targets/${id}.mp3`);
+      audio.preload = 'auto';
+      audio.currentTime = 0;
+      audio.play().catch((e) => {
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn(`Audio playback failed for ${id}:`, e);
+        }
+      });
     }
 
     return { ok: updated, reason: updated ? 'added' : 'duplicate' };

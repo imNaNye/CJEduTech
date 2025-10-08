@@ -69,3 +69,31 @@
     font-family: 'cj_logo';
     src: url('@/assets/fonts/cj_logo.ttf') format('truetype');
 }
+@font-face {
+    font-family: 'CJ ONLYONE NEW title Bold';
+    src: url('@/assets/fonts/cj_title_bold.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'CJ ONLYONE NEW title Medium';
+    src: url('@/assets/fonts/cj_title.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'CJ ONLYONE NEW body Regular';
+    src: url('@/assets/fonts/cj_body.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'CJ ONLYONE NEW body Light';
+    src: url('@/assets/fonts/cj_body_light.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'CJ ONLYONE Medium';
+    src: url('@/assets/fonts/cj.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'CJ ONLYONE Bold';
+    src: url('@/assets/fonts/cj_bold.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'CJ ONLYONE NEW logotype';
+    src: url('@/assets/fonts/cj_logo.ttf') format('truetype');
+}

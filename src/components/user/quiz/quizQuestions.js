@@ -191,6 +191,46 @@ export const quizQuestions = {
   2: [
     {
       q: '다음 중 아래 설명에 부합하는 카드는?',
+      desc: '개인의 내면적인 성품과 관련된 능력으로 자신과 타인, 사회와의 관계 속에서 바람직한 가치관과 태도를 가지고 행동하는 능력',
+      options: [
+        {  img: r1q1A, alt: '인성',  backImg: verticalBack },
+        {  img: r1q1B, alt: '태도', backImg: verticalBack },
+        {  img: r1q1C, alt: '기능', backImg: verticalBack },
+      ],
+      answer: 0,
+      explainCorrect: '인성은 개인의 내면적인 성품과 관련된 능력으로 자신과 타인, 사회와의 관계 속에서 바람직한 가치관과 태도를 가지고 행동하는 능력을 말해요.',
+      explainWrong: '인성은 개인의 내면적인 성품과 관련된 능력으로 자신과 타인, 사회와의 관계 속에서 바람직한 가치관과 태도를 가지고 행동하는 능력을 말해요.',
+      delayMs: 4000,
+    },
+    {
+      q: '다음 중 아래 설명에 부합하는 카드는?',
+      desc: '제한된 시간 안에 효율적으로 일처리를 조율하는 능력',
+      options: [
+        {  img: r1q2A, alt: '가 이미지', backImg: verticalBack },
+        {  img: r1q2B, alt: '나 이미지', backImg: verticalBack },
+        {  img: r1q2C, alt: '다 이미지', backImg: verticalBack },
+        {  img: r1q2D, alt: '창의성', backImg: verticalBack}
+      ],
+      answer: 0,
+      explainCorrect: '정답이에요. 시간 관리 능력은 제한된 시간 안에 효율적으로 일처리를 조율하는 능력을 말해요.',
+      explainWrong: '아쉬워요. 시간 관리 능력은 제한된 시간 안에 효율적으로 일처리를 조율하는 능력을 말해요.',
+    },
+    {
+      q: '제시상황에 적절한 응대를 찾아 연결하세요.',
+
+      desc: '아동 동반 고객이 방문할 경우',
+      options: [
+        { label: '', img: r1q3X, alt: 'X 이미지', backImg: horizontalBack, caption: "편견없이 일반 좌석으로 안내한다." },
+        { label: '', img: r1q3Y, alt: 'Y 이미지', backImg: horizontalBack, caption: "소음에 대비해 출입문 근처 자리를 안내한다." },
+        { label: '', img: r1q3Z, alt: 'Z 이미지', backImg: horizontalBack, caption:"아동용 의자가 있는 좌석으로 안내한다."
+         },
+      ],
+      answer: 2,
+      explainCorrect: '아동 동반 고객이 방문할 경우, 아동용 의자가 있는 좌석 쪽으로 안내하거나 아동용 의자를 제공해드려야해요.',
+      explainWrong: '아동 동반 고객이 방문할 경우, 아동용 의자가 있는 좌석 쪽으로 안내하거나 아동용 의자를 제공해드려야해요.',
+    },
+    {
+      q: '다음 중 아래 설명에 부합하는 카드는?',
       desc: '고객, 동료 등의 입장을 헤아리고 먼저 생각하는 마음',
       options: [
         {  img: r2q1A, alt: 'A1 이미지', backImg: verticalBack },
@@ -227,8 +267,6 @@ export const quizQuestions = {
       explainCorrect: '제공된 음식에 문제가 있을 경우, 죄송한 마음을 표현 후 새로운 제품으로 교환해드리는 것이 적절한 응대입니다.',
       explainWrong: '제공된 음식에 문제가 있을 경우, 죄송한 마음을 표현 후 새로운 제품으로 교환해드리는 것이 적절한 응대입니다.',
     },
-  ],
-  3: [
     {
       q: '다음 중 아래 설명에 부합하는 카드는?',
       desc: '상황 변화나 고객, 팀 동료 특성을 빠르게 파악하는 능력',
@@ -266,5 +304,8 @@ export const quizQuestions = {
       explainCorrect: '정답입니다. 예약 손님의 자리가 없는 경우, 대기 좌석 쪽으로 안내하고 사례를 제공하는 등 양해를 구하는 것이 적절한 응대입니다.',
       explainWrong: '오답이에요. 예약 손님의 자리가 없는 경우, 대기 좌석 쪽으로 안내하고 사례를 제공하는 등 양해를 구하는 것이 적절한 응대입니다.',
     },
+  ],
+  3: [
+    
   ],
 };

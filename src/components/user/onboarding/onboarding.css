@@ -5,7 +5,7 @@
   --frame-h: calc(var(--frame-w) * 9 / 16);
 
   width: 100vw;
-  height: 94vh;
+  height: 100vh;
   margin-left: auto;
   margin-right: auto;
   margin-top: calc((100vh - var(--frame-h)) / 2);
@@ -35,7 +35,7 @@
   transform: scale(0.80);
   transform-origin: center center;
   width: min(1400px, 94%);
-  height: 70vh;
+  height: 80vh;
   min-height: 68%;
   border-radius: 24px;
   border: 1px solid var(--grey04, #D9D9D9);
@@ -60,6 +60,7 @@
 /* Robot image keeps intrinsic ratio */
 .logo-robot {
   width: clamp(220px, 30vw, 426px);
+  margin-top: 5vh;
   height: auto;
   aspect-ratio: auto;
 }

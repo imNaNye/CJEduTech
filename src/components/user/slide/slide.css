@@ -33,6 +33,7 @@
   color: #FF6E37;
   font-size: 1.4rem;
   font-weight: bold;
+  font-family: "CJ ONLYONE NEW title";
 }
 
 .slide-title {
@@ -42,6 +43,7 @@
   margin-bottom: 0;
   padding-bottom: 0;
   margin-top: 0;
+  font-family: "CJ ONLYONE NEW title";
 }
 /* slide.css */
 
@@ -50,6 +52,7 @@
   text-align: center;
   font-size: 1.4rem;
   color: #555;
+  font-family: "CJ ONLYONE NEW body";
 }
 
 .slide-subtitle strong {
@@ -79,8 +82,8 @@
 /* ===== Target grid ===== */
 /* Use: <div class="target-grid" data-count="5"> ...cards... </div> */
 .target-grid {
-  --card-w: clamp(240px, 20vw, 340px);
-  --card-h: clamp(200px, 40vh, 320px);
+  --card-w: clamp(120px, 20vw, 300px);
+  --card-h: clamp(100px, 40vh, 250px);
   --cols: 3; /* fallback */
   display: grid;
   grid-template-columns: repeat(var(--cols), var(--card-w));
@@ -159,6 +162,7 @@
   font-size: clamp(16px, 1.8vw, 22px);
   white-space: normal;
   overflow-wrap: break-word;
+  font-family: "CJ ONLYONE NEW title";
 }
 
 /* 라벨/설명 텍스트가 길어도 높이 증가하지 않도록 라인 클램프 */
@@ -176,6 +180,7 @@
   font-size: clamp(14px, 1.5vw, 18px);
   line-height: 1.4;
   color: #666;
+  font-family: "CJ ONLYONE NEW body";
 }
 
 /* Click/disabled visuals (works with SlideProvider isBlocked) */

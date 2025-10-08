@@ -75,10 +75,12 @@
   background: #fff; border: clamp(3px, .35vw, 4px) solid var(--orange);
   box-shadow: 0 2px 8px rgba(0,0,0,.06);
   font-size: clamp(14px, 1.6vw, 18px);
+  font-family: "CJ ONLYONE NEW title";
+  
 }
 
 /* 제목 스타일 */
-.quiz-header h3 { margin: 0; display: flex; align-items: baseline; gap: 14px; font-size: 20px;}
+.quiz-header h3 { margin: 0; display: flex; align-items: baseline; gap: 14px; font-size: 20px; font-family: "CJ ONLYONE NEW title";}
 .qno { color: var(--orange); font-weight: 800; font-size: clamp(24px, 2.4vw, 36px); }
 .question-text { color: var(--ink); font-weight: 800; font-size: clamp(20px, 2.2vw, 32px); letter-spacing: 0.2px; }
 
@@ -117,6 +119,7 @@ h3 {
   font-size: clamp(14px, 1.4vw, 18px);
   line-height: 1.6;
   color: var(--ink);
+  font-family: "CJ ONLYONE NEW body";
 }
 
 .quiz-main { width: 100%; display: flex; flex-direction: column; align-items: center; }
@@ -242,6 +245,7 @@ h3 {
   border-radius: 10px;
   padding: 14px 16px;
   margin-bottom: 20px;
+  font-family: "CJ ONLYONE NEW body";
 }
 
 /* 버튼 기본 리셋 */
@@ -348,7 +352,7 @@ section > header .timer {
   background: #fff; /* 내부 바탕 */
 
   /* progress ring */
-  --ring-w: clamp(5px, .35vw, 7px); /* 링 두께 */
+  --ring-w: clamp(1px, .1vw, 5px); /* 링 두께 */
   --remain: 1;                      /* JS에서 0~1 값으로 주입 */
   --deg: calc(var(--remain) * 360deg);
   background:
@@ -359,6 +363,7 @@ section > header .timer {
   /* 텍스트 가독성 */
   box-shadow: 0 2px 8px rgba(0,0,0,.06);
   transition: background 120ms linear;
+  font-family: "CJ ONLYONE NEW title";
 }
 
 /* 상단 중앙 제목 */
@@ -428,6 +433,7 @@ section > header .timer {
   font-weight: 600;
   color: var(--ink);
   font-size: 20px;
+  font-family: "CJ ONLYONE NEW body";
 }
 
 .quiz-result .result-right {
@@ -442,6 +448,7 @@ section > header .timer {
   font-size: 28px;
   font-weight: 800;
   color: var(--orange);
+  font-family: "CJ ONLYONE NEW title";
 }
 
 .quiz-result .quiz-explain {
@@ -469,4 +476,5 @@ section > header .timer {
   max-width: var(--card-w);
   line-height: 1.4;
   font-size: 20px;
+  font-family: "CJ ONLYONE NEW body";
 }

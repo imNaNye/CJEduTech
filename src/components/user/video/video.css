@@ -69,12 +69,14 @@
   cursor: not-allowed;
   transition: background-color 0.3s;
   display: block;
+  font-family: "CJ ONLYONE NEW body";
 }
 
 .finish-button:enabled {
   background-color: #ff7a00; /* 주황색 */
   cursor: pointer;
   color: white;
+  font-family: "CJ ONLYONE NEW body";
 }
 
 /* Progress bar overlaid at the top of the video, matching the video's width */

@@ -28,6 +28,7 @@
   font-size: 18px;
   line-height: 1.2;
   color: var(--ink, #222);
+  font-family: "CJ ONLYONE NEW title";
 }
 .page-header-short .title {
   margin-left: 10px;
@@ -35,6 +36,7 @@
   font-size: 32px;
   line-height: 1.2;
   color: var(--ink, #222);
+  font-family: "CJ ONLYONE NEW title";
 }
 /* 우측 유저 정보 컨테이너 */
 .user-info {
@@ -59,6 +61,7 @@
   font-weight: 600;
   font-size: 18px;
   color: #666;
+  font-family: "CJ ONLYONE NEW title";
 }
 
 /* 작은 화면에서 살짝 압축 */

@@ -31,12 +31,12 @@ function RoundStepLayout() {
 
 function App() {
   return (
+    <RoundStepProvider>
     <UserProvider> {/* 전역 사용자 상태 적용 */}
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/user/selectAvatar" element={<SelectAvatarPage />} />
-          <Route element={<RoundStepLayout />}>
             <Route path="/user/onboarding" element={<OnBoardingPage/>} />
             <Route path="/user/donorsOnboarding" element={<DonorsOnboardingPage/>} />
             <Route path="/user/slide" element={<SlideRoute />} />
@@ -51,13 +51,13 @@ function App() {
             <Route path="/user/loadResult" element={<LoadResultPage />} />
 
             <Route path="/user/end" element={<EndPage />} />
-          </Route>
           
           <Route path="/admin/session" element={<AdminSessionPage />} />
           <Route path="/test" element={<TestApi />} />
         </Routes>
       </BrowserRouter>
     </UserProvider>
+    </RoundStepProvider>
   );
 }
 

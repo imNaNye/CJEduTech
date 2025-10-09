@@ -25,6 +25,10 @@
 }
 
 
+.disclaimer{
+  color: #AFAFAF;
+  margin: 0 auto;
+}
 
 .ai-discussion-main {
   /* Design-size stage (will be scaled by parent) */

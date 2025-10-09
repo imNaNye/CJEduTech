@@ -977,7 +977,7 @@ export function initChatSocket(io) {
 
       // Preload topics only (first topic will be announced by scheduler ~10s after creation)
       ensureRoomTopics(composed);
-
+      broadcastCurrentTopic(io,composed);
       // start per-room test bot
       ensureRoomBot(io, composed);
 
@@ -1011,7 +1011,7 @@ export function initChatSocket(io) {
       });
     });
 
-    socket.on("message:send", (payload, cb) => {
+    socket.on("message:send", async (payload, cb) => {
       try {
         const { roomId: baseId, round, text, nickname,avatar } = payload || {};
         const roomId = baseId ? composeRoomId(baseId, round) : joinedRoomId;
@@ -1041,7 +1041,8 @@ export function initChatSocket(io) {
           const stForRoom = getRoomState(roomId);
           const context = buildMentContext(roomId);
           const discussion_topic = context.topic || '';
-          const video_id = stForRoom.videoId || '';
+          const video_id = await resolveVideoKey( stForRoom.videoId) || '';
+          console.log(video_id);
           const chat_history = (context.recent || []).map(m => ({ nickname: m.nickname, text: m.text }));
 
           (async () => {
@@ -1101,6 +1102,12 @@ export function initChatSocket(io) {
           if (cmd === '종료' || cmd.toLowerCase() === 'end'){
             expireRoom(io, roomId);
             cb?.({ ok: true, command: 'end' });
+            return;
+          }
+          // ✅ 새로 추가: /다음 명령
+          if (cmd === '다음' || cmd.toLowerCase() === 'nexttopic') {
+            const changed = setNextTopic(io, roomId);
+            cb?.({ ok: changed, command: 'nexttopic' });
             return;
           }
           if (cmd === '멘트' || cmd.toLowerCase() === 'next' || cmd.toLowerCase() === 'ment'){
@@ -1215,6 +1222,7 @@ function startMentorScheduler(io) {
         expireRoom(io, roomId);
         continue;
       }
+
       // 1) 5분 주기 현재 토픽 교체 + 공지
       if (!st.topicIntervalMs) st.topicIntervalMs = 1000*60*5; // 5분
       if (!st.topicNextAt) st.topicNextAt = now + 1000 * 10; // 방 생성 직후 10초 뒤 첫 교체

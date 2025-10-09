@@ -46,7 +46,7 @@ export default function Chat({ isMine, nickname, text, createdAt, reactionsCount
     return found ? found.src : avatar1;
   }
 
-  const isAIDM = (!isMine) && (avatarUrl === 'ai' || nickname === '고라AI');
+  const isAIDM = (!isMine) && (avatarUrl === 'ai' || nickname === '아이고라AI');
 
   return (
     <div className={`chat ${isMine ? 'mine' : 'others'}`}>

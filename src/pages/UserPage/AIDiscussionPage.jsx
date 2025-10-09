@@ -17,7 +17,7 @@ export default function AIDiscussionPage(){
 
     const [overlayImages, setOverlayImages] = useState([example1, example2]);
 
-    const { round, setRound, step, setStep } = useRoundStep();
+    const { round, setRound, step, setStep,videoId,setVideoId } = useRoundStep();
     const handleOverlayClick = () => {
         setOverlayImages((prev) => prev.slice(1));
     };

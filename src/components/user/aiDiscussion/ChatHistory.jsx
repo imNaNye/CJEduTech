@@ -115,7 +115,7 @@ export default function ChatHistory({ onTopicChange = () => {} }) {
         {
           id: payload.id || `ai_dm_${Date.now()}`,
           roomId,
-          nickname: '고라AI',
+          nickname: '아이고라AI',
           text: payload.text || '',
           createdAt: payload.createdAt || new Date().toISOString(),
           avatar: 'ai',

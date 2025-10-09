@@ -11,7 +11,7 @@ export default function ChatContainer({ nickname, topic }) {
     const [localNickname, setLocalNickname] = useState(nickname);
     const [localTopic, setLocalTopic] = useState(topic);
 
-    const { round, setRound, step, setStep } = useRoundStep();
+    const { round, setRound, step, setStep,videoId } = useRoundStep();
     useEffect(() => {
       if (!nickname) {
         const storedNickname = localStorage.getItem("nickname");
@@ -31,7 +31,7 @@ export default function ChatContainer({ nickname, topic }) {
 
     return (
         <div className="chat-container">
-          <PageHeader isShort={true} title={`Round ${round} : ${localTopic || '토론 주제'}`}/>
+          <PageHeader isShort={true} title={`Video ${videoId+1} : ${localTopic || '토론 주제'}`}/>
             <ChatHistory onTopicChange={handleTopicChange}/>
             <div className="chat-input-area">
                 <ChatInput/>

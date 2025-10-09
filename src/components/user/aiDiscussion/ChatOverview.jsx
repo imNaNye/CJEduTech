@@ -262,6 +262,9 @@ export default function ChatOverView(){
         <ChatTimer/>
         <SubjectOverview totals={myTotals}/>
       </div>
+      <div className = "disclaimer">
+        사용자 입력 내용은 서비스 결과 제공에만 이용되며, 종료 후 저장되지 않습니다.
+      </div>
 
       <section className="principle-icons">
         <div className="principle-icon">

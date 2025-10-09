@@ -26,7 +26,7 @@ export default function ChatInput() {
     <div className="chat-input-wrapper">
       <textarea
         className="chat-input-field"
-        placeholder="메시지를 입력하세요"
+        placeholder="메시지를 입력하세요(@아이고라 를 이용하여 AI에게 직접 문의해보세요)"
         value={text}
         onChange={(e) => setText(e.target.value)}
         onCompositionStart={() => setIsComposing(true)}

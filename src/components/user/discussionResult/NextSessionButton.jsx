@@ -4,17 +4,17 @@ import { useRoundStep } from '../../../contexts/RoundStepContext';
 
 export default function NextSessionButton() {
   const navigate = useNavigate();
-  const { round, setRound, step, setStep } = useRoundStep();
+  const { round, setRound, step, setStep,videoId, setVideoId } = useRoundStep();
   return (
     <button
       className="next-session-button"
       onClick={() => {
-        if (round === 3) {//임시, 원래는 3
+        if (videoId === 2) {
           navigate("/user/loadResult");
         } else {
-          setRound(round + 1);
-          setStep(1);
-          navigate("/user/roundIndicator", { replace: true });
+          setStep(4);
+          setVideoId(videoId+1);
+          navigate("/user/video", { replace: true });
         }
       }}
     >

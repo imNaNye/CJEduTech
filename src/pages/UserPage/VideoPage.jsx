@@ -10,7 +10,6 @@ export default function VideoPage({ onComplete }) {
   const { round, step, setStep, videoId, setVideoId } = useRoundStep();
   const [videoEnded, setVideoEnded] = useState(false);
   const [progress, setProgress] = useState(0); // 0 ~ 100 percent
-  const [videoIdx, setVideoIdx] = useState(0);
   const videoRef = useRef(null);
   const lockSeekRef = useRef(false);
   const lastTimeRef = useRef(0);
@@ -28,11 +27,7 @@ export default function VideoPage({ onComplete }) {
     }
   };
   const playlist = videoByRound[round] || [];
-  const content = playlist[videoIdx];
-
-  useEffect(() => {
-    setVideoIdx(0);
-  }, [round]);
+  const content = playlist[videoId];
 
   useEffect(() => {
     setVideoEnded(false);
@@ -47,7 +42,7 @@ export default function VideoPage({ onComplete }) {
     };
     if (v.readyState >= 2) tryPlay();
     else v.addEventListener('loadeddata', tryPlay, { once: true });
-  }, [round, videoIdx]);
+  }, [round, videoId]);
 
   useEffect(() => {
     // Chrome/iOS 정책: 사용자 제스처 이후에만 소리 재생 허용
@@ -57,14 +52,14 @@ export default function VideoPage({ onComplete }) {
     };
     window.addEventListener('pointerdown', handler, true);
     return () => window.removeEventListener('pointerdown', handler, true);
-  }, [round, videoIdx, muted]);
+  }, [round, videoId, muted]);
 
   if (!content) return <div>이 라운드의 영상이 없습니다.</div>;
-  const isLast = videoIdx === playlist.length - 1;
+  const isLast = videoId === playlist.length - 1;
 
   return (
     <div className='video-page'>
-      <PageHeader title={`${content.title} (${videoIdx + 1} / ${playlist.length})`} />
+      <PageHeader title={`${content.title} (${videoId + 1} / ${playlist.length})`} />
       <section className='video-main'>
         <div className="video-player">
           <div className="video-progress">
@@ -89,7 +84,7 @@ export default function VideoPage({ onComplete }) {
           )}
           <video
             className="video-element"
-            key={`${round}-${videoIdx}`}
+            key={`${round}-${videoId}`}
             ref={videoRef}
             src={content.src}
             autoPlay

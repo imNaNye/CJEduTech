@@ -51,6 +51,18 @@ export default function AIChat({ onTopicChange = () => {} }) {
         const targets = Array.isArray(payload.targets) ? payload.targets : [];
         if (!myNick || !targets.includes(myNick)) return; // 본인 대상 아니면 스킵
       }
+              // 토론 주제 관련 멘트면 상위로 전달하여 주제 업데이트
+        if (payload?.type === 'current_topic'){
+          const newTopic = payload?.topic || payload?.text || '';
+          if (newTopic) {
+            try { onTopicChange(newTopic); } catch {}
+          }
+          return;
+        }
+        if (payload?.type === 'ai_dm'){
+          return;
+        }
+
 
       // 먼저 thinking 연출로 전환 (이전 멘트는 유지)
       pendingRef.current = payload;
@@ -71,13 +83,7 @@ export default function AIChat({ onTopicChange = () => {} }) {
         setCurrentMent(next);
         setPhase("message");
 
-        // 토론 주제 관련 멘트면 상위로 전달하여 주제 업데이트
-        if (next?.type === 'topic_comment'){
-          const newTopic = next?.topic || next?.text || '';
-          if (newTopic) {
-            try { onTopicChange(newTopic); } catch {}
-          }
-        }
+
 
         // 효과음 재생 (브라우저 정책상 play가 막히면 조용히 실패)
         const playSafe = (audio) => {

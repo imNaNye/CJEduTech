@@ -3,6 +3,7 @@ import { socket } from "@/api/chat";
 import Chat from "./Chat";
 import { useRoundStep } from '@/contexts/RoundStepContext';
 import AIChat from "./AIChat";
+import aiIcon from "@/assets/images/discussion/AI_icon.png";
 function generateRandomNickname() {
   const adjectives = ["빠른", "멋진", "똑똑한", "용감한", "행복한"];
   const animals = ["호랑이", "토끼", "독수리", "사자", "여우"];
@@ -104,11 +105,33 @@ export default function ChatHistory({ onTopicChange = () => {} }) {
       setAutoScroll(true);
     });
 
+    // AI DM listener (private AI DM messages)
+    const onAiMent = (payload) => {
+      // Only handle private AI DM messages here; others are ignored
+      if (!payload || payload.type !== 'ai_dm') return;
+      // Push as a regular chat message from AI with AI avatar
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: payload.id || `ai_dm_${Date.now()}`,
+          roomId,
+          nickname: '고라AI',
+          text: payload.text || '',
+          createdAt: payload.createdAt || new Date().toISOString(),
+          avatar: 'ai',
+          avatarUrl:'ai',
+        },
+      ]);
+      setAutoScroll(true);
+    };
+    socket.on('ai:ment', onAiMent);
+
     return () => {
       socket.off("room:recent");
       socket.off("message:new");
-      socket.off("reaction:update");
+      socket  .off("reaction:update");
       socket.off("message:ai");
+      socket.off('ai:ment', onAiMent);
     };
   }, []);
 

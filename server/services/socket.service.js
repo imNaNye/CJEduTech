@@ -74,6 +74,69 @@ async function loadRoundQuestions(baseId, round){
   return [];
 }
 
+// ===== Master content file for discussion questions (per video) =====
+const DISCUSSION_MASTER_FILE = process.env.DISCUSSION_MASTER_FILE || path.join(DISCUSSION_QUESTIONS_DIR, 'content.json');
+
+// Default mapping for numeric videoId (0~9) → keys in content.json
+const DEFAULT_VIDEO_INDEX = [
+  'video_tous_1',
+  'video_tous_3',
+  'video_tous_5',
+  'video_vips_mgr_1',
+  'video_vips_mgr_4',
+  'video_vips_mgr_5',
+  'video_vips_cook_2',
+  'video_vips_cook_3',
+  'video_vips_cook_4',
+  'video_vips_cook_5',
+];
+
+// Resolver: convert videoId (number/string) to content.json key
+async function resolveVideoKey(videoId){
+  if (!videoId && videoId !== 0) return null;
+  try{
+    const data = await readJSON(DISCUSSION_MASTER_FILE);
+    const vc = data && data.video_content ? data.video_content : {};
+
+    // If already a direct key like 'video_tous_1', pass-through when exists
+    if (typeof videoId === 'string' && vc[videoId]) return videoId;
+
+    // Numeric or numeric-string → map
+    const idx = typeof videoId === 'number' ? videoId : Number(String(videoId).trim());
+    if (Number.isInteger(idx) && idx >= 0){
+      // Prefer explicit mapping arrays if provided in content.json
+      // 1) video_index: [ 'video_xxx', ... ]
+      if (Array.isArray(data?.video_index) && data.video_index[idx]){
+        return data.video_index[idx];
+      }
+      // 2) video_index_map: { "0": "video_xxx" }
+      const viaMap = data?.video_index_map && (data.video_index_map[String(idx)] || data.video_index_map[idx]);
+      if (typeof viaMap === 'string') return viaMap;
+
+      // 3) Fallback to built-in default order
+      if (DEFAULT_VIDEO_INDEX[idx]) return DEFAULT_VIDEO_INDEX[idx];
+    }
+  }catch{ /* ignore; fallthrough to null */ }
+  return null;
+}
+
+// Helper to load discussion questions from master JSON based on videoId
+async function loadVideoDiscussionQuestions(videoId){
+  // Accept 0~9 (number/string) or full key like 'video_tous_1'
+  const key = await resolveVideoKey(videoId) || (typeof videoId === 'string' ? videoId : null);
+  if (!key) return [];
+  try {
+    const data = await readJSON(DISCUSSION_MASTER_FILE);
+    const vc = data && data.video_content;
+    const entry = vc && vc[key];
+    const arr = entry && entry.discussion_questions;
+    if (Array.isArray(arr)) return arr.map((it)=> (typeof it === 'string' ? it : (it && it.text) || '')).filter(Boolean);
+  } catch (e) {
+    // ignore and fallback
+  }
+  return [];
+}
+
 // ===== Archiving (persist chat logs per room) =====
 const ARCHIVE_DIR = process.env.CHAT_ARCHIVE_DIR || path.join(process.cwd(), 'data', 'chat_archives');
 async function ensureDir(dir){ try{ await fs.mkdir(dir, { recursive: true }); }catch{ /*noop*/ } }
@@ -168,6 +231,70 @@ function getRoomState(roomId) {
     roomStates.set(roomId, st);
   }
   return st;
+}
+
+// ===== Topic Rotation & Broadcast Helpers =====
+async function ensureRoomTopics(roomId){
+  const st = getRoomState(roomId);
+  if (Array.isArray(st.topics) && st.topics.length) return;
+  try {
+    // 1) Try master content.json via videoId
+    const videoTopics = await loadVideoDiscussionQuestions(st.videoId);
+    if (videoTopics && videoTopics.length){
+      st.topics = videoTopics;
+    } else {
+      // 2) Fallback to legacy per-round files
+      const { baseId, round } = decomposeRoomId(roomId);
+      const arr = await loadRoundQuestions(baseId, round);
+      const topics = (arr || []).map(it => (typeof it === 'string' ? it : (it && it.text) || '')).filter(Boolean);
+      st.topics = topics;
+    }
+  } catch {
+    // 3) Last resort defaults
+    st.topics = [
+      '오늘 토론의 핵심 가치는 무엇인가요?',
+      '가장 설득력 있는 근거는 무엇인가요?',
+      '반대 입장에서 본 핵심 리스크는 무엇인가요?'
+    ];
+  }
+  if (!Array.isArray(st.topics) || !st.topics.length){
+    st.topics = [
+      '오늘 토론의 핵심 가치는 무엇인가요?',
+      '가장 설득력 있는 근거는 무엇인가요?',
+      '반대 입장에서 본 핵심 리스크는 무엇인가요?'
+    ];
+  }
+  if (typeof st.topicIndex !== 'number') st.topicIndex = -1;
+}
+
+function broadcastCurrentTopic(io, roomId){
+  const st = getRoomState(roomId);
+  const text = st.topic || '';
+  if (!text) return;
+  const payload = {
+    roomId,
+    id: randomUUID(),
+    type: 'current_topic',
+    text,
+    targets: [],
+    createdAt: new Date().toISOString()
+  };
+  io.of('/chat').to(`room:${roomId}`).emit('ai:ment', payload);
+}
+
+function setNextTopic(io, roomId){
+  const st = getRoomState(roomId);
+  const topics = Array.isArray(st.topics) ? st.topics : [];
+  if (!topics.length) return false;
+
+  const cur = (typeof st.topicIndex === 'number') ? st.topicIndex : -1;
+  // If there is no next topic, do nothing (stay on current and wait)
+  if (cur + 1 >= topics.length) return false;
+
+  st.topicIndex = cur + 1;
+  st.topic = topics[st.topicIndex];
+  broadcastCurrentTopic(io, roomId);
+  return true;
 }
 
 // ===== Helpers =====
@@ -844,6 +971,9 @@ export function initChatSocket(io) {
       const stForJoin = getRoomState(composed);
       if (videoId) stForJoin.videoId = videoId; // 방 생성 시 전달된 영상 ID 저장
 
+      // Preload topics only (first topic will be announced by scheduler ~10s after creation)
+      ensureRoomTopics(composed);
+
       // start per-room test bot
       ensureRoomBot(io, composed);
 
@@ -1081,11 +1211,14 @@ function startMentorScheduler(io) {
         expireRoom(io, roomId);
         continue;
       }
-      // 1) 3분 주기 토론 멘트: 방 생성 시 즉시 한 번, 이후 5분마다
-      if (!st.topicNextAt) st.topicNextAt = now+1000 * 10; // 안전장치
+      // 1) 5분 주기 현재 토픽 교체 + 공지
       if (!st.topicIntervalMs) st.topicIntervalMs = 1000*60*5; // 5분
+      if (!st.topicNextAt) st.topicNextAt = now + 1000 * 10; // 방 생성 직후 10초 뒤 첫 교체
       if (now >= st.topicNextAt) {
-        generateTopicMentAndBroadcast(io, roomId);
+        // ensure topics loaded and rotate
+        ensureRoomTopics(roomId).then(() => {
+          setNextTopic(io, roomId);
+        });
         st.topicNextAt = now + st.topicIntervalMs;
       }
 

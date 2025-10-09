@@ -178,11 +178,11 @@ letter-spacing: 0.379px;
 /* AI tip callout (orange card on the right) */
 .ai-chat {
   position: absolute;
-  right: 0rem;
+  left: 3%;
   z-index: 10;
 
   display: flex;
-  width: 27.5625rem; /* 441px → rem */
+  width: 90%; /* 441px → rem */
   padding: 1.5rem 1.375rem; /* 24px 22px */
   align-items: flex-start;
   gap: 0.875rem; /* 14px */
@@ -382,4 +382,11 @@ box-sizing: border-box;
   .ai-discussion-main{ flex-direction: column; height: auto; }
   .chat-overview{ width: 100%; height: auto; max-height: 50vh; }
   .chat-container{ width: 100%; height: calc(100vh - 16px - 16px); }
+}
+
+/* ===== AI DM bubble (rendered in ChatHistory as user-like) ===== */
+.chat-bubble.ai-dm {
+  background: #f3f4f6;        /* light grey */
+  border-color: #e5e7eb;      /* subtle border */
+  color: #111;                /* high contrast text */
 }

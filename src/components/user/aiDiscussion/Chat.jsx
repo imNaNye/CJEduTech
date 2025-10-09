@@ -1,5 +1,3 @@
-
-
 import avatar1 from "@/assets/images/avatar/avatar1.png";
 import avatar2 from "@/assets/images/avatar/avatar2.png";
 import avatar3 from "@/assets/images/avatar/avatar3.png";
@@ -12,7 +10,7 @@ import avatar9 from "@/assets/images/avatar/avatar9.png";
 import avatar10 from "@/assets/images/avatar/avatar10.png";
 import avatar11 from "@/assets/images/avatar/avatar11.png";
 import avatar12 from "@/assets/images/avatar/avatar12.png";
-
+import AIicon from "@/assets/images/discussion/AI_icon.png";
 
 export default function Chat({ isMine, nickname, text, createdAt, reactionsCount = 0, didReact = false, aiLabel, aiScore, aiLabels, aiScores ,avatarUrl}) {
   
@@ -29,6 +27,7 @@ export default function Chat({ isMine, nickname, text, createdAt, reactionsCount
         { id: '10', src: avatar10 },
         { id: '11', src: avatar11 },
         { id: '12', src: avatar12 },
+        {id:'ai',src:AIicon},
       ];
 
   const time = createdAt ? new Date(createdAt) : new Date();
@@ -38,16 +37,23 @@ export default function Chat({ isMine, nickname, text, createdAt, reactionsCount
 
   const labels = Array.isArray(aiLabels) && aiLabels.length ? aiLabels : (aiLabel ? [aiLabel] : []);
   function findAvatarById(id) {
+    // Allow direct URL/path usage as well as mapped ids
+    if (typeof id === 'string') {
+      const looksLikePath = id.startsWith('http') || id.includes('/') || id.endsWith('.png') || id.endsWith('.jpg') || id.endsWith('.jpeg') || id.endsWith('.svg');
+      if (looksLikePath) return id; // use the provided path directly
+    }
     const found = avatars.find(a => a.id === id);
-    console.log("findAvatar:",id);
     return found ? found.src : avatar1;
   }
+
+  const isAIDM = (!isMine) && (avatarUrl === 'ai' || nickname === '고라AI');
+
   return (
     <div className={`chat ${isMine ? 'mine' : 'others'}`}>
             {!isMine && (
         <img src={findAvatarById(avatarUrl)} alt="avatar" className="chat-profile-image" />
       )}
-      <div className={`chat-bubble ${isMine ? 'mine' : 'others'}`}>
+      <div className={`chat-bubble ${isMine ? 'mine' : 'others'} ${isAIDM ? 'ai-dm' : ''}`}>
         {!isMine && <div className="chat-nickname">{nickname || '익명'}</div>}
         <div className="chat-text">{text}</div>
         <div className="chat-time">{ts}</div>

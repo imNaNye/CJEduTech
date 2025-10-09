@@ -11,7 +11,7 @@ export default function ChatContainer({ nickname, topic }) {
     const [localNickname, setLocalNickname] = useState(nickname);
     const [localTopic, setLocalTopic] = useState(topic);
 
-    const { round, setRound, step, setStep,videoId } = useRoundStep();
+    const { round, setRound, step, setStep,videoId,setVideoId } = useRoundStep();
     useEffect(() => {
       if (!nickname) {
         const storedNickname = localStorage.getItem("nickname");

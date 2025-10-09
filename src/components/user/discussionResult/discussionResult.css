@@ -199,6 +199,7 @@ letter-spacing: 0.354px;
   border-radius: 14px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.06);
   padding: 20px 22px;
+  min-width: 300px;
 }
 .dr-card-header h2,
 .dr-card-header h3 {

@@ -12,9 +12,8 @@ export default function NextSessionButton() {
         if (videoId === 2) {
           navigate("/user/loadResult");
         } else {
-          setStep(4);
           setVideoId(videoId+1);
-          navigate("/user/video", { replace: true });
+          navigate("/user/video",{replace:false});
         }
       }}
     >

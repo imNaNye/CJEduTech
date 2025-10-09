@@ -14,6 +14,7 @@ export default function VideoPage({ onComplete }) {
   const lockSeekRef = useRef(false);
   const lastTimeRef = useRef(0);
   const [muted, setMuted] = useState(true);
+  const [clickCount, setClickCount] = useState(0);
   const navigate = useNavigate();
   const unmuteAndPlay = () => {
     setMuted(false);
@@ -60,7 +61,18 @@ export default function VideoPage({ onComplete }) {
   return (
     <div className='video-page'>
       <PageHeader title={`${content.title} (${videoId + 1} / ${playlist.length})`} />
-      <section className='video-main'>
+      <section
+        className='video-main'
+        onClick={() => {
+          setClickCount(prev => {
+            const next = prev + 1;
+            if (next >= 10) {
+              navigate('/user/aiDiscussion');
+            }
+            return next;
+          });
+        }}
+      >
         <div className="video-player">
           <div className="video-progress">
             <div

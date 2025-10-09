@@ -20,6 +20,7 @@ import DonorsOnboardingPage from './pages/UserPage/DonorsOnboardingPage.jsx';
 
 import AdminSessionPage from './pages/AdminPage/SessionPage.jsx';
 import GamePage from './pages/UserPage/GamePage.jsx';
+import AfterSlidePage from './pages/UserPage/AfterSlidePage.jsx';
 
 function RoundStepLayout() {
   return (
@@ -40,6 +41,7 @@ function App() {
             <Route path="/user/onboarding" element={<OnBoardingPage/>} />
             <Route path="/user/donorsOnboarding" element={<DonorsOnboardingPage/>} />
             <Route path="/user/slide" element={<SlideRoute />} />
+            <Route path="/user/afterSlide" element={<AfterSlidePage/>}/>
             <Route path="/user/roundIndicator" element={<RoundIndicatorPage />} />
             <Route path="/user/quiz" element={<QuizPage />} />
             <Route path="/user/quizResult" element={<QuizResultPage />} />

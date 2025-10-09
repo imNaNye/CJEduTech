@@ -1,0 +1,9 @@
+.after-slide-page{
+    width:100vw;
+    height: 100vh;
+}
+.after-slide-image{
+    width: 100vw;
+    height: 94vh;
+    background-image: '@/assets/images/slide/afterslide.png';
+}

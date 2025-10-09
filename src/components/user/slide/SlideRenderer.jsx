@@ -21,7 +21,7 @@ export default function SlideRenderer() {
     if (pageIndex === lastIndex && allDone) {
       setRound(1)
       setStep(2)
-      navigate('/user/roundIndicator')
+      navigate('/user/afterSlide')
     }
   }, [pageIndex, lastIndex, allDone, navigate, setRound, setStep])
 
@@ -35,7 +35,7 @@ export default function SlideRenderer() {
       // 모든 슬라이드 끝났으면 원하는 경로로 이동
       setRound(1)
       setStep(2)
-      navigate('/user/roundIndicator') 
+      navigate('/user/afterSlide') 
     } else {
       // 아직 마지막이 아니면 다음 슬라이드로
       setPageIndex(i => Math.min(config.length - 1, i + 1))

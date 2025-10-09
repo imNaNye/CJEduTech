@@ -6,9 +6,10 @@
 }
 
 /* ===== CJ Game: 공통 레이아웃 ===== */
-.cjgame-wrap { width: 100%; max-width: 1200px; margin: 52px auto; padding: 24px; box-sizing: border-box; }
-.cjgame-title { color:black; font-size: 24px; font-weight: 700; margin: 8px 0 4px; }
-.cjgame-subtitle { color: #666; margin: 0 0 16px; }
+.cjgame-wrap 
+{ width: 100%;height: 80vh;max-width: 1200px; margin: 52px auto; padding: 24px; box-sizing: border-box; }
+.cjgame-title { color:black; font-size: 1.7rem; font-weight: 700; margin: 8px 0 4px; font-family: "CJ ONLYONE NEW title";}
+.cjgame-subtitle { color: #666; margin: 0 0 16px; font-family: "CJ ONLYONE NEW title";}
 .cjgame-center {  text-align: center; }
 .cjgame-muted { color: #9aa0a6; }
 
@@ -36,16 +37,16 @@
 border: 1px solid var(--grey04, #D9D9D9);
 background: var(--white, #FFF);}
 /* ===== 중앙 풀(버튼들) ===== */
-.cjgame-pool { display: grid; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap: 12px; align-items: start; justify-items: stretch; margin: 16px 0 24px; min-height: 120px; }
+.cjgame-pool { padding-top: 3vh; padding-bottom: 3vh; display: grid; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap: 12px; align-items: start; justify-items: stretch; margin: 16px 0 24px; min-height: 120px; }
 .cjgame-chip { border-radius: 15.671px;
-background: var(--grey03, #AFAFAF); padding: 12px 14px; font-weight: 700; border: 1px solid #e5e7eb; cursor: grab; text-align: center; }
-.cjgame-chip:active { cursor: grabbing; }
-.cjgame-chip--small { padding: 6px 10px; font-size: 13px; }
+background:#ff9c59; padding: 12px 14px; font-weight: 700; border: 1px solid #e5e7eb; cursor: grab; text-align: center; font-family: "CJ ONLYONE NEW title";font-size: 1rem;}
+.cjgame-chip:active { cursor: grabbing; background: #ff6d2e;}
+.cjgame-chip--small { padding: 6px 10px; font-size: 1rem; text-align: center; align-items: center; justify-content: center; display: flex;}
 
 /* ===== 버킷(인재상) ===== */
 .cjgame-buckets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.cjgame-bucket { border-radius: 16px; background: linear-gradient(180deg, #fff, #fafafa); border: 1px solid #eee; min-height: 130px; display: flex; flex-direction: column; }
-.cjgame-bucket-title { font-weight: 800; text-align: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+.cjgame-bucket { height: 25vh; border-radius: 16px; background: linear-gradient(180deg, #ffe9db, #fff); border: 2px solid rgb(255, 225, 210); min-height: 130px; display: flex; flex-direction: column; }
+.cjgame-bucket-title { font-family: "CJ ONLYONE NEW title"; font-weight: 800; text-align: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 2rem;}
 .cjgame-bucket-body { color: black; display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; min-height: 90px; align-content: flex-start; }
 
 /* 색상 톤 (참고 이미지와 유사감) */

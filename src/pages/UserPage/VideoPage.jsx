@@ -142,13 +142,8 @@ export default function VideoPage({ onComplete }) {
           disabled={!videoEnded}
           onClick={() => {
             if (!videoEnded) return;
-            if (!isLast) {
-              setVideoEnded(false);
-              setProgress(0);
-              setVideoIdx((i) => i + 1);
-            } else {
-              setStep(3);
-              navigate('/user/roundIndicator');
+            else {
+              navigate('/user/aiDiscussion');
             }
           }}
         >

@@ -331,7 +331,7 @@ const navigate = useNavigate();
             draggable
             onDragStart={(e) => onDragStart(e, item.id)}
             onDragEnd={() => { if (dragGhostRef.current) { document.body.removeChild(dragGhostRef.current); dragGhostRef.current = null; } }}
-            onMouseLeave={() => setHovered(null)}
+            
             onClick={() => setHovered((v) => (v === item.id ? null : item.id))}
             title="드래그하거나 클릭해서 설명 보기"
           >

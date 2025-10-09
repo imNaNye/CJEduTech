@@ -45,6 +45,12 @@ export default function AIChat({ onTopicChange = () => {} }) {
   }, []);
 
   useEffect(() => {
+      // 효과음 재생 (브라우저 정책상 play가 막히면 조용히 실패)
+      const playSafe = (audio) => {
+        try { audio && audio.currentTime && (audio.currentTime = 0); } catch {}
+        try { audio && audio.play && audio.play().catch(() => {}); } catch {}
+      };
+
     const onMent = (payload) => {
       // payload: { id, roomId, type: "topic_comment"|"encourage", text, targets?: string[], createdAt }
       if (!payload) return;
@@ -85,6 +91,7 @@ export default function AIChat({ onTopicChange = () => {} }) {
         const next = pendingRef.current;
         setCurrentMent(next);
         setPhase("message");
+        
 
 
 

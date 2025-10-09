@@ -21,6 +21,7 @@ export default function AIChat({ onTopicChange = () => {} }) {
   const [phase, setPhase] = useState("idle");
   const [currentMent, setCurrentMent] = useState(null); // { id, type, text, createdAt }
   const [dots, setDots] = useState(".");
+  const [hidden, setHidden] = useState(false);
 
   const myNick = typeof window !== "undefined" ? localStorage.getItem("nickname") : null;
   const thinkTimerRef = useRef(null);
@@ -51,18 +52,20 @@ export default function AIChat({ onTopicChange = () => {} }) {
         const targets = Array.isArray(payload.targets) ? payload.targets : [];
         if (!myNick || !targets.includes(myNick)) return; // 본인 대상 아니면 스킵
       }
-              // 토론 주제 관련 멘트면 상위로 전달하여 주제 업데이트
-        if (payload?.type === 'current_topic'){
-          const newTopic = payload?.topic || payload?.text || '';
-          if (newTopic) {
-            try { onTopicChange(newTopic); } catch {}
-          }
-          return;
+      // 토론 주제 관련 멘트면 상위로 전달하여 주제 업데이트
+      if (payload?.type === 'current_topic'){
+        const newTopic = payload?.topic || payload?.text || '';
+        if (newTopic) {
+          try { onTopicChange(newTopic); } catch {}
         }
-        if (payload?.type === 'ai_dm'){
-          return;
-        }
+        return;
+      }
+      if (payload?.type === 'ai_dm'){
+        return;
+      }
 
+      // 새 멘트가 도착했으므로 숨김 해제
+      setHidden(false);
 
       // 먼저 thinking 연출로 전환 (이전 멘트는 유지)
       pendingRef.current = payload;
@@ -108,7 +111,7 @@ export default function AIChat({ onTopicChange = () => {} }) {
 
   // 항상 상주: idle일 때도 배지와 말풍선 프레임은 보여줌
   return (
-    <div className={`ai-chat ai-chat--${phase}`}>
+    <div className={`ai-chat ai-chat--${phase}`} onClick={() => setHidden(prev => !prev)} style={{ display: hidden ? 'none' : 'flex' }}>
       <img className="badge-img" src={aiIcon} alt="aiIcon"/>
 
       {/* 메시지는 유지 표시 (thinking 중에도) */}

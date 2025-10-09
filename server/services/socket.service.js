@@ -75,7 +75,7 @@ async function loadRoundQuestions(baseId, round){
 }
 
 // ===== Master content file for discussion questions (per video) =====
-const DISCUSSION_MASTER_FILE = process.env.DISCUSSION_MASTER_FILE || path.join(DISCUSSION_QUESTIONS_DIR, 'content.json');
+const DISCUSSION_MASTER_FILE = process.env.DISCUSSION_MASTER_FILE || path.join(DISCUSSION_QUESTIONS_DIR, 'default.json');
 
 // Default mapping for numeric videoId (0~9) → keys in content.json
 const DEFAULT_VIDEO_INDEX = [
@@ -682,7 +682,7 @@ async function generateTopicMentAndBroadcast(io, roomId) {
 const state = getRoomState(roomId);
 const context = buildMentContext(roomId);
 const discussion_topic = context.topic || '';
-const video_id = state.videoId || '';
+const video_id = await resolveVideoKey(state.videoId) || '';
 // 가장 최근 대화 전송자를 타겟으로 지정
 const lastSender = (Array.isArray(context.recent) && context.recent.length)
   ? context.recent[context.recent.length - 1].nickname
@@ -969,7 +969,11 @@ export function initChatSocket(io) {
 
       // ensure room state exists & save current video id
       const stForJoin = getRoomState(composed);
-      if (videoId) stForJoin.videoId = videoId; // 방 생성 시 전달된 영상 ID 저장
+      const hasVideoId = (videoId !== undefined && videoId !== null);
+      if (hasVideoId) {
+        stForJoin.videoId = videoId; // 0~9 숫자/문자 모두 허용
+      }
+      console.log('[room:join] videoId incoming=', videoId, 'stored=', hasVideoId ? stForJoin.videoId : '(skipped)');
 
       // Preload topics only (first topic will be announced by scheduler ~10s after creation)
       ensureRoomTopics(composed);

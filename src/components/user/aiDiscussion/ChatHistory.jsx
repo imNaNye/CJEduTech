@@ -68,7 +68,7 @@ export default function ChatHistory({ onTopicChange = () => {} }) {
   }, [messages, autoScroll]);
 
   useEffect(() => {
-    console.log("채팅방 입장 : ",roomId," 라운드 : ",round);
+    console.log("채팅방 입장 : ",roomId," 라운드 : ",round, "videoId : ",videoId);
     socket.emit("room:join", { roomId,round,videoId});
 
     socket.on("room:recent", (payload) => {

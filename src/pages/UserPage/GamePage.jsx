@@ -4,8 +4,8 @@ import '../../components/user/game/game.css'
 
 export default function GamePage(){
     return(
-        <div className="CJ 인성적 요소 구분 게임">
-            <PageHeader title="Game"/>
+        <div className="Gamepage">
+            <PageHeader title="CJ 인성적 요소 구분 게임"/>
             <GameMain/>
         </div>
     )

@@ -187,7 +187,7 @@
 /* Click/disabled visuals (works with SlideProvider isBlocked) */
 .target-card[disabled], .target-card.is-disabled {
   pointer-events: none;
-  opacity: .5;
+  opacity: .8;
   filter: grayscale(.15);
 }
 

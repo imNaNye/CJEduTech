@@ -22,7 +22,8 @@ export function SlideProvider({ children, config, defaultCooldownMs = 0, blockPo
   const page = config[pageIndex] ?? null;
   const required = page?.requiredTargets ?? [];
   const requiredCount = required.length;
-  const timeoutMs = (page?.timeoutSec ?? 0) * 1000;
+  // Force a hardcoded 10-second timeout after all targets are clicked
+  const timeoutMs = 7000;
 
   useEffect(() => {
     setClickedSet(new Set());
@@ -43,9 +44,11 @@ export function SlideProvider({ children, config, defaultCooldownMs = 0, blockPo
     }
   }, [page, required]);
 
-  const nowTs = Date.now();
-  const isBlocked = blockPolicy === 'global' && nowTs < nextAllowedAt;
-  const msRemaining = Math.max(0, nextAllowedAt - nowTs);
+  const isBlocked = useMemo(() => {
+    const nowTs = Date.now();
+    return blockPolicy === 'global' && nowTs < nextAllowedAt;
+  }, [blockPolicy, nextAllowedAt]);
+  const msRemaining = Math.max(0, nextAllowedAt - Date.now());
 
   const getCooldownMs = (id) => {
     const cd = page?.targets?.[id]?.cooldownMs;
@@ -53,41 +56,45 @@ export function SlideProvider({ children, config, defaultCooldownMs = 0, blockPo
   };
 
   const markClicked = (id) => {
-    // 전역 잠금 중이면 무시
+    console.log('🖱️ markClicked called with id:', id);
+    console.log('👉 page:', page);
+    console.log('👉 required:', required);
+
     if (isBlocked) {
       return { ok: false, reason: 'cooldown', waitMs: msRemaining };
     }
-    // 요구 타겟이 아니면 무시(정책에 따라 허용 가능)
+
     if (!required.includes(id)) {
       return { ok: false, reason: 'not-required' };
     }
 
-    let updated = false;
-    setClickedSet((prev) => {
-      if (prev.has(id)) return prev;
-      const next = new Set(prev);
-      next.add(id);
-      updated = true;
-      return next;
+    const prevSet = clickedSet;
+    if (prevSet.has(id)) {
+      return { ok: false, reason: 'duplicate' };
+    }
+
+    const nextSet = new Set(prevSet);
+    nextSet.add(id);
+    setClickedSet(nextSet);
+
+    // if (blockPolicy === 'global') {
+    //   const cd = getCooldownMs(id);
+    //   if (cd > 0) setNextAllowedAt(Date.now() + cd);
+    // }
+
+    const fullId = id.includes('.') ? id : `${page.id}.${id}`;
+    console.log('✅ updated: true');
+    console.log(`🔊 /sounds/targets/${fullId}.mp3`);
+    const audio = new Audio(`/sounds/targets/${fullId}.mp3`);
+    audio.preload = 'auto';
+    audio.currentTime = 0;
+    audio.play().catch((e) => {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`Audio playback failed for ${fullId}:`, e);
+      }
     });
 
-    if (updated && blockPolicy === 'global') {
-      const cd = getCooldownMs(id);
-      if (cd > 0) setNextAllowedAt(Date.now() + cd);
-    }
-
-    if (updated) {
-      const audio = new Audio(`@/assets/sounds/targets/${id}.mp3`);
-      audio.preload = 'auto';
-      audio.currentTime = 0;
-      audio.play().catch((e) => {
-        if (process.env.NODE_ENV !== 'production') {
-          console.warn(`Audio playback failed for ${id}:`, e);
-        }
-      });
-    }
-
-    return { ok: updated, reason: updated ? 'added' : 'duplicate' };
+    return { ok: true, reason: 'added' };
   };
 
   const allDone = requiredCount > 0 && clickedSet.size >= requiredCount;

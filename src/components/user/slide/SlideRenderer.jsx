@@ -25,8 +25,11 @@ export default function SlideRenderer() {
     }
   }, [pageIndex, lastIndex, allDone, navigate, setRound, setStep])
 
-  setStep(2)
-  setRound(1)
+
+  useEffect(() => {
+    setStep(2)
+    setRound(1)
+  }, [setStep, setRound])
 
   const PageComponent = pageComponentMap[page.id]
 

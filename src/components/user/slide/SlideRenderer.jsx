@@ -17,13 +17,20 @@ export default function SlideRenderer() {
 
   if (!page) return <div>끝</div>
 
-  useEffect(() => {
-    if (pageIndex === lastIndex && allDone) {
-      setRound(1)
-      setStep(2)
-      navigate('/user/afterSlide')
-    }
-  }, [pageIndex, lastIndex, allDone, navigate, setRound, setStep])
+useEffect(() => {
+  if (!page) return;
+
+  const isLastPage = pageIndex === config.length - 1;
+  if (isLastPage && allDone) {
+    const timeout = setTimeout(() => {
+      setRound(1);
+      setStep(2);
+      navigate('/user/afterSlide');
+    }, 7000); // 1초 후 이동 (자동 넘김보다 약간 늦게 실행되도록)
+
+    return () => clearTimeout(timeout);
+  }
+}, [pageIndex, config.length, allDone, navigate, setRound, setStep, page]);
 
 
   useEffect(() => {

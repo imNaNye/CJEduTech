@@ -100,23 +100,27 @@ export function SlideProvider({ children, config, defaultCooldownMs = 0, blockPo
   const allDone = requiredCount > 0 && clickedSet.size >= requiredCount;
 
   useEffect(() => {
+    console.log(config.length)
+    console.log(pageIndex)
     if (!allDone || !page) return;
     if (timerRef.current) return;
-    if (timeoutMs <= 0) {
-      setPageIndex((i) => Math.min(i + 1, config.length - 1));
-      return;
-    }
+
+    const isLastPage = pageIndex >= config.length - 1;
+    if (isLastPage) return;
+
     timerRef.current = setTimeout(() => {
-      setPageIndex((i) => Math.min(i + 1, config.length - 1));
+      setPageIndex((i) => i + 1);
       timerRef.current = null;
     }, timeoutMs);
+
     return () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
       }
     };
-  }, [allDone, timeoutMs, page, config.length]);
+
+  }, [allDone, timeoutMs, page, config.length, pageIndex]);
 
   const value = useMemo(
     () => ({

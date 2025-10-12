@@ -31,7 +31,7 @@ export default function AbilitySlide() {
         </div>
 
       </div>
-      <p className="slide-footer">화면 아무곳이나 클릭하여 슬라이드를 재생해 주세요!</p>
+      <p className="slide-footer">화면을 클릭하여 슬라이드를 재생해 주세요!</p>
     </div>
   )
 }

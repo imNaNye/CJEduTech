@@ -191,6 +191,15 @@ export default function QuizPage() {
   };
 
   const current = questions[idx];
+  // helper: Render text with line breaks as <br />
+  const withLineBreaks = (text) => {
+    return text.split('\n').map((line, idx) => (
+      <React.Fragment key={idx}>
+        {line}
+        <br />
+      </React.Fragment>
+    ));
+  };
   if (!current) {
     setStep(3);
     navigate('/user/roundIndicator', { replace: true });
@@ -212,7 +221,7 @@ export default function QuizPage() {
           <>
             <h3 className='timer-h3'>Q{idx + 1}. {current.q}</h3>
             {current.desc && (
-              <p className="quiz-desc">{current.desc}</p>
+              <p className="quiz-desc">{withLineBreaks(current.desc)}</p>
             )}
           </>
         )}
@@ -330,7 +339,7 @@ export default function QuizPage() {
                 const text = isCorrect
                   ? (current?.explainCorrect ?? current?.explanation)
                   : (current?.explainWrong ?? current?.explanation);
-                return text ? <p className="quiz-explain">{text}</p> : null;
+                return text ? <p className="quiz-explain">{withLineBreaks(text)}</p> : null;
               })()}
             </div>
           </div>

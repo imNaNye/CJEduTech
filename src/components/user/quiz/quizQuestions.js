@@ -74,15 +74,15 @@ export const quizQuestions = {
   1: [
     {
       q: '다음 중 아래 설명에 부합하는 카드는?',
-      desc: '개인의 내면적인 성품과 관련된 능력으로 자신과 타인, 사회와의 관계 속에서 바람직한 가치관과 태도를 가지고 행동하는 능력',
+      desc: '개인의 내면적인 성품과 관련된 능력으로 자신과 타인, 사회와의 관계 속에서 \n바람직한 가치관과 태도를 가지고 행동하는 능력',
       options: [
         {  img: r1q1A, alt: '인성',  backImg: verticalBack },
         {  img: r1q1B, alt: '태도', backImg: verticalBack },
         {  img: r1q1C, alt: '기능', backImg: verticalBack },
       ],
       answer: 0,
-      explainCorrect: '인성은 개인의 내면적인 성품과 관련된 능력으로 자신과 타인, 사회와의 관계 속에서 바람직한 가치관과 태도를 가지고 행동하는 능력을 말해요.',
-      explainWrong: '인성은 개인의 내면적인 성품과 관련된 능력으로 자신과 타인, 사회와의 관계 속에서 바람직한 가치관과 태도를 가지고 행동하는 능력을 말해요.',
+      explainCorrect: '인성은 개인의 내면적인 성품과 관련된 능력으로 자신과 타인, 사회와의 관계 속에서 \n바람직한 가치관과 태도를 가지고 행동하는 능력을 말해요.',
+      explainWrong: '인성은 개인의 내면적인 성품과 관련된 능력으로 자신과 타인, 사회와의 관계 속에서 \n바람직한 가치관과 태도를 가지고 행동하는 능력을 말해요.',
       delayMs: 4000,
     },
     {
@@ -95,8 +95,8 @@ export const quizQuestions = {
         {  img: r1q2D, alt: '창의성', backImg: verticalBack}
       ],
       answer: 0,
-      explainCorrect: '정답이에요. 시간 관리 능력은 제한된 시간 안에 효율적으로 일처리를 조율하는 능력을 말해요.',
-      explainWrong: '아쉬워요. 시간 관리 능력은 제한된 시간 안에 효율적으로 일처리를 조율하는 능력을 말해요.',
+      explainCorrect: '정답이에요. 시간 관리 능력은 제한된 시간 안에 효율적으로 일처리를 \n조율하는 능력을 말해요.',
+      explainWrong: '아쉬워요. 시간 관리 능력은 제한된 시간 안에 효율적으로 일처리를 \n조율하는 능력을 말해요.',
     },
     
     {
@@ -109,8 +109,8 @@ export const quizQuestions = {
         {  img: r2q1D, alt: 'D1 이미지', backImg: verticalBack },
       ],
       answer: 3,
-      explainCorrect: '배려심은 고객, 동료 등의 입장을 헤아리고 먼저 생각하는 마음을 말해요.',
-      explainWrong: '배려심은 고객, 동료 등의 입장을 헤아리고 먼저 생각하는 마음을 말해요.',
+      explainCorrect: '배려심은 고객, 동료 등의 입장을 헤아리고 먼저 생각하는 마음을 \n말해요.',
+      explainWrong: '배려심은 고객, 동료 등의 입장을 헤아리고 먼저 생각하는 마음을 \n말해요.',
     },
    
     

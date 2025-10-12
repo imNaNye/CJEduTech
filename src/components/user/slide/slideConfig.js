@@ -3,7 +3,7 @@ import { abilityTargets, attitudeTargets, characterTargets, skillTargets, standa
 export const SlideConfig = [
     {
         id: 'ability',
-        timeoutSec: 2,
+        timeoutSec: 47,
         requiredTargets: ['ability.a', 'ability.b', 'ability.c'],
         targets: abilityTargets,
         data: {
@@ -13,7 +13,7 @@ export const SlideConfig = [
     },
     {
         id: 'character',
-        timeoutSec: 2,
+        timeoutSec: 81,
         requiredTargets: ['character.a', 'character.b', 'character.c', 'character.d',
             'character.e', 'character.f', 'character.g', 'character.h'
         ],
@@ -25,7 +25,7 @@ export const SlideConfig = [
     },
     {
         id: 'attitude',
-        timeoutSec: 2,
+        timeoutSec: 59,
         requiredTargets: ['attitude.a', 'attitude.b','attitude.c','attitude.d','attitude.e'],
         targets: attitudeTargets,
         data: {
@@ -35,7 +35,7 @@ export const SlideConfig = [
     },
     {
         id: 'skill',
-        timeoutSec: 2,
+        timeoutSec: 66,
         requiredTargets: ['skill.a', 'skill.b','skill.c','skill.d','skill.e','skill.f'],
         targets: skillTargets,
         data: {
@@ -45,7 +45,7 @@ export const SlideConfig = [
     },
     {
         id: 'standard',
-        timeoutSec: 2,
+        timeoutSec: 73,
         requiredTargets: ['standard.a', 'standard.b', 'standard.c', 'standard.d'],
         targets: standardTargets,
         data: {

@@ -1,6 +1,7 @@
 // src/slides/SlideProvider.jsx
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
-
+import { useRoundStep } from '@/contexts/RoundStepContext';
+import { useNavigate } from 'react-router-dom';
 
 const SlideCtx = createContext(null);
 
@@ -19,6 +20,22 @@ export function SlideProvider({ children, config, defaultCooldownMs = 0, blockPo
   // 전역 잠금: 다음 클릭 가능 시각(Unix ms). now < nextAllowedAt 이면 잠김
   const [nextAllowedAt, setNextAllowedAt] = useState(0);
 
+  const [flipping, setFlipping] = useState(false);
+
+  const { setStep } = useRoundStep();
+  const navigate = useNavigate();
+
+  const [hasInteracted, setHasInteracted] = useState(false);
+
+  useEffect(() => {
+    const handleClick = () => {
+      setHasInteracted(true);
+      window.removeEventListener('click', handleClick);
+    };
+    window.addEventListener('click', handleClick);
+    return () => window.removeEventListener('click', handleClick);
+  }, []);
+
   const page = config[pageIndex] ?? null;
   const required = page?.requiredTargets ?? [];
   const requiredCount = required.length;
@@ -28,6 +45,7 @@ export function SlideProvider({ children, config, defaultCooldownMs = 0, blockPo
   useEffect(() => {
     setClickedSet(new Set());
     setNextAllowedAt(0);
+    setFlipping(false); // reset flip status
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
@@ -55,72 +73,42 @@ export function SlideProvider({ children, config, defaultCooldownMs = 0, blockPo
     return typeof cd === 'number' ? cd : defaultCooldownMs;
   };
 
-  const markClicked = (id) => {
-    console.log('🖱️ markClicked called with id:', id);
-    console.log('👉 page:', page);
-    console.log('👉 required:', required);
-
-    if (isBlocked) {
-      return { ok: false, reason: 'cooldown', waitMs: msRemaining };
-    }
-
-    if (!required.includes(id)) {
-      return { ok: false, reason: 'not-required' };
-    }
-
-    const prevSet = clickedSet;
-    if (prevSet.has(id)) {
-      return { ok: false, reason: 'duplicate' };
-    }
-
-    const nextSet = new Set(prevSet);
-    nextSet.add(id);
-    setClickedSet(nextSet);
-
-    // if (blockPolicy === 'global') {
-    //   const cd = getCooldownMs(id);
-    //   if (cd > 0) setNextAllowedAt(Date.now() + cd);
-    // }
-
-    const fullId = id.includes('.') ? id : `${page.id}.${id}`;
-    console.log('✅ updated: true');
-    console.log(`🔊 /sounds/targets/${fullId}.mp3`);
-    const audio = new Audio(`/sounds/targets/${fullId}.mp3`);
-    audio.preload = 'auto';
-    audio.currentTime = 0;
-    audio.play().catch((e) => {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn(`Audio playback failed for ${fullId}:`, e);
-      }
-    });
-
-    return { ok: true, reason: 'added' };
-  };
+  const markClicked = () => ({ ok: false, reason: 'disabled' });
 
   const allDone = requiredCount > 0 && clickedSet.size >= requiredCount;
 
   useEffect(() => {
-    console.log(config.length)
-    console.log(pageIndex)
-    if (!allDone || !page) return;
-    if (timerRef.current) return;
+    if (!page) return;
 
-    const isLastPage = pageIndex >= config.length - 1;
-    if (isLastPage) return;
+    // Play slide audio on mount only if user has interacted
+    if (hasInteracted && page?.id) {
+      const audio = new Audio(`/sounds/narration/merged${page.id}.mp3`);
+      audio.play().catch(err => {
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('Audio playback failed:', err);
+        }
+      });
+    }
 
-    timerRef.current = setTimeout(() => {
-      setPageIndex((i) => i + 1);
-      timerRef.current = null;
-    }, timeoutMs);
+    const flipTimeout = setTimeout(() => {
+      setFlipping(true);
+    }, 3000);
+
+    const autoAdvanceTimeout = setTimeout(() => {
+      const isLastPage = pageIndex >= config.length - 1;
+      if (isLastPage) {
+        setStep(2);
+        navigate('/user/roundIndicator');
+      } else {
+        setPageIndex(i => i + 1);
+      }
+    }, (page.timeoutSec ?? 7) * 1000);
 
     return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
+      clearTimeout(flipTimeout);
+      clearTimeout(autoAdvanceTimeout);
     };
-
-  }, [allDone, timeoutMs, page, config.length, pageIndex]);
+  }, [pageIndex, page, hasInteracted]);
 
   const value = useMemo(
     () => ({
@@ -137,9 +125,9 @@ export function SlideProvider({ children, config, defaultCooldownMs = 0, blockPo
       isBlocked,
       msRemaining,
       nextAllowedAt,
-      nextRequiredId: required.find(id => !clickedSet.has(id)),
+      flipping,
     }),
-    [pageIndex, page, config, required, requiredCount, clickedSet, allDone, isBlocked, msRemaining, nextAllowedAt]
+    [pageIndex, page, config, required, requiredCount, clickedSet, allDone, isBlocked, msRemaining, nextAllowedAt, flipping]
   );
 
   return <SlideCtx.Provider value={value}>{children}</SlideCtx.Provider>;

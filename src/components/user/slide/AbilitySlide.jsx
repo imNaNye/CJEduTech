@@ -31,7 +31,7 @@ export default function AbilitySlide() {
         </div>
 
       </div>
-      <p className="slide-footer">슬라이드는 자동 전환되며, 종료 후 퀴즈 화면으로 전환됩니다.</p>
+      <p className="slide-footer">화면 아무곳이나 클릭하여 슬라이드를 재생해 주세요!</p>
     </div>
   )
 }

@@ -1,49 +1,80 @@
-// src/components/user/slide/ClickableTarget.jsx
 import React from 'react'
 import { useSlides } from './SlideProvider'
 
-export default function ClickableTarget({ id, as: Tag = 'button', onClick, className = '', children }) {
-  const { markClicked, clickedSet, required, page, isBlocked, nextRequiredId } = useSlides()
-
-  const isRequired = required.includes(id)
-  const isDone = clickedSet.has(id)
-  const isNext = id === nextRequiredId
+export default function ClickableTarget({ id, as: Tag = 'button', className = '', children }) {
+  const { page, flipping } = useSlides()
 
   const content = page?.targets?.[id] ?? null
   const title = content?.title ?? id
   const postText = content?.postText ?? ''
   const image = content?.image ?? ''
 
-  const handleClick = (e) => {
-    if (onClick) onClick(e)
-    markClicked(id)
-  }
+  const isFlipped = Boolean(flipping)
 
   const classes = [
     'target-card',
     className,
-    isBlocked ? 'is-disabled' : '',
-    isDone ? 'is-active' : '',
-    isNext ? 'is-next' : ''
+    isFlipped ? 'flipped' : ''
   ]
     .filter(Boolean)
     .join(' ')
 
-  return (
-    <Tag type="button" className={classes} onClick={handleClick} disabled={isBlocked} aria-disabled={isBlocked ? 'true' : 'false'}>
-      {/* 첫 번째 행: 이미지 또는 설명 텍스트 (고정 높이 영역) */}
-      {!isDone ? (
-        image ? <img className="icon" src={image} alt="" /> : <div className="icon" />
-      ) : (
-        <div className="desc">{postText}</div>
-      )}
+  // Inline styles to ensure front/back are mutually exclusive even if global CSS is missing
+  const containerStyle = {
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+    perspective: '1000px',
+  }
 
-      {/* 두 번째 행: 라벨 */}
-      <div className="label">
-        {title}
+  const innerStyle = {
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+    transformStyle: 'preserve-3d',
+    transition: 'transform 0.6s',
+    transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+  }
+
+  const faceBase = {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    top: 0,
+    left: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backfaceVisibility: 'hidden'
+  }
+
+  const frontStyle = {
+    ...faceBase,
+    transform: 'rotateY(0deg)'
+  }
+
+  const backStyle = {
+    ...faceBase,
+    transform: 'rotateY(180deg)'
+  }
+
+  return (
+    <Tag type="button" className={classes} disabled aria-disabled="true" style={{ position: 'relative' }}>
+      <div style={containerStyle}>
+        <div className="card-inner" style={innerStyle}>
+          <div className="card-face front" style={frontStyle}>
+            {image ? <img className="icon" src={image} alt="" /> : <div className="icon" />}
+            <div className="label">{title}</div>
+          </div>
+
+          <div className="card-face back" style={backStyle}>
+            <div className="desc">{postText}</div>
+            <div className="label">{title}</div>
+          </div>
+        </div>
       </div>
 
-      {/* children 사용 시에도 카드 높이 변화가 없도록 별도 레이어로 렌더 */}
       {children ? <div style={{ position: 'absolute', inset: 8, pointerEvents: 'none' }}>{children}</div> : null}
     </Tag>
   )

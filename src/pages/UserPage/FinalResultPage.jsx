@@ -64,9 +64,10 @@ export default function FinalResultPage() {
 
   const donutRef = useRef(null);
   const lineRef = useRef(null);
-  const barsRef = useRef(null);
   const donutChartRef = useRef(null);
   const lineChartRef = useRef(null);
+  // ADD
+  const barsRef = useRef(null);
   const barsChartRef = useRef(null);
 
   async function ensureChartJS(){
@@ -642,20 +643,22 @@ export default function FinalResultPage() {
         });
       }
 
-      // --- Bars (participation per round + quiz rates) ---
+      // --- Bars: 토론별 참여도(나 or 전체) ---
       const barsCtx = barsRef.current?.getContext('2d');
       if (barsCtx){
         barsChartRef.current?.destroy?.();
-        const labels = (participation || []).map((r, idx) => `R${(r && r.round_number != null) ? r.round_number : (idx + 1)}`);
-        const mine = (participation || []).map(r => r.myMessages || 0);
-        const qRates = (quiz?.rounds || []).map(r => r.correctRate || 0);
+        const labels = (participation || []).map((r, idx) => `토론 ${r.round_number ?? (idx+1)}`);
+        const myArr = (participation || []).map(r => Number(r?.myMessages || 0));
+        const totArr = (participation || []).map(r => Number(r?.totalMessages || 0));
+        const useMine = myArr.some(v => v > 0);
+        const dataArr = useMine ? myArr : totArr;
+        const dataLabel = useMine ? '나의 메시지 수' : '전체 메시지 수';
         barsChartRef.current = new Chart(barsCtx, {
           type: 'bar',
           data: {
             labels,
             datasets: [
-              { label: '나의 메시지 수', data: mine, backgroundColor: '#3a7bd5', yAxisID: 'y' },
-              { label: '퀴즈 정답률(%)', data: qRates, type: 'bar', backgroundColor: '#2ecc71', yAxisID: 'y1' },
+              { label: dataLabel, data: dataArr, backgroundColor: '#3a7bd5', yAxisID: 'y' }
             ]
           },
           options: {
@@ -664,12 +667,12 @@ export default function FinalResultPage() {
             animation: true,
             plugins: { legend: { display: true, position: 'bottom' } },
             scales: {
-              y: { beginAtZero: true, ticks: { precision: 0 }, title: { display: true, text: '메시지 수' } },
-              y1: { beginAtZero: true, suggestedMax: 100, position: 'right', grid: { drawOnChartArea: false }, ticks: { callback: v => v + '%' }, title: { display: true, text: '정답률(%)' } }
+              y: { beginAtZero: true, ticks: { precision: 0 }, title: { display: true, text: '메시지 수' } }
             }
           }
         });
       }
+
     })();
 
     return () => {
@@ -805,43 +808,36 @@ export default function FinalResultPage() {
         </article>
       </section>
 
-      {/* SECTION 3: 라운드별 참여도 + 공감 TOP3 */}
+      {/* SECTION 3: 토론별 참여도 + 공감 TOP3 */}
       <section className="frp-section frp-section--3">
-        <div className="frp-col">
-          <article className="frp-card frp-bars">
-            <header className="frp-card__header"><h3>라운드별 토론 참여도</h3></header>
-            <div className="frp-bars__chart" aria-hidden="false">
-              <canvas ref={barsRef} style={{width:'100%', height:'100%'}} />
-            </div>
-            <footer className="frp-card__footer frp-legend--inline">
-            </footer>
-          </article>
-        </div>
+        <article className="frp-card frp-bars">
+          <header className="frp-card__header"><h3>토론별 참여도</h3></header>
+          <div className="frp-bars__chart" aria-hidden="false">
+            <canvas ref={barsRef} />
+          </div>
+        </article>
 
-        <aside className="frp-col">
-          <article className="frp-card frp-top3">
-            <header className="frp-card__header"><h3>공감을 많이 받은 발언 TOP3</h3></header>
-            <ol className="frp-top3__list">
-              {top3.length ? top3.map((m, i) => (
-                <li key={i}>
-                  <div className="badge">{i+1}</div>
-                  <div className="frp-top3__content">
-                    <p>{m.text}</p>
-                    <div className="frp-top3__meta">
-                      <span className="frp-top3__count">공감 {m.reactionsCount ?? 0}</span>
-                    </div>
+        <article className="frp-card frp-top3">
+          <header className="frp-card__header"><h3>공감을 많이 받은 발언 TOP3</h3></header>
+          <ol className="frp-top3__list">
+            {top3.length ? top3.map((m, i) => (
+              <li key={i}>
+                <div className="badge">{i+1}</div>
+                <div className="frp-top3__content">
+                  <p>{m.text}</p>
+                  <div className="frp-top3__meta">
+                    <span className="frp-top3__count">공감 {m.reactionsCount ?? 0}</span>
                   </div>
-                </li>
-              )) : (
-                <li>
-                  <div className="badge">-</div>
-                  <div className="frp-top3__content"><p className="frp-muted">데이터 없음</p></div>
-                </li>
-              )}
-            </ol>
-          </article>
-        </aside>
-        
+                </div>
+              </li>
+            )) : (
+              <li>
+                <div className="badge">-</div>
+                <div className="frp-top3__content"><p className="frp-muted">데이터 없음</p></div>
+              </li>
+            )}
+          </ol>
+        </article>
       </section>
           <button
       className="save-pdf-button"

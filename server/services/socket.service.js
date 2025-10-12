@@ -416,6 +416,8 @@ async function expireRoom(io, roomId) {
 
   // 결과 집계 (per user)
   const msgs = recentByRoom.get(roomId) || [];
+  // Track, per user, the most-liked message for each persona label
+  const perUserTopByLabel = {}; // nickname -> { 정직|열정|창의|존중: { messageId, text, reactionsCount, createdAt } }
   const perUser = {};
   for (const m of msgs) {
     const nick = m.nickname || '익명';
@@ -426,6 +428,7 @@ async function expireRoom(io, roomId) {
       labels: { 정직:0, 창의:0, 존중:0, 열정:0 },
       topReacted: undefined,
     };
+    if (!perUserTopByLabel[nick]) perUserTopByLabel[nick] = { 정직:null, 열정:null, 창의:null, 존중:null };
     perUser[nick].totalMessages += 1;
     const set = reactionsByMsg.get(m.id);
     const rc = set ? set.size : 0;
@@ -441,9 +444,21 @@ async function expireRoom(io, roomId) {
     }
     const ai = aiByMsg.get(m.id);
     if (ai?.labels && Array.isArray(ai.labels)) {
-      for (const l of ai.labels) if (ALLOWED_LABELS.has(l)) perUser[nick].labels[l] = (perUser[nick].labels[l]||0) + 1;
+      for (const l of ai.labels) {
+        if (!ALLOWED_LABELS.has(l)) continue;
+        perUser[nick].labels[l] = (perUser[nick].labels[l]||0) + 1;
+        const cur = perUserTopByLabel[nick][l];
+        if (!cur || rc > (cur.reactionsCount || 0)) {
+          perUserTopByLabel[nick][l] = { messageId: m.id, text: m.text, reactionsCount: rc, createdAt: m.createdAt };
+        }
+      }
     } else if (ai?.label && ALLOWED_LABELS.has(ai.label)) {
-      perUser[nick].labels[ai.label] = (perUser[nick].labels[ai.label]||0) + 1;
+      const l = ai.label;
+      perUser[nick].labels[l] = (perUser[nick].labels[l]||0) + 1;
+      const cur = perUserTopByLabel[nick][l];
+      if (!cur || rc > (cur.reactionsCount || 0)) {
+        perUserTopByLabel[nick][l] = { messageId: m.id, text: m.text, reactionsCount: rc, createdAt: m.createdAt };
+      }
     }
   }
   // 랭킹 계산
@@ -462,8 +477,44 @@ async function expireRoom(io, roomId) {
     else { rank += sameCount; sameCount = 1; lastScore = s; }
     rankingArr[i].rank = rank;
   }
+  // === Persona grouping (server-provided) ===
+  const groups = { 정직: [], 열정: [], 창의: [], 존중: [] };
+  const ORDER = ['정직','열정','창의','존중'];
+  for (const [nick, u] of Object.entries(perUser)) {
+    const counts = u.labels || {};
+    let best = null; let bestCnt = -1;
+    for (const k of ORDER){
+      const v = Number(counts[k] || 0);
+      if (v > bestCnt){ bestCnt = v; best = k; }
+      else if (v === bestCnt && v > 0) { /* keep earlier by ORDER */ }
+    }
+
+    // If no labels yet, assign to the smallest group (ties resolved by ORDER priority)
+    if (!best || bestCnt <= 0) {
+      let minKey = ORDER[0];
+      for (const k of ORDER) {
+        if (groups[k].length < groups[minKey].length) minKey = k;
+      }
+      groups[minKey].push({ nickname: nick, totalPersonaLabels: 0, topReacted: u.topReacted || null });
+      continue;
+    }
+
+    const topForBest = perUserTopByLabel[nick]?.[best] || u.topReacted || null;
+    groups[best].push({ nickname: nick, totalPersonaLabels: bestCnt, topReacted: topForBest });
+  }
+  for (const k of Object.keys(groups)){
+    groups[k].sort((a,b) => {
+      const ra = a.topReacted?.reactionsCount || 0;
+      const rb = b.topReacted?.reactionsCount || 0;
+      if (rb !== ra) return rb - ra;
+      if ((b.totalPersonaLabels||0) !== (a.totalPersonaLabels||0)) return (b.totalPersonaLabels||0) - (a.totalPersonaLabels||0);
+      const ua = perUser[a.nickname]?.totalReactions || 0;
+      const ub = perUser[b.nickname]?.totalReactions || 0;
+      return ub - ua;
+    });
+  }
   const createdAt = Date.now();
-  resultsByRoom.set(roomId, { createdAt, roomId, perUser, ranking: rankingArr });
+  resultsByRoom.set(roomId, { createdAt, roomId, perUser, ranking: rankingArr, groups });
   for (const r of rankingArr) {
     lastResultByUser.set(r.nickname, {
       roomId,
@@ -479,15 +530,24 @@ async function expireRoom(io, roomId) {
 
   // === Archive to disk ===
   const stMeta = roomStates.get(roomId) || {};
+  // Persist video id information for final aggregation by video
+  let video_id_index = (typeof stMeta.videoId !== 'undefined') ? stMeta.videoId : undefined;
+  let video_id_key;
+  try {
+    video_id_key = await resolveVideoKey(stMeta.videoId);
+  } catch {}
   const archive = {
     roomId,
     createdAt,
     expireAt: stMeta.expireAt || Date.now(),
     topic: stMeta.topic || '',
+    video_id_index,
+    video_id_key,
     round_number: stMeta.roundNumber || (stMeta.context && stMeta.context.round_number) || undefined,
     messages: serializeMessagesForArchive(roomId),
     perUser,
-    ranking: rankingArr
+    ranking: rankingArr,
+    groups
   };
   const { baseId, round } = decomposeRoomId(roomId);
   const suffix = round !== undefined ? `-r${round}` : '';

@@ -18,36 +18,72 @@ function toBaseRoomId(roomId){
 export async function generateFinalResult(roomId, nickname, opts = {}){
   if (!roomId) throw new Error('roomId_required');
   const baseId = toBaseRoomId(roomId);
-  const key = `${baseId}|${nickname||''}`;
+  const desiredVideoId = (opts && Object.prototype.hasOwnProperty.call(opts, 'videoId')) ? opts.videoId : undefined;
+  const vidKey = (typeof desiredVideoId === 'undefined' || desiredVideoId === null) ? 'latest' : String(desiredVideoId);
+  const key = `${baseId}|${nickname||''}|vid=${vidKey}`;
   const force = !!opts.force;
   if (!force && finalResultCache.has(key)){
     const cached = finalResultCache.get(key);
     return { roomId: baseId, nickname, cached: true, ...cached };
   }
+  let archives = await listRoomArchives(baseId);
 
-  let rounds = await listRoomArchives(baseId);
-  // Use only the latest archive per round_number
+  // ---- Video-scoped archive selection (latest per video) ----
   const timeOf = (a) => {
     const t = a?.archivedAt || a?.createdAt || a?.updatedAt || a?.endedAt || a?.timestamp;
     const n = t ? Date.parse(t) : NaN;
     return Number.isFinite(n) ? n : 0;
   };
-  const latestByRound = new Map(); // key: round_number (number | undefined) -> archive
-  for (const a of rounds){
-    const rkey = (typeof a?.round_number === 'number') ? a.round_number : undefined;
-    const prev = latestByRound.get(rkey);
-    if (!prev || timeOf(a) > timeOf(prev)){
-      latestByRound.set(rkey, a);
+
+  // Keep only archives that have explicit video identity
+  const validArchives = (archives || []).filter(a =>
+    typeof a?.video_id_index !== 'undefined' || typeof a?.video_id_key !== 'undefined'
+  );
+
+  // Build a map of latest archive per video id (index or key)
+  const latestByVideo = {};
+  for (const a of validArchives) {
+    const vid = (typeof a.video_id_index !== 'undefined') ? a.video_id_index : a.video_id_key;
+    if (!latestByVideo[vid] || timeOf(a) > timeOf(latestByVideo[vid])) {
+      latestByVideo[vid] = a;
     }
   }
-  rounds = Array.from(latestByRound.values())
-    .sort((x,y) => {
-      const rx = (typeof x?.round_number === 'number') ? x.round_number : 0;
-      const ry = (typeof y?.round_number === 'number') ? y.round_number : 0;
-      return rx - ry;
-    });
 
-  if (!rounds.length){
+  let filtered = [];
+  if (typeof desiredVideoId !== 'undefined' && desiredVideoId !== null) {
+    // If a specific videoId is requested, use only its latest archive
+    for (const [vid, a] of Object.entries(latestByVideo)) {
+      if (String(vid) === String(desiredVideoId)) {
+        filtered.push(a);
+        break;
+      }
+    }
+  } else {
+    // Otherwise, pick the single most recent archive across all videos
+    const latest = Object.values(latestByVideo).sort((x, y) => timeOf(y) - timeOf(x))[0];
+    if (latest) filtered = [latest];
+  }
+
+  archives = filtered;
+  // Stable order (usually single item)
+  archives = archives.sort((x,y) => timeOf(x) - timeOf(y));
+  // Debug: print aggregation target archives (files) for this run
+  try {
+    const debugList = (archives || []).map((a, i) => ({
+      idx: i,
+      video_id_index: a?.video_id_index,
+      video_id_key: a?.video_id_key,
+      round_number: a?.round_number,
+      file: a?.file || a?.filename || a?.path || a?.source || null,
+      archivedAt: a?.archivedAt || a?.createdAt || a?.updatedAt || a?.endedAt || a?.timestamp || null,
+      totalMessages: Array.isArray(a?.messages) ? a.messages.length : null,
+    }));
+    console.info('[FinalResult][selected archives]', { roomId: baseId, desiredVideoId, count: debugList.length, list: debugList });
+  } catch (e) {
+    console.warn('[FinalResult][debug log failed]', e?.message);
+  }
+
+  if (!archives.length){
     const empty = {
       createdAt: new Date().toISOString(),
       sections: {
@@ -56,21 +92,22 @@ export async function generateFinalResult(roomId, nickname, opts = {}){
         personaIntegrated: { counts: { '정직':0,'창의':0,'존중':0,'열정':0 }, percentages: { '정직':0,'창의':0,'존중':0,'열정':0 } },
         personaByRound: [],
         participationByRound: [],
-        top3Statements: []
+        top3Statements: [],
+        video: (typeof desiredVideoId !== 'undefined') ? desiredVideoId : undefined
       }
     };
     finalResultCache.set(key, empty);
     return { roomId: baseId, nickname, cached:false, ...empty };
   }
 
-  // 2) Aggregate across rounds
+  // 2) Aggregate across selected archives (by video)
   const perUser = {};
   const personaByRound = []; // [{ round_number, labels:{...} }]
   const participationByRound = []; // [{ round_number, totalMessages, totalReactions, myMessages, myReactions }]
   const allMessages = [];
   const integratedLabels = { '정직':0,'창의':0,'존중':0,'열정':0 };
 
-  for (const a of rounds){
+  for (const a of archives){
     const rno = (typeof a.round_number === 'number') ? a.round_number : undefined;
     const labelsAgg = { '정직':0,'창의':0,'존중':0,'열정':0 };
     const msgs = Array.isArray(a.messages) ? a.messages : [];
@@ -122,16 +159,19 @@ export async function generateFinalResult(roomId, nickname, opts = {}){
     percentages: Object.fromEntries(Object.entries(integratedLabels).map(([k,v])=>[k, Math.round((v/totalLabelSum)*1000)/10])) // 0.1% 단위 반올림
   };
 
-  // 5) AI summary with only my messages
+  // 5) AI summary with only my messages (skippable)
   let aiSummary = null;
+  const skipAISummary = !!opts.skipAISummary;
   try {
-    const myMsgs = allMessages.filter(m => (nickname||'') && m.nickname === nickname).map(m => ({ text: m.text || '' }));
-    if (myMsgs.length){
-      const url = `${AI_BASE.replace(/\/$/, '')}/evaluate`;
-      const payload = { user_id: nickname || 'me', user_messages: myMsgs, discussion_context:{} };
-      console.log(payload);
-      const res = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
-      if (res.ok){ const data = await res.json().catch(()=>({})); aiSummary = data?.personalized_feedback || data?.result || data?.text || null; }
+    if (!skipAISummary) {
+      const myMsgs = allMessages.filter(m => (nickname||'') && m.nickname === nickname).map(m => ({ text: m.text || '' }));
+      if (myMsgs.length){
+        const url = `${AI_BASE.replace(/\/$/, '')}/evaluate`;
+        const payload = { user_id: nickname || 'me', user_messages: myMsgs, discussion_context:{} };
+        const res = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
+        if (res.ok){ const data = await res.json().catch(()=>({})); aiSummary = data?.personalized_feedback || data?.result || data?.text || null; }
+        console.log("aiSummary:",aiSummary);
+      }
     }
   } catch {}
 
@@ -149,7 +189,9 @@ export async function generateFinalResult(roomId, nickname, opts = {}){
     }));
 
   // 7) Build final sections object tailored for FinalResultPage
+  const selectedVideoId = (typeof desiredVideoId !== 'undefined') ? desiredVideoId : (archives[0]?.video_id_key ?? archives[0]?.video_id_index);
   const sections = {
+    video: selectedVideoId,
     overall,
     aiSummary,
     personaIntegrated,
@@ -223,4 +265,190 @@ export async function generateOverallSummary(roomId, opts = {}) {
   const result = { summaryText, createdAt: new Date().toISOString(), payload };
   overallSummaryCache.set(roomId, result);
   return { roomId, cached: false, ...result };
+}
+
+// Aggregate across multiple videoIds
+export async function generateMultiVideoFinalResult(roomId, nickname, videoIds = []) {
+  if (!Array.isArray(videoIds) || !videoIds.length)
+    throw new Error('videoIds_required');
+  try { console.info('[MultiFinalResult][request]', { roomId, nickname, videoIds }); } catch {}
+
+  const allResults = [];
+  for (const vid of videoIds) {
+    const r = await generateFinalResult(roomId, nickname, { videoId: vid, skipAISummary: true });
+    if (r && r.sections) allResults.push(r.sections);
+  }
+
+  // Collect my messages across the latest archives of requested videos for a single AI summary call
+  let aiSummary = null;
+  try {
+    const archives = await listRoomArchives(toBaseRoomId(roomId));
+    const timeOf = (a) => {
+      const t = a?.archivedAt || a?.createdAt || a?.updatedAt || a?.endedAt || a?.timestamp;
+      const n = t ? Date.parse(t) : NaN;
+      return Number.isFinite(n) ? n : 0;
+    };
+    // keep only with video identity
+    const valid = (archives||[]).filter(a => typeof a?.video_id_index !== 'undefined' || typeof a?.video_id_key !== 'undefined');
+    // latest by video for requested list
+    const latestByVideo = {};
+    for (const a of valid) {
+      const vid = (typeof a.video_id_index !== 'undefined') ? a.video_id_index : a.video_id_key;
+      if (!videoIds.some(v => String(v) === String(vid))) continue;
+      if (!latestByVideo[vid] || timeOf(a) > timeOf(latestByVideo[vid])) latestByVideo[vid] = a;
+    }
+    // gather my messages
+    const myMsgs = Object.values(latestByVideo)
+      .flatMap(a => Array.isArray(a?.messages) ? a.messages : [])
+      .filter(m => (nickname||'') && m.nickname === nickname && (m?.text||'').trim().length > 0)
+      .map(m => ({ text: m.text || '' }));
+    if (myMsgs.length) {
+      const url = `${AI_BASE.replace(/\/$/, '')}/evaluate`;
+      const payload = { user_id: nickname || 'me', user_messages: myMsgs, discussion_context:{} };
+      const res = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
+      if (res.ok){ const data = await res.json().catch(()=>({})); aiSummary = data?.personalized_feedback || data?.result || data?.text || null; }
+      console.info('[MultiFinalResult][aiSummary] requested once for all videos', { countMessages: myMsgs.length });
+    }
+  } catch (e) {
+    console.warn('[MultiFinalResult][aiSummary] failed', e?.message);
+  }
+
+  if (!allResults.length) {
+    return {
+      roomId,
+      nickname,
+      createdAt: new Date().toISOString(),
+      sections: {
+        overall: { rank: null, score: null, totalMessages: 0, totalReactions: 0 },
+        aiSummary: null,
+        personaIntegrated: { counts: { '정직':0,'창의':0,'존중':0,'열정':0 }, percentages: { '정직':0,'창의':0,'존중':0,'열정':0 } },
+        personaByVideo: [],
+        participationByVideo: [],
+        ranking: [],
+      }
+    };
+  }
+
+  const mergedLabels = { '정직':0,'창의':0,'존중':0,'열정':0 };
+  const mergedRanking = {};
+  const participationByVideo = [];
+  const personaByVideo = [];
+
+  let totalMessages = 0;
+  let totalReactions = 0;
+
+  for (const sec of allResults) {
+    totalMessages += sec.overall?.totalMessages || 0;
+    totalReactions += sec.overall?.totalReactions || 0;
+
+    for (const k of Object.keys(mergedLabels)) {
+      mergedLabels[k] += sec.personaIntegrated?.counts?.[k] || 0;
+    }
+
+    personaByVideo.push({ video: sec.video, labels: { ...sec.personaIntegrated?.counts } });
+    participationByVideo.push({
+      video: sec.video,
+      totalMessages: sec.overall?.totalMessages || 0,
+      totalReactions: sec.overall?.totalReactions || 0,
+      score: sec.overall?.score || 0,
+    });
+
+    for (const r of (sec.ranking || [])) {
+      if (!mergedRanking[r.nickname])
+        mergedRanking[r.nickname] = { nickname: r.nickname, totalMessages: 0, totalReactions: 0, labels: { '정직':0,'창의':0,'존중':0,'열정':0 } };
+      mergedRanking[r.nickname].totalMessages += r.totalMessages || 0;
+      mergedRanking[r.nickname].totalReactions += r.totalReactions || 0;
+      for (const k of Object.keys(mergedLabels)) {
+        mergedRanking[r.nickname].labels[k] += (r.labels?.[k] || 0);
+      }
+    }
+  }
+
+  const calcScore = (u) => (u.totalReactions||0) * 3 +
+    Object.values(u.labels||{}).reduce((a,b)=>a+(b||0),0) +
+    (u.totalMessages||0) * 0.5;
+
+  const ranking = Object.values(mergedRanking)
+    .map(u => ({ ...u, score: calcScore(u) }))
+    .sort((a,b)=> b.score - a.score);
+
+  let rank = 1, same = 0, last = null;
+  for (const r of ranking) {
+    if (last === null) { rank = 1; same = 1; last = r.score; }
+    else if (r.score === last) same++;
+    else { rank += same; same = 1; last = r.score; }
+    r.rank = rank;
+  }
+
+  const me = ranking.find(r => r.nickname === nickname);
+
+  const totalLabelSum = Object.values(mergedLabels).reduce((a,b)=>a+(b||0),0) || 1;
+  const personaIntegrated = {
+    counts: mergedLabels,
+    percentages: Object.fromEntries(Object.entries(mergedLabels).map(([k,v])=>[k, Math.round((v/totalLabelSum)*1000)/10]))
+  };
+
+  const overall = {
+    rank: me?.rank ?? null,
+    score: me?.score ?? null,
+    totalMessages,
+    totalReactions,
+  };
+
+  // Derive round-shaped arrays from video-based arrays (to avoid client-side mock fallbacks)
+  const personaByRound = Array.isArray(personaByVideo) ? personaByVideo.map((v, idx) => ({
+    round_number: idx + 1,
+    labels: { ...(v.labels || {}) },
+  })) : [];
+
+  const participationByRound = Array.isArray(participationByVideo) ? participationByVideo.map((v, idx) => ({
+    round_number: idx + 1,
+    totalMessages: Number(v.totalMessages || 0),
+    totalReactions: Number(v.totalReactions || 0),
+    myMessages: Number(v.myMessages || 0),
+    myReactions: Number(v.myReactions || 0),
+  })) : [];
+
+  // Build Top3 statements across latest archives of the requested videos (only my messages)
+  let top3Statements = [];
+  try {
+    const archives2 = await listRoomArchives(toBaseRoomId(roomId));
+    const timeOf2 = (a) => {
+      const t = a?.archivedAt || a?.createdAt || a?.updatedAt || a?.endedAt || a?.timestamp;
+      const n = t ? Date.parse(t) : NaN;
+      return Number.isFinite(n) ? n : 0;
+    };
+    const valid2 = (archives2||[]).filter(a => typeof a?.video_id_index !== 'undefined' || typeof a?.video_id_key !== 'undefined');
+    const latestByVideo2 = {};
+    for (const a of valid2) {
+      const vid = (typeof a.video_id_index !== 'undefined') ? a.video_id_index : a.video_id_key;
+      if (!videoIds.some(v => String(v) === String(vid))) continue;
+      if (!latestByVideo2[vid] || timeOf2(a) > timeOf2(latestByVideo2[vid])) latestByVideo2[vid] = a;
+    }
+    const myMsgs2 = Object.values(latestByVideo2)
+      .flatMap(a => Array.isArray(a?.messages) ? a.messages : [])
+      .filter(m => (nickname||'') && m.nickname === nickname && (m?.text||'').trim().length > 0);
+    top3Statements = myMsgs2
+      .sort((a,b)=> (b.reactionsCount||0) - (a.reactionsCount||0))
+      .slice(0,3)
+      .map(m => ({ text: m.text, reactionsCount: m.reactionsCount || 0, createdAt: m.createdAt, round_number: m.round_number }));
+  } catch {}
+
+  return {
+    roomId,
+    nickname,
+    createdAt: new Date().toISOString(),
+    sections: {
+      overall,
+      aiSummary,
+      personaIntegrated,
+      personaByVideo,
+      participationByVideo,
+      // derived for clients expecting round-based keys
+      personaByRound,
+      participationByRound,
+      top3Statements,
+      ranking,
+    }
+  };
 }

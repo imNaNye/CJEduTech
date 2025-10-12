@@ -210,7 +210,7 @@ export default function QuizPage() {
         </div>
         {phase !== 'result' && (
           <>
-            <h3>Q{idx + 1}. {current.q}</h3>
+            <h3 className='timer-h3'>Q{idx + 1}. {current.q}</h3>
             {current.desc && (
               <p className="quiz-desc">{current.desc}</p>
             )}

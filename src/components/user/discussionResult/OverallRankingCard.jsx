@@ -58,17 +58,35 @@ function rankSuffix(n){
  *    stats?:{ justice?:number, passion?:number, creativity?:number, respect?:number, likes?:number, messages?:number }
  *  }>
  */
-export default function OverallRankingCard({ ranking=[] }){
+export default function OverallRankingCard({ ranking = [], perUser = {} }){
   const list = useMemo(() => {
-    if (Array.isArray(ranking) && ranking.length) return ranking.slice(0, 20);
+    if (Array.isArray(ranking) && ranking.length) {
+      return ranking.slice(0, 20).map((r, idx) => {
+        const info = perUser?.[r.nickname] || {};
+        const labels = info.labels || {};
+        return {
+          rank: r.rank,
+          nickname: r.nickname,
+          avatar: r.avatar || AVATARS[idx % AVATARS.length],
+          stats: {
+            justice: Number(labels['정직'] || 0),
+            passion: Number(labels['열정'] || 0),
+            creativity: Number(labels['창의'] || 0),
+            respect: Number(labels['존중'] || 0),
+            likes: Number((info.totalReactions ?? r.totalReactions) || 0),
+            messages: Number((info.totalMessages ?? r.totalMessages) || 0)
+          }
+        };
+      });
+    }
     // mock 1..20
-    return Array.from({ length: 20 }).map((_,i)=>({
-      rank: i+1,
-      nickname: `참가자${i+1}`,
+    return Array.from({ length: 20 }).map((_, i) => ({
+      rank: i + 1,
+      nickname: `참가자${i + 1}`,
       avatar: AVATARS[i % AVATARS.length],
-      stats: { justice: 12, passion: 10, creativity: 8, respect: 6, likes: 12+i, messages: 10+i }
+      stats: { justice: 12, passion: 10, creativity: 8, respect: 6, likes: 12 + i, messages: 10 + i }
     }));
-  }, [ranking]);
+  }, [ranking, perUser]);
 
   const { imgRef: towerImgRef, height: towerHeight } = useTowerHeight();
   const listGridStyle = useMemo(() => ({

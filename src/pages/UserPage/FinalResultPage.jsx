@@ -57,6 +57,11 @@ export default function FinalResultPage() {
   const [data, setData] = useState(null);
   const [quiz, setQuiz] = useState(null);
 
+  // 하드코딩된 비디오 세트 선택 (A세트: 0~2, B세트: 3~9)
+  const VIDEO_SET_A = [0, 1, 2];
+  const VIDEO_SET_B = [3, 4, 5, 6, 7, 8, 9];
+  const selectedVideoSet = VIDEO_SET_A; // ⚙️ 여기서 A/B 전환 가능
+
   const donutRef = useRef(null);
   const lineRef = useRef(null);
   const barsRef = useRef(null);
@@ -212,34 +217,17 @@ export default function FinalResultPage() {
         setLoading(false);
         return;
       }
-      try{
-        // 1) 최종 결과 조회 (GET)
-        const res = await http.get(`/api/review/ggg/final-result?nickname=${encodeURIComponent(nickname||'')}`);
-        const json = res;
-        console.log('[FinalResultPage] GET final-result:', json);
-        if (aborted) return;
-        setData(fillSectionsWithMockIfSparse(json, nickname));
-      }catch(e){
-        if (aborted) return;
-        const status = e?.status || e?.response?.status;
-        if (status === 404) {
-          // 2) 없으면 생성 (POST)
-          try{
-            const created = await http.post(`/api/review/${encodeURIComponent(roomId)}/final-result?force=true`, { nickname: nickname || '' ,force:"true"});
-            console.log('[FinalResultPage] POST final-result (created):', created);
-            if (!aborted) setData(fillSectionsWithMockIfSparse(created, nickname));
-          }catch(e2){
-            console.error('[FinalResultPage] POST final-result failed', e2);
-            if (!aborted){
-              setData({ sections: buildMockSections() });
-              //setError('최종결과 생성 실패: 임시 데이터로 표시합니다.');
-            }
-          }
-        } else {
-          console.error('[FinalResultPage] GET final-result failed', e);
-          // 기타 실패: 임시 데이터 폴백
+      try {
+        // 멀티 비디오 통합 결과 호출
+        const created = await http.post(`/api/review/${encodeURIComponent(roomId)}/multi-final-result`, {
+          nickname: nickname || '',
+          videoIds: selectedVideoSet,
+        });
+        console.log('[FinalResultPage] multi-final-result:', created);
+        if (!aborted) setData(fillSectionsWithMockIfSparse(created, nickname));
+      } catch (e) {
+        if (!aborted) {
           setData({ sections: buildMockSections() });
-          //setError('서버 조회 실패: 임시 데이터로 표시합니다.');
         }
       } finally {
         // 3) 퀴즈 결과는 GET/POST 결과와 무관하게 시도
@@ -273,10 +261,42 @@ export default function FinalResultPage() {
   }, [data, quiz]);
 
   const sections = data?.sections;
+
+  // --- Adapt server's video-based arrays to the existing round-based variables (UI text unchanged) ---
+  const videoAsRounds = useMemo(() => {
+    const personaByVideo = sections?.personaByVideo || [];
+    const participationByVideo = sections?.participationByVideo || [];
+
+    const personaByRoundFromVideo = Array.isArray(personaByVideo) && personaByVideo.length
+      ? personaByVideo.map((v, idx) => ({
+          round_number: (typeof v.video !== 'undefined' ? Number(idx + 1) : idx + 1),
+          labels: { ...(v.labels || {}) },
+        }))
+      : [];
+
+    const participationByRoundFromVideo = Array.isArray(participationByVideo) && participationByVideo.length
+      ? participationByVideo.map((v, idx) => ({
+          round_number: (typeof v.video !== 'undefined' ? Number(idx + 1) : idx + 1),
+          totalMessages: Number(v.totalMessages || 0),
+          totalReactions: Number(v.totalReactions || 0),
+          // myMessages / myReactions are not provided per-video; keep 0 so chart renders without mock fallback
+          myMessages: Number(v.myMessages || 0),
+          myReactions: Number(v.myReactions || 0),
+        }))
+      : [];
+
+    return { personaByRoundFromVideo, participationByRoundFromVideo };
+  }, [sections]);
   const overall = sections?.overall || { rank:null, score:null, totalMessages:0, totalReactions:0 };
   const personaIntegrated = sections?.personaIntegrated || { counts:{}, percentages:{} };
-  const personaByRound = sections?.personaByRound || [];
-  const participation = sections?.participationByRound || [];
+  const personaByRound = (sections?.personaByRound && sections.personaByRound.length)
+    ? sections.personaByRound
+    : videoAsRounds.personaByRoundFromVideo;
+
+  const participation = (sections?.participationByRound && sections.participationByRound.length)
+    ? sections.participationByRound
+    : videoAsRounds.participationByRoundFromVideo;
+
   const top3 = sections?.top3Statements || [];
   const aiSummary = sections?.aiSummary || '';
   const { avatarUrl } = useUser();

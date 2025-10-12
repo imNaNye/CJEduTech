@@ -1,6 +1,6 @@
 // server/routes/review.routes.js
 import { Router } from 'express';
-import { generateOverallSummary, getOverallSummary, generateFinalResult, getFinalResult } from '../services/review.service.js';
+import { generateOverallSummary, getOverallSummary, generateFinalResult, getFinalResult, generateMultiVideoFinalResult } from '../services/review.service.js';
 
 const router = Router();
 
@@ -29,6 +29,20 @@ router.get('/:roomId/final-result', (req, res) => {
     return res.json(v);
   } catch (e) {
     return res.status(500).json({ error: 'final_result_failed', message: e?.message });
+  }
+});
+
+// POST /api/review/:roomId/multi-final-result  body: { nickname, videoIds: [] }
+router.post('/:roomId/multi-final-result', async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const nickname = req.body?.nickname || req.query?.nickname || '';
+    const videoIds = Array.isArray(req.body?.videoIds) ? req.body.videoIds : [];
+    if (!videoIds.length) return res.status(400).json({ error: 'videoIds_required' });
+    const result = await generateMultiVideoFinalResult(roomId, nickname, videoIds);
+    return res.json(result);
+  } catch (e) {
+    return res.status(500).json({ error: 'multi_final_result_failed', message: e?.message });
   }
 });
 

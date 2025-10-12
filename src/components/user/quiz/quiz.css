@@ -96,7 +96,7 @@
 
 header > div { font-weight: 600; color: var(--ink); }
 
-h3 {
+.timer-h3 {
     color: var(--orange02, #FF6E37);
     text-align: center;
     font-family: "CJ ONLYONE NEW title";

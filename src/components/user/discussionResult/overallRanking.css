@@ -3,7 +3,11 @@
   margin:0 0 14px 0;
   font-family: "CJ ONLYONE NEW title";
   font-weight:800;
-  text-align:left;
+  text-align:center;
+    color: var(--orange02, #FF6E37);
+    font-size: 39px;
+    font-style: normal;
+    line-height: 160%; /* 78.4px */
 }
 
 /* 좌: 탑 이미지 / 우: 목록 */

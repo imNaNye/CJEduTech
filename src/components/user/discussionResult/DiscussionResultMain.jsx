@@ -6,7 +6,7 @@ import { http } from '@/lib/http' ;
 import { useUser } from '@/contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
 import TalentGroupCard from './TalentGroupCard';
-
+import { useRoundStep } from '@/contexts/RoundStepContext';
 import OverallRankingCard from './OverallRankingCard';
 // Dynamically load Chart.js from CDN (no static import)
 async function ensureChartJS(){
@@ -102,6 +102,7 @@ function buildMockMyResult(nickname = '나', room){
 }
 
 export default function DiscussionResultMain() {
+    const { round, setRound, step, setStep,videoId,setVideoId } = useRoundStep();
     const avatars = [
       { id: '1', src: avatar1 },
       { id: '2', src: avatar2 },
@@ -473,29 +474,19 @@ export default function DiscussionResultMain() {
   // Ranking list (top 10)
   const ranking = roomResult?.ranking || [];
   const topN = ranking.slice(0, 10);
-
-  // --- 임시 인재상 그룹핑: 닉네임 해시로 4개 그룹에 균등 분산(재현 가능) ---
-const TRAIT_KEYS = ['정직','열정','창의','존중'];
-function hashToUInt(str){
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
-  return h >>> 0; // unsigned
+function koreanOrdinal(n){
+  const map = [
+    '첫번째','두번째','세번째', '첫번째','두번째','세번째','네번째','다섯번째',
+    '여섯번째','일곱번째'
+  ];
+  if (!Number.isFinite(n) || n <= 0) return '';
+  return map[n-1] || `${n}번째`;
 }
-const groupedMembers = useMemo(() => {
-  const groups = { '정직': [], '열정': [], '창의': [], '존중': [] };
-  const perUser = roomResult?.perUser || {};
-  const nicks = Object.keys(perUser);
-  nicks.forEach(nick => {
-    const idx = hashToUInt(nick) % 4; // 닉네임 기반 의사난수 → 4개 그룹
-    const trait = TRAIT_KEYS[idx];
-    groups[trait].push({
-      nickname: nick,
-      avatar: undefined, // 서버 연동 전이므로 폴백(내부 컴포넌트에서 처리)
-      topReacted: perUser[nick]?.topReacted
-    });
-  });
-  return groups;
-}, [roomResult]);
+  const ordinalText = useMemo(() => {
+    const n = Number(videoId);
+    if (!Number.isFinite(n)) return '';
+    return koreanOrdinal(n + 1); // videoId가 0부터 시작하므로 +1
+  }, [videoId]);
 
   if (loading) {
     return (
@@ -559,48 +550,52 @@ const groupedMembers = useMemo(() => {
       {/* 우측 스크롤 영역: 나의 레포트 + 랭킹 */}
       <div className="dr-scroll-area">
         {/* 전체 랭킹 */}
-        <OverallRankingCard ranking={roomResult?.ranking || []} />
+        <OverallRankingCard ranking={roomResult?.ranking || []} perUser={roomResult?.perUser || {}} />
         {/* 인재상 그룹 */}
-          <TalentGroupCard
-    trait="정직"
-    members={(roomResult?.ranking || []).map(r => ({
-      nickname: r.nickname,
-      // r.avatar가 있으면 매핑, 없으면 폴백
-      avatar: undefined,
-      topReacted: roomResult?.perUser?.[r.nickname]?.topReacted,
-    }))}
-  />
-    <TalentGroupCard
-    trait="열정"
-    members={(roomResult?.ranking || []).map(r => ({
-      nickname: r.nickname,
-      // r.avatar가 있으면 매핑, 없으면 폴백
-      avatar: undefined,
-      topReacted: roomResult?.perUser?.[r.nickname]?.topReacted,
-    }))}
-  />
-    <TalentGroupCard
-    trait="창의"
-    members={(roomResult?.ranking || []).map(r => ({
-      nickname: r.nickname,
-      // r.avatar가 있으면 매핑, 없으면 폴백
-      avatar: undefined,
-      topReacted: roomResult?.perUser?.[r.nickname]?.topReacted,
-    }))}
-  />
-    <TalentGroupCard
-    trait="존중"
-    members={(roomResult?.ranking || []).map(r => ({
-      nickname: r.nickname,
-      // r.avatar가 있으면 매핑, 없으면 폴백
-      avatar: undefined,
-      topReacted: roomResult?.perUser?.[r.nickname]?.topReacted,
-    }))}
-  />
+        <TalentGroupCard
+          trait="정직"
+          members={(roomResult?.groups?.['정직'] || []).map(it => ({
+            nickname: it.nickname,
+            avatar: undefined,
+            topReacted: it.topReacted,
+            totalPersonaLabels: it.totalPersonaLabels,
+          }))}
+        />
+        <TalentGroupCard
+          trait="열정"
+          members={(roomResult?.groups?.['열정'] || []).map(it => ({
+            nickname: it.nickname,
+            avatar: undefined,
+            topReacted: it.topReacted,
+            totalPersonaLabels: it.totalPersonaLabels,
+          }))}
+        />
+        <TalentGroupCard
+          trait="창의"
+          members={(roomResult?.groups?.['창의'] || []).map(it => ({
+            nickname: it.nickname,
+            avatar: undefined,
+            topReacted: it.topReacted,
+            totalPersonaLabels: it.totalPersonaLabels,
+          }))}
+        />
+        <TalentGroupCard
+          trait="존중"
+          members={(roomResult?.groups?.['존중'] || []).map(it => ({
+            nickname: it.nickname,
+            avatar: undefined,
+            topReacted: it.topReacted,
+            totalPersonaLabels: it.totalPersonaLabels,
+          }))}
+        />
         {/* 나의 레포트 */}
         <section className="dr-my-report card">
           <div className="dr-card-header">
-            <h2>{myNickname ? `나의 첫번째 토론 레포트` : '나의 토론 레포트'}</h2>
+            <h2>
+            {myNickname
+              ? `나의 ${ordinalText ? ordinalText + ' ' : ''}토론 레포트`
+              : '나의 토론 레포트'}
+          </h2>
           </div>
 
           <div className="dr-card-body-2x2">

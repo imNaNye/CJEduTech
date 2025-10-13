@@ -915,7 +915,7 @@ async function classifyAndBroadcast(io, msg) {
     return;
   }
   try {
-    const res = await fetch(AI_ENDPOINT + "/classify", {
+    const res = await fetch(AI_ENDPOINT + "/classify-gpt", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

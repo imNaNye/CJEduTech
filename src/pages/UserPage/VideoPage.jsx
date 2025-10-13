@@ -155,7 +155,7 @@ export default function VideoPage({ onComplete }) {
           }}
         >
           {videoEnded
-            ? (isLast ? '영상 시청 종료' : '다음 영상 보기')
+            ? (isLast ? '영상 시청 종료' : '영상 시청 종료')
             : '영상은 자동 재생됩니다. 한 번 클릭해서 음소거를 해제해 주세요.'}
         </button>
       </section>

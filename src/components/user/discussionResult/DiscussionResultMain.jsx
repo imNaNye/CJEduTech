@@ -77,13 +77,23 @@ function buildMockRoomResult(nickname = '나'){
     '동료B': { totalMessages: 9,  totalReactions: 13, labels: { '정직': 2, '열정': 2, '창의': 4, '존중': 1 }, topReacted: { text: '실험을 작게 자주 해보죠.', reactionsCount: 6 } },
     '동료C': { totalMessages: 7,  totalReactions: 8,  labels: { '정직': 1, '열정': 3, '창의': 1, '존중': 2 }, topReacted: { text: '일정을 먼저 확정합시다.', reactionsCount: 4 } },
   };
+
   const ranking = [
     { nickname, rank: 1, score: 96, totalMessages: perUser[nickname].totalMessages, totalReactions: perUser[nickname].totalReactions },
     { nickname: '동료A', rank: 2, score: 88, totalMessages: perUser['동료A'].totalMessages, totalReactions: perUser['동료A'].totalReactions },
     { nickname: '동료B', rank: 3, score: 80, totalMessages: perUser['동료B'].totalMessages, totalReactions: perUser['동료B'].totalReactions },
     { nickname: '동료C', rank: 4, score: 72, totalMessages: perUser['동료C'].totalMessages, totalReactions: perUser['동료C'].totalReactions },
   ];
-  return { perUser, ranking, createdAt };
+
+  // 각 인재상에 한 명씩 배치 (정직→나, 열정→동료A, 창의→동료B, 존중→동료C)
+  const groups = {
+    '정직': [{ nickname, totalPersonaLabels: perUser[nickname].labels['정직'], topReacted: perUser[nickname].topReacted }],
+    '열정': [{ nickname: '동료A', totalPersonaLabels: perUser['동료A'].labels['열정'], topReacted: perUser['동료A'].topReacted }],
+    '창의': [{ nickname: '동료B', totalPersonaLabels: perUser['동료B'].labels['창의'], topReacted: perUser['동료B'].topReacted }],
+    '존중': [{ nickname: '동료C', totalPersonaLabels: perUser['동료C'].labels['존중'], topReacted: perUser['동료C'].topReacted }],
+  };
+
+  return { perUser, ranking, createdAt, groups };
 }
 
 function buildMockMyResult(nickname = '나', room){
@@ -130,7 +140,15 @@ export default function DiscussionResultMain() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [overallSummary, setOverallSummary] = useState("");
-
+  const [avatarMap, setAvatarMap] = useState({}); // { nickname: avatarId }
+  function hashNicknameToAvatarId(nick=''){
+    let h = 0; for (let i=0;i<nick.length;i++){ h=((h<<5)-h)+nick.charCodeAt(i); h|=0; }
+    return String((Math.abs(h)%12)+1);
+  }
+  function getAvatarForNickname(nick){
+    const id = (avatarMap && avatarMap[nick]) ? String(avatarMap[nick]) : hashNicknameToAvatarId(nick);
+    return findAvatarById(id);
+  }
   const donutRef = useRef(null);
   const donutChartRef = useRef(null);
 
@@ -161,7 +179,9 @@ export default function DiscussionResultMain() {
         const roomData = roomOutcome.value;
         setRoomResult(roomData);
         console.log("[DiscussionResultMain] roomData", roomData);
-
+        if (roomData && roomData.avatarMap && typeof roomData.avatarMap === 'object') {
+          setAvatarMap(roomData.avatarMap);
+        }
                 // --- Overall summary (once per room) ---
         try {
           // 1) 조회
@@ -535,6 +555,7 @@ function koreanOrdinal(n){
             <div className="dr-hero-actions">
               <SavePDFButton/>
               <NextSessionButton/>
+              {/*
               <button
                 type="button"
                 className="next-session-button"
@@ -542,6 +563,7 @@ function koreanOrdinal(n){
               >
                 최종 결과
               </button>
+              */}
             </div>
           </div>
         </div>
@@ -550,13 +572,13 @@ function koreanOrdinal(n){
       {/* 우측 스크롤 영역: 나의 레포트 + 랭킹 */}
       <div className="dr-scroll-area">
         {/* 전체 랭킹 */}
-        <OverallRankingCard ranking={roomResult?.ranking || []} perUser={roomResult?.perUser || {}} />
+        <OverallRankingCard ranking={roomResult?.ranking || []} perUser={roomResult?.perUser || {}} avatarMap={avatarMap} />
         {/* 인재상 그룹 */}
         <TalentGroupCard
           trait="정직"
           members={(roomResult?.groups?.['정직'] || []).map(it => ({
             nickname: it.nickname,
-            avatar: undefined,
+            avatar: getAvatarForNickname(it.nickname),
             topReacted: it.topReacted,
             totalPersonaLabels: it.totalPersonaLabels,
           }))}

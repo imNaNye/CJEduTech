@@ -337,6 +337,7 @@ function serializeMessagesForArchive(roomId){
       baseRoomId: baseId,
       round_number: round,
       nickname: m.nickname,
+      avatarId: m.avatarId || m.avatar,
       text: m.text,
       createdAt: m.createdAt,
       reactedUsers: Array.from(set),
@@ -416,11 +417,15 @@ async function expireRoom(io, roomId) {
 
   // 결과 집계 (per user)
   const msgs = recentByRoom.get(roomId) || [];
+  const avatarIdByNick = {}; // ✅ 닉네임→아바타 맵
   // Track, per user, the most-liked message for each persona label
   const perUserTopByLabel = {}; // nickname -> { 정직|열정|창의|존중: { messageId, text, reactionsCount, createdAt } }
   const perUser = {};
   for (const m of msgs) {
     const nick = m.nickname || '익명';
+    if ((m.avatarId || m.avatar) && !avatarIdByNick[nick]) {
+      avatarIdByNick[nick] = String(m.avatarId || m.avatar);
+    }
     if (!perUser[nick]) perUser[nick] = {
       nickname: nick,
       totalMessages: 0,
@@ -514,7 +519,8 @@ async function expireRoom(io, roomId) {
     });
   }
   const createdAt = Date.now();
-  resultsByRoom.set(roomId, { createdAt, roomId, perUser, ranking: rankingArr, groups });
+
+  resultsByRoom.set(roomId, { createdAt, roomId, perUser, ranking: rankingArr, groups, avatarMap: avatarIdByNick }); // ✅ 추가
   for (const r of rankingArr) {
     lastResultByUser.set(r.nickname, {
       roomId,
@@ -547,7 +553,8 @@ async function expireRoom(io, roomId) {
     messages: serializeMessagesForArchive(roomId),
     perUser,
     ranking: rankingArr,
-    groups
+    groups,
+    avatarMap: avatarIdByNick // ✅ 추가
   };
   const { baseId, round } = decomposeRoomId(roomId);
   const suffix = round !== undefined ? `-r${round}` : '';
@@ -1050,6 +1057,7 @@ export function initChatSocket(io) {
         const ai = aiByMsg.get(m.id) || {};
         return { 
           ...m, 
+          avatarId: m.avatarId || m.avatar,
           reactedUsers: Array.from(set), 
           reactionsCount: set.size,
           aiLabels: ai.labels,
@@ -1191,10 +1199,13 @@ export function initChatSocket(io) {
           cb?.({ ok: false, reason: 'room_expired' });
           return;
         }
+        const avatarId = (payload && (payload.avatarId ?? payload.avatar) != null)
+        ? String(payload.avatarId ?? payload.avatar)
+        : undefined;
         const msg = {
           id: randomUUID(),
           roomId,
-          avatar : avatar ||"2",
+          avatarId, // ✅ avatarId로 저장
           nickname: nickname || "익명",
           text: trimmed,
           createdAt: new Date().toISOString()

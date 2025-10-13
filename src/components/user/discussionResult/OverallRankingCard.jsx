@@ -58,16 +58,24 @@ function rankSuffix(n){
  *    stats?:{ justice?:number, passion?:number, creativity?:number, respect?:number, likes?:number, messages?:number }
  *  }>
  */
-export default function OverallRankingCard({ ranking = [], perUser = {} }){
+export default function OverallRankingCard({ ranking = [], perUser = {}, avatarMap = {} }){
   const list = useMemo(() => {
     if (Array.isArray(ranking) && ranking.length) {
       return ranking.slice(0, 20).map((r, idx) => {
         const info = perUser?.[r.nickname] || {};
         const labels = info.labels || {};
+          const aid = avatarMap?.[r.nickname];
+          const avatar = (aid && !Number.isNaN(Number(aid)))
+            ? AVATARS[(Number(aid)-1) % AVATARS.length]
+            : (r.avatar || AVATARS[idx % AVATARS.length]);
         return {
           rank: r.rank,
           nickname: r.nickname,
-          avatar: r.avatar || AVATARS[idx % AVATARS.length],
+
+          avatar,
+          
+          
+          
           stats: {
             justice: Number(labels['정직'] || 0),
             passion: Number(labels['열정'] || 0),

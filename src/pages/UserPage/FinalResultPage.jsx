@@ -847,9 +847,11 @@ export default function FinalResultPage() {
     >
       종료하기
     </button>
-        <button className="next-session-button" onClick={handleClick}>
+    {/*
+      <button className="next-session-button" onClick={handleClick}>
       PDF 저장
-    </button>
+      </button> 
+    */}
       </div>
 
     </div>

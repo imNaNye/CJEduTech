@@ -106,6 +106,9 @@ export async function generateFinalResult(roomId, nickname, opts = {}){
   const participationByRound = []; // [{ round_number, totalMessages, totalReactions, myMessages, myReactions }]
   const allMessages = [];
   const integratedLabels = { '정직':0,'창의':0,'존중':0,'열정':0 };
+  // mine: integrated and per round
+  const integratedLabelsMine = { '정직':0,'창의':0,'존중':0,'열정':0 };
+  const personaByRoundMine = []; // [{ round_number, labels:{...} }]
 
   for (const a of archives){
     const rno = (typeof a.round_number === 'number') ? a.round_number : undefined;
@@ -126,6 +129,11 @@ export async function generateFinalResult(roomId, nickname, opts = {}){
       }
     }
 
+    // my labels for this archive (round/video)
+    const myAgg = (a.perUser && nickname && a.perUser[nickname]) ? a.perUser[nickname] : null;
+    const myLabelsThis = myAgg?.labels || { '정직':0,'창의':0,'존중':0,'열정':0 };
+    for (const k of Object.keys(integratedLabelsMine)) integratedLabelsMine[k] += (myLabelsThis[k] || 0);
+
     for (const m of msgs){
       totalReactions += (m.reactionsCount||0);
       if ((nickname||'') && m.nickname === nickname){
@@ -137,6 +145,7 @@ export async function generateFinalResult(roomId, nickname, opts = {}){
 
     personaByRound.push({ round_number: rno, labels: labelsAgg });
     participationByRound.push({ round_number: rno, totalMessages: msgs.length, totalReactions: totalReactions, myMessages: myMsgs, myReactions: myReacts });
+    personaByRoundMine.push({ round_number: rno, labels: { ...myLabelsThis } });
   }
 
   // 3) Ranking recompute (overall)
@@ -157,6 +166,11 @@ export async function generateFinalResult(roomId, nickname, opts = {}){
   const personaIntegrated = {
     counts: integratedLabels,
     percentages: Object.fromEntries(Object.entries(integratedLabels).map(([k,v])=>[k, Math.round((v/totalLabelSum)*1000)/10])) // 0.1% 단위 반올림
+  };
+  const totalLabelSumMine = Object.values(integratedLabelsMine).reduce((a,b)=>a+(b||0),0) || 1;
+  const personaIntegratedMine = {
+    counts: integratedLabelsMine,
+    percentages: Object.fromEntries(Object.entries(integratedLabelsMine).map(([k,v])=>[k, Math.round((v/totalLabelSumMine)*1000)/10]))
   };
 
   // 5) AI summary with only my messages (skippable)
@@ -195,7 +209,9 @@ export async function generateFinalResult(roomId, nickname, opts = {}){
     overall,
     aiSummary,
     personaIntegrated,
+    personaIntegratedMine,
     personaByRound,
+    personaByRoundMine,
     participationByRound,
     top3Statements,
     ranking // keep full ranking for other widgets if needed
@@ -333,6 +349,9 @@ export async function generateMultiVideoFinalResult(roomId, nickname, videoIds =
   const mergedRanking = {};
   const participationByVideo = [];
   const personaByVideo = [];
+  // mine
+  const personaByVideoMine = [];
+  const mergedLabelsMine = { '정직':0,'창의':0,'존중':0,'열정':0 };
 
   let totalMessages = 0;
   let totalReactions = 0;
@@ -352,6 +371,15 @@ export async function generateMultiVideoFinalResult(roomId, nickname, videoIds =
       totalReactions: sec.overall?.totalReactions || 0,
       score: sec.overall?.score || 0,
     });
+
+    // mine per video from per-result ranking
+    const meRowSec = (sec.ranking || []).find(x => x.nickname === nickname);
+    if (meRowSec && meRowSec.labels){
+      for (const k of Object.keys(mergedLabelsMine)) mergedLabelsMine[k] += (meRowSec.labels[k] || 0);
+      personaByVideoMine.push({ video: sec.video, labels: { ...meRowSec.labels } });
+    } else {
+      personaByVideoMine.push({ video: sec.video, labels: { '정직':0,'창의':0,'존중':0,'열정':0 } });
+    }
 
     for (const r of (sec.ranking || [])) {
       if (!mergedRanking[r.nickname])
@@ -387,6 +415,14 @@ export async function generateMultiVideoFinalResult(roomId, nickname, videoIds =
     counts: mergedLabels,
     percentages: Object.fromEntries(Object.entries(mergedLabels).map(([k,v])=>[k, Math.round((v/totalLabelSum)*1000)/10]))
   };
+  const totalLabelSumMine2 = Object.values(mergedLabelsMine).reduce((a,b)=>a+(b||0),0) || 1;
+  const personaIntegratedMine = {
+    counts: mergedLabelsMine,
+    percentages: Object.fromEntries(Object.entries(mergedLabelsMine).map(([k,v])=>[k, Math.round((v/totalLabelSumMine2)*1000)/10]))
+  };
+  const personaByRoundMine = Array.isArray(personaByVideoMine)
+    ? personaByVideoMine.map((v, idx) => ({ round_number: idx + 1, labels: { ...(v.labels || {}) } }))
+    : [];
 
   const overall = {
     rank: me?.rank ?? null,
@@ -441,11 +477,11 @@ export async function generateMultiVideoFinalResult(roomId, nickname, videoIds =
     sections: {
       overall,
       aiSummary,
-      personaIntegrated,
+      personaIntegrated :personaIntegratedMine ,
       personaByVideo,
       participationByVideo,
       // derived for clients expecting round-based keys
-      personaByRound,
+      personaByRound :personaByRoundMine ,
       participationByRound,
       top3Statements,
       ranking,

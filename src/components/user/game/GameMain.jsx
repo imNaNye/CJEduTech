@@ -2,7 +2,6 @@ import { useMemo, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRoundStep } from '../../../contexts/RoundStepContext';
 import guide1 from "@/assets/images/game/guide1.png";
-import guide2 from "@/assets/images/game/guide2.png";
 import "./game.css";
 
 // 4 인재상 키
@@ -71,7 +70,6 @@ const makeEmptySelections = () =>
 
 export default function GameMain() {
   const [step, setLevel] = useState("guide"); // guide | play | mid | final | wait
-  const [guideIdx, setGuideIdx] = useState(0); // 0/1
   const [phaseIdx, setPhaseIdx] = useState(0); // 0: 인성, 1: 태도, 2: 기능
   const [hovered, setHovered] = useState(null); // {id}
   const [selections, setSelections] = useState(makeEmptySelections);
@@ -156,10 +154,6 @@ const navigate = useNavigate();
   const allPlaced = remainingItems.length === 0;
 
   const goNextFromPlay = () => {
-    setLevel("mid");
-  };
-
-  const goNextFromMid = () => {
     if (phaseIdx < CATEGORIES.length - 1) {
       setPhaseIdx((v) => v + 1);
       setLevel("play");
@@ -169,72 +163,29 @@ const navigate = useNavigate();
     }
   };
 
+
   const restart = () => {
     setSelections(makeEmptySelections());
     setPhaseIdx(0);
-    setGuideIdx(0);
     setLevel("guide");
     setActiveTraitInfo(null);
   };
 
-  // 가이드 화면 두 장
+  // 가이드 화면 단일 페이지
   if (step === "guide") {
     return (
       <div
         className="cjgame-wrap cjgame-guide-screen"
-        onClick={() => {
-          if (guideIdx === 0) setGuideIdx(1);
-          else setLevel("play");
-        }}
+        onClick={() => setLevel("play")}
       >
         <div className="cjgame-guide-image">
-          {/* 프로젝트 자산 경로에 맞춰 이미지 교체하세요 */}
-          {guideIdx === 0 ? (
-            <img alt="guide1" src={guide1} />
-          ) : (
-            <img alt="guide2" src={guide2} />
-          )}
+          <img alt="guide1" src={guide1} />
         </div>
-        <p className="cjgame-guide-hint">화면을 클릭하면 진행합니다</p>
+        <p className="cjgame-guide-hint">화면을 클릭하면 시작합니다</p>
       </div>
     );
   }
 
-  // 중간결과(현재 카테고리 요약)
-  if (step === "mid") {
-    const catKey = currentCategory.key;
-    return (
-      <div className="cjgame-wrap cjgame-mid-screen">
-        <h2 className="cjgame-title">중간 결과 – {currentCategory.label}</h2>
-        <div className="cjgame-result-grid">
-          {TRAITS.map((t) => (
-            <div key={t.key} className="cjgame-result-card">
-              <div className={`cjgame-result-card-header trait-${t.key}`}> {t.label} </div>
-              <div className="cjgame-result-chips">
-                {selections[catKey][t.key].map((id) => (
-                  <span
-                    key={id}
-                    className={`cjgame-chip cjgame-chip--small cjgame-chip--${t.key}`}
-                    title={id}
-                  >
-                    {id}
-                  </span>
-                ))}
-                {selections[catKey][t.key].length === 0 && (
-                  <div className="cjgame-muted">(선택 없음)</div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="cjgame-mid-actions">
-          <button className="cjgame-btn cjgame-primary" onClick={goNextFromMid}>
-            다음
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   // 최종결과(전체 합산)
   if (step === "final") {
@@ -249,7 +200,7 @@ const navigate = useNavigate();
 
     return (
       <div className="cjgame-wrap cjgame-final-screen">
-        <h2 className="cjgame-title">최종 결과</h2>
+        <h2 className="cjgame-title">나의 분류 결과</h2>
         <p className="cjgame-subtitle">각 인재상에 배치된 기본 역량을 확인해 주세요.</p>
         <div className="cjgame-result-grid">
           {TRAITS.map((t) => (
@@ -273,9 +224,11 @@ const navigate = useNavigate();
           ))}
         </div>
         <div className="cjgame-final-actions">
-
+          <button className="cjgame-btn" onClick={restart}>
+            다시하기
+          </button>
           <button className="cjgame-btn cjgame-primary" onClick={() => setLevel("wait")}>
-            확인
+            최종 제출하기
           </button>
         </div>
       </div>
@@ -389,7 +342,7 @@ const navigate = useNavigate();
 
       <footer className="cjgame-footer">
         <button className="cjgame-btn cjgame-primary" disabled={!allPlaced} onClick={goNextFromPlay}>
-          {phaseIdx < CATEGORIES.length - 1 ? "중간 결과 보기" : "최종 결과로"}
+          {phaseIdx < CATEGORIES.length - 1 ? "다음 단계로" : "최종 결과로"}
         </button>
       </footer>
     </div>

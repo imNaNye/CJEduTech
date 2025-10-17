@@ -2,7 +2,8 @@
   width: 100vw;
   min-height: 100vh;
   background: var(--grey06, #F7F7F7);
-
+  word-break: keep-all;     /* 단어 단위 줄바꿈 */
+  white-space: normal;      /* 줄바꿈 허용 */
 }
 
 /* ===== CJ Game: 공통 레이아웃 ===== */

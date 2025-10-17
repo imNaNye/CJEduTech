@@ -98,7 +98,7 @@ export function SlideProvider({ children, config, defaultCooldownMs = 0, blockPo
       const isLastPage = pageIndex >= config.length - 1;
       if (isLastPage) {
         setStep(2);
-        navigate('/admin/roundIndicator');
+        navigate('/admin/afterSlide');
       } else {
         setPageIndex(i => i + 1);
       }

@@ -3,12 +3,15 @@ import { useUser } from '../../../contexts/UserContext';
 
 export default function NextButton() {
   const navigate = useNavigate();
-  const {isAdmin} = useUser();
+  const {isAdmin, setIsAdmin} = useUser();
 
   const handleClick = () => {
     if (isAdmin){
       navigate('/admin/slide');
-    } 
+    } else {
+      setIsAdmin(true);
+      navigate('/admin/slide');
+    }
   };
 
   return (

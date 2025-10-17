@@ -8,7 +8,7 @@ export default function AfterSlideImage() {
 
     const handleClick = () => {
         setStep(2)
-        navigate('/user/roundIndicator')
+        navigate('/admin/roundIndicator')
     };
 
     return (

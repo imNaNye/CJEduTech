@@ -2,12 +2,14 @@ import roundStartSound from '@/assets/sounds/round_start.mp3';
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRoundStep } from "../../contexts/RoundStepContext";
+import { useUser } from '../../contexts/UserContext';
 import PageHeader from "../../components/common/PageHeader";
 import logoRobot from "@//assets/images/common/logoRobot.png";
 import "@/components/user/roundIndicator/roundIndicator.css";
 
 export default function RoundIndicatorPage(){
     const { step, round } = useRoundStep();
+    const { isAdmin, setIsAdmin }= useUser();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -15,10 +17,11 @@ export default function RoundIndicatorPage(){
         audio.play();
 
         const timeout = setTimeout(() => {
+            if (!isAdmin){setIsAdmin(true);}
             if(step === 1){
                 navigate('/admin/slideIndicator');
             } else if(step === 2){
-                navigate('/admin/quiz');
+                navigate('/admin/quizIndicator');
             } else if(step === 3){
                 navigate('/admin/game');
             } else if(step === 4){

@@ -18,3 +18,15 @@
     bottom: 55vh;
     right: 37vw;
 }
+.user-indicator-footer{
+    position: fixed;
+    bottom: 7vh;
+    left: 38vw;
+    color: #a0a0a0;
+    text-align: center;
+    font-family: "CJ ONLYONE NEW title";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}

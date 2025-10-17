@@ -32,6 +32,7 @@ import QuizIndicatorPage from './pages/AdminPage/QuizIndicatorPage.jsx';
 import GameIndicatorPage from './pages/AdminPage/GameIndicatorPage.jsx';
 import GameIndicatorPage2 from './pages/AdminPage/GameIndicatorPage2.jsx';
 import VideoIndicatorPage from './pages/AdminPage/VideoIndicatorPage.jsx';
+import UserSessionPage from './pages/UserPage/UserSessionPage.jsx';
 
 function RoundStepLayout() {
   return (
@@ -47,13 +48,19 @@ function App() {
     <UserProvider> {/* 전역 사용자 상태 적용 */}
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<LoginPage />} />
+          <Route path="/" element={<UserSessionPage />} />
 
+          <Route path="/user/login" element={<LoginPage/>}/>
           <Route path="/user/quizResult" element={<QuizResultPage />} />{/* 미사용 */}
 
           <Route path="/user/selectAvatar" element={<SelectAvatarPage />} />{/* 수강자 */}
+          <Route path="/user/onboarding" element={<OnBoardingPage/>} />
+          <Route path="/user/slideIndicator" element={<SlideIndicatorPage/>}/>
+          <Route path="/user/quizIndicator" element={<QuizIndicatorPage/>}/>
           <Route path="/user/quiz" element={<QuizPage />} />{/* 수강자 */}
+          <Route path="/user/gameIndicator" element={<GameIndicatorPage/>}/>
           <Route path="/user/game" element={<GamePage/>}/>{/* 수강자 */}
+          <Route path="/user/videoIndicator" element={<VideoIndicatorPage/>}/>
           <Route path="/user/aiDiscussion" element={<AIDiscussionPage />} />{/* 수강자 */}
           <Route path="/user/discussionResult" element={<DiscussionResultPage />} />{/* 수강자 */}
           <Route path="/user/finalResult" element={<FinalResultPage />} />{/* 수강자 */}

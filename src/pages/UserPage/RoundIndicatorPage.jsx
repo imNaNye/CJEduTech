@@ -5,9 +5,11 @@ import { useRoundStep } from "../../contexts/RoundStepContext";
 import PageHeader from "../../components/common/PageHeader";
 import logoRobot from "@//assets/images/common/logoRobot.png";
 import "@/components/user/roundIndicator/roundIndicator.css";
+import { useUser } from '../../contexts/UserContext';
 
 export default function RoundIndicatorPage(){
     const { step, round } = useRoundStep();
+    const { isAdmin, setIsAdmin } = useUser();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -16,13 +18,16 @@ export default function RoundIndicatorPage(){
 
         const timeout = setTimeout(() => {
             if(step === 1){
-                navigate('/user/slide');
+                setIsAdmin(false);
+                navigate('/user/slideIndicator');
             } else if(step === 2){
-                navigate('/user/quiz');
+                setIsAdmin(false);
+                navigate('/user/quizIndicator');
             } else if(step === 3){
-                navigate('/user/game');
+                setIsAdmin(false);
+                navigate('/user/gameIndicator');
             } else if(step === 4){
-                navigate('/user/video');
+                navigate('/user/videoIndicator');
             }
         }, 6000);
 

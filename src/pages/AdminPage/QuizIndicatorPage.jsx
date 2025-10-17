@@ -11,10 +11,10 @@ export default function QuizIndicatorPage(){
 
     useEffect(() => {
         setStep(2);
-        setIsAdmin(true);
     }, []);
     
     const [timeLeft, setTimeLeft] = useState(180);
+    const [isButtonActive, setIsButtonActive] = useState(isAdmin);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -30,6 +30,15 @@ export default function QuizIndicatorPage(){
         return () => clearInterval(timer);
     }, []);
 
+    useEffect(() => {
+        if (!isAdmin) {
+            const timer = setTimeout(() => {
+                setIsButtonActive(true);
+            }, 10000);
+            return () => clearTimeout(timer);
+        }
+    }, [isAdmin]);
+
     const formatTime = (seconds) => {
         const m = String(Math.floor(seconds / 60)).padStart(2, '0');
         const s = String(seconds % 60).padStart(2, '0');
@@ -38,11 +47,20 @@ export default function QuizIndicatorPage(){
 
     return (
         <div className="quiz-indicator-page">
-            <div className="timer">
-                {formatTime(timeLeft)}
-            </div>
+            {isAdmin && (
+                <div className="timer">
+                    {formatTime(timeLeft)}
+                </div>
+            )}
             <PageHeader/>
-            <IndicatorNextButton/>
+            {!isAdmin && (
+                <div className="user-indicator-footer">
+                    퍼실리테이터의 안내 후 다음으로 버튼을 눌러주세요.
+                </div>
+            )}
+            <div style={{ pointerEvents: isButtonActive ? 'auto' : 'none', opacity: isButtonActive ? 1 : 0.5 }}>
+                <IndicatorNextButton/>
+            </div>
         </div>
     )
 }

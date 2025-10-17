@@ -15,6 +15,7 @@ export default function RoundIndicatorPage(){
     useEffect(() => {
         const audio = new Audio(roundStartSound);
         audio.play();
+        setIsAdmin(true);
 
         const timeout = setTimeout(() => {
             if (!isAdmin){setIsAdmin(true);}

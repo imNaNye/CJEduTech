@@ -4,6 +4,7 @@
     right: 4vw;
     border-radius: 13px;
     background: var(--orange02, #FF6E37);
+    color:white;
     justify-content: center;
     align-items: center;
     font-family: "CJ ONLYONE NEW body";

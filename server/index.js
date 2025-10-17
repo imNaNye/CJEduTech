@@ -77,6 +77,9 @@ app.use('/api/chat', chatRouter);
 import reviewRoutes from './routes/review.routes.js';
 app.use('/api/review', reviewRoutes);
 
+import gameRoutes from './routes/game.routes.js';
+app.use('/api/game', gameRoutes);
+
 // Initialize chat socket namespace/handlers from service
 initChatSocket(io);
 

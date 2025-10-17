@@ -1,3 +1,49 @@
+/* ===== 기본 역량 바구니 (점선 박스 + 상단 라벨) ===== */
+.cjgame-basket {
+  position: relative;
+  margin: 16px 0 24px;
+  padding: 24px 16px 16px;
+  border: 2px dashed #d5d5d5;
+  border-radius: 16px;
+  background: #fff;
+}
+.cjgame-basket-label {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+  background: #fff;
+  font-weight: 800;
+  font-family: "CJ ONLYONE NEW title";
+  font-size: 14px;
+  color: #444;
+}
+/* New basket grid: absolute positioning for chips */
+.cjgame-basket-grid {
+  position: relative;
+  min-height: 180px; /* will be overridden inline when multiple rows */
+}
+
+/* Ensure chip has a visible width inside basket (faces are absolute, so parent needs base width) */
+.cjgame-basket-grid .cjgame-chip {
+  min-width: 180px;          /* desktop base */
+  box-sizing: border-box;    /* include paddings in width calculation */
+  min-height: 60px;
+}
+
+/* Smooth transform for basket chips */
+.cjgame-basket-grid .cjgame-chip { transition: transform .25s ease; }
+
+/* 작은 화면에서는 칩 폭 축소 */
+@media (max-width: 960px){
+  .cjgame-basket-grid .cjgame-chip{ min-width: 140px; max-width: 200px; }
+}
+@media (max-width: 540px){
+  .cjgame-basket-grid .cjgame-chip{ min-width: 100%; max-width: 100%; }
+}
 .Gamepage{
   width: 100vw;
   min-height: 100vh;
@@ -8,14 +54,16 @@
 
 /* ===== CJ Game: 공통 레이아웃 ===== */
 .cjgame-wrap 
-{ width: 100%;height: 80vh;max-width: 1200px; margin: 52px auto; padding: 24px; box-sizing: border-box; }
+{ width: 100%;min-height: 80vh;max-width: 1200px; margin: 52px auto; padding: 24px; box-sizing: border-box; }
 .cjgame-title { color:black; font-size: 1.7rem; font-weight: 700; margin: 8px 0 4px; font-family: "CJ ONLYONE NEW title";}
 .cjgame-subtitle { color: #666; margin: 0 0 16px; font-family: "CJ ONLYONE NEW title";}
 .cjgame-center {  text-align: center; }
 .cjgame-muted { color: #9aa0a6; }
 
 .cjgame-btn { border: none; padding: 12px 18px; border-radius: 12px; cursor: pointer; font-weight: 700; }
+.cjgame-return { background: #666; color: white; }
 .cjgame-primary { background: #ff6d2e; color: white; }
+
 .cjgame-btn.cjgame-primary:disabled { filter: grayscale(0.8); opacity: 0.6; cursor: not-allowed; }
 .cjgame-ghost { background: #fff; border: 1px solid #ddd; }
 
@@ -39,14 +87,21 @@ border: 1px solid var(--grey04, #D9D9D9);
 background: var(--white, #FFF);}
 /* ===== 중앙 풀(버튼들) ===== */
 .cjgame-pool { padding-top: 3vh; padding-bottom: 3vh; display: grid; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap: 12px; align-items: start; justify-items: stretch; margin: 16px 0 24px; min-height: 120px; }
-.cjgame-chip { border-radius: 15.671px;
-background:#ff9c59; padding: 12px 14px; font-weight: 700; border: 1px solid #e5e7eb; cursor: grab; text-align: center; font-family: "CJ ONLYONE NEW title";font-size: 1rem;}
-.cjgame-chip:active { cursor: grabbing; background: #ff6d2e;}
+.cjgame-chip {
+  
+ padding: 12px 14px;
+  font-weight: 700;
+   border: 1px solid #e5e7eb;
+   border-radius: 15.671px;
+background: var(--grey03, #AFAFAF);
+    cursor: grab; text-align: center; font-family: "CJ ONLYONE NEW title";font-size: 1rem;
+  }
+.cjgame-chip:active { cursor: grabbing; background: #AFAFAF;}
 .cjgame-chip--small { padding: 6px 10px; font-size: 1rem; text-align: center; align-items: center; justify-content: center; display: flex;}
 
 /* ===== 버킷(인재상) ===== */
 .cjgame-buckets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.cjgame-bucket { height: 25vh; border-radius: 16px; background: linear-gradient(180deg, #ffe9db, #fff); border: 2px solid rgb(255, 225, 210); min-height: 130px; display: flex; flex-direction: column; }
+.cjgame-bucket { min-height: 30vh; border-radius: 16px; background: linear-gradient(180deg, #ffe9db, #fff); border: 2px solid rgb(255, 225, 210); min-height: 130px; display: flex; flex-direction: column; }
 .cjgame-bucket-title { font-family: "CJ ONLYONE NEW title"; font-weight: 800; text-align: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 2rem;}
 .cjgame-bucket-body { color: black; display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; min-height: 90px; align-content: flex-start; }
 
@@ -59,8 +114,32 @@ background:#ff9c59; padding: 12px 14px; font-weight: 700; border: 1px solid #e5e
 /* ===== 결과 카드 ===== */
 .cjgame-result-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 16px 0 24px; }
 .cjgame-result-card { border: 1px solid #eee; border-radius: 16px; background: #fff; }
-.cjgame-result-card-header { padding: 12px; font-weight: 800; border-bottom: 1px solid #f0f0f0; }
+.cjgame-result-card-header { padding: 12px; border-bottom: 1px solid #f0f0f0; text-align: center;
+text-align: center;
+font-family: "CJ ONLYONE NEW title";
+font-size: 42px;
+font-style: normal;
+font-weight: 700;
+line-height: 160%; /* 67.2px */}
 .cjgame-result-card ul { list-style: none; padding: 10px 14px 16px; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+
+/* ===== Result card basket tones by trait ===== */
+.cjgame-result-card.trait-integrity {
+  background: linear-gradient(180deg, rgba(255, 233, 227, 0.55) 0%, #fff 100%);
+  border: 2px solid #ffd4c7;
+}
+.cjgame-result-card.trait-passion {
+  background: linear-gradient(180deg, rgba(255, 233, 218, 0.55) 0%, #fff 100%);
+  border: 2px solid #ffd1b3;
+}
+.cjgame-result-card.trait-creativity {
+  background: linear-gradient(180deg, rgba(255, 240, 214, 0.55) 0%, #fff 100%);
+  border: 2px solid #ffdca8;
+}
+.cjgame-result-card.trait-respect {
+  background: linear-gradient(180deg, rgba(239, 228, 217, 0.55) 0%, #fff 100%);
+  border: 2px solid #e0c9b2;
+}
 
 .cjgame-mid-actions, .cjgame-final-actions, .cjgame-footer { display: flex; gap: 10px; justify-content: center; margin-top: 8px; }
 .cjgame-footer { margin-top: 20px; }
@@ -74,7 +153,6 @@ background:#ff9c59; padding: 12px 14px; font-weight: 700; border: 1px solid #e5e
 .cjgame-trait-info-text { color:#444; }
 .cjgame-trait-info-close { margin-left:auto; }
 .cjgame-bucket-title { cursor: pointer; }
-.cjgame-bucket-title:after { content: ' ⓘ'; font-weight: 700; opacity: .6; }
 
 /* ===== 반응형 ===== */
 @media (max-width: 960px) {
@@ -86,7 +164,13 @@ background:#ff9c59; padding: 12px 14px; font-weight: 700; border: 1px solid #e5e
   .cjgame-buckets, .cjgame-result-grid { grid-template-columns: 1fr; }
 }
 /* ===== Inline bucket hint (one-line) ===== */
-.cjgame-bucket-hint { font-size: 13px; line-height: 1.3; color: #666; padding: 6px 10px 0; text-align: center; }
+.cjgame-bucket-hint {  line-height: 1.3; color: #666; padding: 6px 10px 0; text-align: center; 
+font-family: "CJ ONLYONE NEW body";
+font-size: 15px;
+font-style: normal;
+font-weight: 400;
+line-height: 160%; /* 40px */
+letter-spacing: 0.769px;}
 /* ===== Chip colors by trait ===== */
 .cjgame-chip--integrity { background: #ffe9e3; border-color: #ffd4c7; color: #8c2d14; }
 .cjgame-chip--passion   { background: #ffe9da; border-color: #ffd1b3; color: #7a3814; }
@@ -100,12 +184,16 @@ background:#ff9c59; padding: 12px 14px; font-weight: 700; border: 1px solid #e5e
 .cjgame-bucket .cjgame-chip--respect:hover   { filter: brightness(0.98); }
 
 /* ===== Result chips layout ===== */
-.cjgame-result-chips { display:flex; flex-wrap:wrap; gap:8px; padding: 10px 14px 16px; }
-
+.cjgame-result-chips { display:flex; flex-wrap:wrap; gap:8px; padding: 10px 14px 16px; text-align: center; align-items: center;}
+.cjgame-result-chips .cjgame-chip{
+  margin: auto;
+  min-width: 80%;
+  min-height: 40px;
+}
 /* ===== Flip chip for description (pool) ===== */
-.cjgame-chip { position: relative; min-height: 44px; }
+.cjgame-chip { position: relative; }
 .cjgame-chip--flip { perspective: 800px; transform-style: preserve-3d; transition: transform 0.5s ease; }
-.cjgame-chip-face { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 12px 14px; border-radius: inherit; backface-visibility: hidden; }
+.cjgame-chip-face {  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 12px 14px; border-radius: inherit; backface-visibility: hidden; }
 .cjgame-chip-front { transform: rotateY(0deg); }
 .cjgame-chip-back { transform: rotateY(180deg); background: #fff; color: #000; font-weight: 700; line-height: 1.3; text-align: center; /* two-line clamp */ display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .cjgame-chip--flip.is-desc { transform: rotateY(180deg); }
@@ -127,3 +215,6 @@ background:#ff9c59; padding: 12px 14px; font-weight: 700; border: 1px solid #e5e
   z-index: 9999;
   transform: translateZ(0); /* ensure proper rasterization */
 }
+
+/* helper for chip placer wrapper */
+.cjgame-chip-placer { will-change: transform;transition: transform 0.5s ease; }

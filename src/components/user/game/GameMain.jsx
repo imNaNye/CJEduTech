@@ -1,3 +1,44 @@
+// Lightweight client for game telemetry
+const API_BASE = import.meta.env?.VITE_API_URL || ""; // e.g., https://api.example.com
+
+async function postJSON(path, body) {
+  console.log(API_BASE);
+  const url = `${API_BASE}/api/game/${path}`;
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      credentials: "include",
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(`HTTP ${res.status} ${res.statusText}: ${text}`);
+    }
+    return await res.json().catch(() => ({}));
+  } catch (err) {
+    console.error(`[GameService] POST ${path} failed:`, err);
+    throw err;
+  }
+}
+
+export const GameService = {
+  /** Notify server that a player has started the game */
+  start({ nickname, sessionId, startedAt }) {
+    return postJSON("start", { nickname, sessionId, startedAt });
+  },
+  /** Submit final trait classification results */
+  submit({ nickname, sessionId, selectionsByCategory, mergedByTrait, submittedAt }) {
+    return postJSON("submit", {
+      nickname,
+      sessionId,
+      selectionsByCategory,
+      mergedByTrait,
+      submittedAt,
+    });
+  },
+};
+
 import { useMemo, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRoundStep } from '../../../contexts/RoundStepContext';
@@ -77,8 +118,16 @@ export default function GameMain() {
 
   const dragGhostRef = useRef(null);
 
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const { round, setRound, setStep } = useRoundStep();
+
+  // stable session id for this play
+  const sessionIdRef = useRef(`${Date.now()}-${Math.random().toString(36).slice(2,8)}`);
+  const getNickname = () =>
+    localStorage.getItem("nickname") ||
+    localStorage.getItem("userNickname") ||
+    localStorage.getItem("user_name") ||
+    "게스트";
 
   const currentCategory = CATEGORIES[phaseIdx];
 
@@ -176,7 +225,18 @@ const navigate = useNavigate();
     return (
       <div
         className="cjgame-wrap cjgame-guide-screen"
-        onClick={() => setLevel("play")}
+        onClick={async () => {
+          setLevel("play");
+          try {
+            await GameService.start({
+              nickname: getNickname(),
+              sessionId: sessionIdRef.current,
+              startedAt: Date.now(),
+            });
+          } catch (e) {
+            console.warn("[Game] start notify failed", e);
+          }
+        }}
       >
         <div className="cjgame-guide-image">
           <img alt="guide1" src={guide1} />
@@ -201,10 +261,10 @@ const navigate = useNavigate();
     return (
       <div className="cjgame-wrap cjgame-final-screen">
         <h2 className="cjgame-title">나의 분류 결과</h2>
-        <p className="cjgame-subtitle">각 인재상에 배치된 기본 역량을 확인해 주세요.</p>
+        <p className="cjgame-subtitle">내가 각 인재상에 배치한 기본 역량을 확인해 주세요.</p>
         <div className="cjgame-result-grid">
           {TRAITS.map((t) => (
-            <div key={t.key} className="cjgame-result-card">
+            <div key={t.key} className={`cjgame-result-card trait-${t.key}`}>
               <div className={`cjgame-result-card-header trait-${t.key}`}>{t.label}</div>
               <div className="cjgame-result-chips">
                 {merged[t.key].map((id) => (
@@ -224,10 +284,37 @@ const navigate = useNavigate();
           ))}
         </div>
         <div className="cjgame-final-actions">
-          <button className="cjgame-btn" onClick={restart}>
+          <button className="cjgame-btn cjgame-return" onClick={restart}>
             다시하기
           </button>
-          <button className="cjgame-btn cjgame-primary" onClick={() => setLevel("wait")}>
+          <button
+            className="cjgame-btn cjgame-primary"
+            onClick={async () => {
+              // prepare payloads
+              const selectionsByCategory = selections;
+              const mergedByTrait = TRAITS.reduce((acc, t) => {
+                acc[t.key] = [
+                  ...selections.personal[t.key],
+                  ...selections.attitude[t.key],
+                  ...selections.functional[t.key],
+                ];
+                return acc;
+              }, {});
+              try {
+                await GameService.submit({
+                  nickname: getNickname(),
+                  sessionId: sessionIdRef.current,
+                  selectionsByCategory,
+                  mergedByTrait,
+                  submittedAt: Date.now(),
+                });
+              } catch (e) {
+                console.warn("[Game] submit failed", e);
+              } finally {
+                setLevel("wait");
+              }
+            }}
+          >
             최종 제출하기
           </button>
         </div>
@@ -259,9 +346,7 @@ const navigate = useNavigate();
   return (
     <div className="cjgame-wrap cjgame-play-screen">
       <header className="cjgame-topbar">
-        <div className="cjgame-badge" style={{ background: currentCategory.color }}>
-          {currentCategory.label}
-        </div>
+
         <div className="cjgame-phases">
           {CATEGORIES.map((c, i) => (
             <span
@@ -275,27 +360,60 @@ const navigate = useNavigate();
       <h2 className="cjgame-title cjgame-center">기본 역량을 인재상으로 드래그해서 배치하세요</h2>
       <p className="cjgame-subtitle cjgame-center">버튼을 클릭하면 설명을 볼 수 있어요</p>
 
-      {/* 중앙: 아직 배치되지 않은 기본 역량 버튼들 */}
-      <section className="cjgame-pool">
-        {remainingItems.map((item) => (
-          <button
-            key={item.id}
-            className={`cjgame-chip cjgame-chip--flip ${hovered === item.id ? 'is-desc' : ''}`}
-            draggable
-            onDragStart={(e) => onDragStart(e, item.id)}
-            onDragEnd={() => { if (dragGhostRef.current) { document.body.removeChild(dragGhostRef.current); dragGhostRef.current = null; } }}
-            
-            onClick={() => setHovered((v) => (v === item.id ? null : item.id))}
-            title="드래그하거나 클릭해서 설명 보기"
-          >
-            <span className="cjgame-chip-face cjgame-chip-front">{item.id}</span>
-            <span className="cjgame-chip-face cjgame-chip-back">{item.desc}</span>
-          </button>
-        ))}
-        {remainingItems.length === 0 && (
-          <div className="cjgame-muted cjgame-center">모든 항목을 배치했습니다.</div>
-        )}
-      </section>
+      {/* 중앙: 기본 역량 바구니 (점선 네모 + 상단 라벨) */}
+      {
+        // --- Basket layout calculations (centered multi-rows) ---
+        // (inserted before basket section)
+      }
+      {
+        (() => {
+          const totalItems = remainingItems.length;
+          const perRow = totalItems >= 7 ? Math.ceil(totalItems / 3) : (totalItems >= 4 ? Math.ceil(totalItems / 2) : totalItems);
+          const rows = Math.max(1, Math.ceil(totalItems / Math.max(1, perRow)));
+          const spacingX = 190; // px between items horizontally
+          const spacingY = 70;  // px between rows
+          const chipBaseH = 20; // approximate chip height (min-height 44 + paddings)
+          const basketHeight = rows * chipBaseH + (rows - 1) * spacingY;
+          return (
+            <section className="cjgame-basket" aria-label="기본 역량 바구니">
+              <div className="cjgame-basket-label">{currentCategory.label}</div>
+              <div className="cjgame-basket-grid" style={{ position: 'relative', height: Math.max(120, basketHeight) }}>
+                {remainingItems.map((item, idx) => {
+                  const row = Math.floor(idx / Math.max(1, perRow));
+                  const col = idx % Math.max(1, perRow);
+                  const colsThisRow = (row === rows - 1) ? (totalItems - Math.max(1, perRow) * (rows - 1)) : Math.max(1, perRow);
+                  const rowWidth = (colsThisRow - 1) * spacingX;
+                  const offsetX = (col * spacingX) - rowWidth / 2; // center of this row at 0
+                  const totalHeight = (rows - 1) * spacingY;
+                  const offsetY = (row * spacingY) - totalHeight / 2; // center rows around 0
+                  return (
+                    <div
+                      key={item.id}
+                      className="cjgame-chip-placer"
+                      style={{ position: 'absolute', top: '50%', left: '50%', transform: `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))` }}
+                    >
+                      <button
+                        className={`cjgame-chip cjgame-chip--flip ${hovered === item.id ? 'is-desc' : ''}`}
+                        draggable
+                        onDragStart={(e) => onDragStart(e, item.id)}
+                        onDragEnd={() => { if (dragGhostRef.current) { document.body.removeChild(dragGhostRef.current); dragGhostRef.current = null; } }}
+                        onClick={() => setHovered((v) => (v === item.id ? null : item.id))}
+                        title="드래그하거나 클릭해서 설명 보기"
+                      >
+                        <span className="cjgame-chip-face cjgame-chip-front">{item.id}</span>
+                        <span className="cjgame-chip-face cjgame-chip-back">{item.desc}</span>
+                      </button>
+                    </div>
+                  );
+                })}
+                {remainingItems.length === 0 && (
+                  <div className="cjgame-muted cjgame-center">모든 항목을 배치했습니다.</div>
+                )}
+              </div>
+            </section>
+          );
+        })()
+      }
 
       {/* 하단: 4개 인재상 드롭 영역 */}
 
@@ -307,19 +425,10 @@ const navigate = useNavigate();
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => onDropToTrait(e, t.key)}
           >
-            <div
-              className="cjgame-bucket-title"
-              onClick={() => setActiveTraitInfo(prev => (prev === t.key ? null : t.key))}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActiveTraitInfo(prev => (prev === t.key ? null : t.key)); }}
-              title="클릭하면 설명 보기"
-            >
+            <div className="cjgame-bucket-title">
               {t.label}
             </div>
-            {activeTraitInfo === t.key && (
-              <div className="cjgame-bucket-hint">{TRAIT_DESCS[t.key]}</div>
-            )}
+            <div className="cjgame-bucket-hint">{TRAIT_DESCS[t.key]}</div>
             <div className="cjgame-bucket-body">
               {selections[currentCategory.key][t.key].map((id) => (
                 <span

@@ -18,7 +18,7 @@ import FinalResultPage from './pages/UserPage/FinalResultPage.jsx';
 import LoadResultPage from './pages/UserPage/LoadResultPage.jsx';
 import DonorsOnboardingPage from './pages/UserPage/DonorsOnboardingPage.jsx';
 
-import AdminSessionPage from './pages/AdminPage/SessionPage.jsx';
+import AdminSessionPage from './pages/AdminPage/AdminSessionPage.jsx';
 import GamePage from './pages/UserPage/GamePage.jsx';
 import AfterSlidePage from './pages/UserPage/AfterSlidePage.jsx';
 
@@ -26,8 +26,9 @@ import AfterSlidePage from './pages/UserPage/AfterSlidePage.jsx';
 import AdminRoundIndicatorPage from './pages/AdminPage/AdminRoundIndicatorPage.jsx';
 import AdminAIDiscussionPage from './pages/AdminPage/AdminAIDiscussionPage.jsx';
 import AdminDiscussionResultPage from './pages/AdminPage/AdminDiscussionResultPage.jsx';
-import AdminQuizPage from './pages/AdminPage/AdminQuizPage.jsx';
 import AdminGamePage from './pages/AdminPage/AdminGamePage.jsx';
+import SlideIndicatorPage from './pages/AdminPage/SlideIndicatorPage.jsx';
+import QuizIndicatorPage from './pages/AdminPage/QuizIndicatorPage.jsx';
 
 function RoundStepLayout() {
   return (
@@ -60,9 +61,10 @@ function App() {
           <Route path="/admin/session" element={<AdminSessionPage />} />{/* 강의자용 로그인 */}
           <Route path="/admin/onboarding" element={<OnBoardingPage/>} /> {/* 강의자 */}
           <Route path="/admin/donorsOnboarding" element={<DonorsOnboardingPage/>} />{/* 강의자 */}
+          <Route path="/admin/slideIndicator" element={<SlideIndicatorPage/>}/>
           <Route path="/admin/slide" element={<SlideRoute />} />{/* 강의자 */}
           <Route path="/admin/afterSlide" element={<AfterSlidePage/>}/>{/* 강의자 */}
-          <Route path="/admin/quiz" element={<AdminQuizPage />} />{/* 강의자용 가이드(신규) */}
+          <Route path="/admin/quizIndicator" element={<QuizIndicatorPage/>}/>
           <Route path="/admin/game" element={<AdminGamePage/>}/>{/* 강의자용 가이드(신규) */}
           <Route path="/admin/roundIndicator" element={<AdminRoundIndicatorPage />} />{/* 강의자용 가이드 (신규?) */}
           <Route path="/admin/video" element={<VideoPage />} />{/* 강의자 */}

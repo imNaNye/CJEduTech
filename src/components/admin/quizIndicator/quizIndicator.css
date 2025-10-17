@@ -1,0 +1,8 @@
+.quiz-indicator-page{
+    width: 100vw;
+    height: 100vh;
+    background: url('../../../assets/images/admin/quizIndicator.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}

@@ -16,13 +16,13 @@ export default function RoundIndicatorPage(){
 
         const timeout = setTimeout(() => {
             if(step === 1){
-                navigate('/user/slide');
+                navigate('/admin/slideIndicator');
             } else if(step === 2){
-                navigate('/user/quiz');
+                navigate('/admin/quiz');
             } else if(step === 3){
-                navigate('/user/game');
+                navigate('/admin/game');
             } else if(step === 4){
-                navigate('/user/video');
+                navigate('/admin/video');
             }
         }, 6000);
 

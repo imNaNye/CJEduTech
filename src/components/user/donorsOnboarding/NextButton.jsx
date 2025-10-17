@@ -1,9 +1,14 @@
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../../contexts/UserContext';
+
 export default function NextButton() {
   const navigate = useNavigate();
+  const {isAdmin} = useUser();
 
   const handleClick = () => {
-    navigate('/user/roundIndicator');
+    if (isAdmin){
+      navigate('/admin/slide');
+    } 
   };
 
   return (

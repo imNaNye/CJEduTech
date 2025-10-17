@@ -1,0 +1,8 @@
+.slide-indicator-page {
+    width: 100vw;
+    height: 100vh;
+    background: url('../../../assets/images/admin/slideIndicator.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}

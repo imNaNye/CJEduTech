@@ -1,0 +1,14 @@
+.indicator-next-button{
+    position: fixed;
+    bottom: 5vh;
+    right: 4vw;
+    border-radius: 13px;
+    background: var(--orange02, #FF6E37);
+    justify-content: center;
+    align-items: center;
+    font-family: "CJ ONLYONE NEW body";
+    font-size: 3vh;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}

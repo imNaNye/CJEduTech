@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+const TOTAL_QUIZ_TIME = 150; // 2분 30초
 import correctSound from '@/assets/sounds/correct.wav';
 import wrongSound from '@/assets/sounds/wrong.wav';
 import selectSound from '@/assets/sounds/click.wav';
@@ -10,7 +11,6 @@ import '@/components/user/quiz/quiz.css'
 import PageHeader from '@/components/common/PageHeader.jsx';
 
 const QUESTIONS_PER_ROUND = 9;
-const SECONDS_PER_QUESTION = 20;
 const FEEDBACK_MS = 10000; // 정답/오답 피드백 유지 시간 (ms)
 const REVEAL_MS = 600;    // 선택 → 공개 대기
 const RESULT_MS = 600;    // 공개 → 결과 대기
@@ -23,15 +23,14 @@ export default function QuizPage() {
   const questions = quizQuestions[round] ?? [];
 
   const [idx, setIdx] = useState(0);                   // 현재 문제 인덱스
-  const [secondsLeft, setSecondsLeft] = useState(SECONDS_PER_QUESTION);
   const [running, setRunning] = useState(false);
   const [answered, setAnswered] = useState(false);
   const [isCorrect, setIsCorrect] = useState(null);    // null | boolean
   const [correctCount, setCorrectCount] = useState(0);
   const [phase, setPhase] = useState('preview');
   const [picked, setPicked] = useState(null);
+  const [totalSecondsLeft, setTotalSecondsLeft] = useState(TOTAL_QUIZ_TIME);
 
-  const tickRef = useRef(null);
   const optionRefs = useRef([]);
   const feedbackTimeoutRef = useRef(null);
   const previewTimeoutRef = useRef(null);
@@ -50,73 +49,51 @@ export default function QuizPage() {
     setCorrectCount(0);
     setPicked(null);
     setPhase('preview');
-    setSecondsLeft(SECONDS_PER_QUESTION);
     setAnswered(false);
     setIsCorrect(null);
     setRunning(false);
+    setTotalSecondsLeft(TOTAL_QUIZ_TIME);
+    setStep(3);
 
-    // 최초 미리보기 → 선택 단계로 전환 후 타이머 시작
+    // 최초 미리보기 → 선택 단계로 전환
     if (previewTimeoutRef.current) clearTimeout(previewTimeoutRef.current);
     previewTimeoutRef.current = setTimeout(() => {
       setPhase('select');
-      resetAndStart();
+      setAnswered(false);
+      setIsCorrect(null);
+      setRunning(true);
+      setPicked(null);
+      // 첫 카드에 포커스(선택 단계일 때만 의미)
+      setTimeout(() => {
+        if (optionRefs.current && optionRefs.current[0]) {
+          optionRefs.current[0].focus();
+        }
+      }, 0);
     }, PREVIEW_MS);
 
+    const totalTimer = setInterval(() => {
+      setTotalSecondsLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(totalTimer);
+          setRunning(false);
+          navigate('/user/roundIndicator', { replace: true });
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
     return () => {
-      clearInterval(tickRef.current);
       if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
       if (previewTimeoutRef.current) clearTimeout(previewTimeoutRef.current);
+      clearInterval(totalTimer);
       feedbackTimeoutRef.current = null;
       previewTimeoutRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round, step]);
 
-  const resetAndStart = () => {
-    clearInterval(tickRef.current);
-    setSecondsLeft(SECONDS_PER_QUESTION);
-    setAnswered(false);
-    setIsCorrect(null);
-    setRunning(true);
-    setPicked(null);
-
-    tickRef.current = setInterval(() => {
-      setSecondsLeft(prev => {
-        if (prev <= 1) {
-          // 타임아웃 → 오답 처리 후 다음 문제로 이동
-          clearInterval(tickRef.current);
-          setRunning(false);
-          setAnswered(true);
-          setIsCorrect(false);
-          // 공개 단계를 잠깐 스킵하고 결과로 바로 이동(디자인에 맞게 조절 가능)
-          setPhase('result');
-          if (feedbackRef.current) feedbackRef.current.focus();
-          if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
-          const delay = (questions[idx]?.delayMs ?? FEEDBACK_MS);
-          feedbackTimeoutRef.current = setTimeout(() => {
-            goNextQuestion();
-          }, delay);
-          return SECONDS_PER_QUESTION;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    // 첫 카드에 포커스(선택 단계일 때만 의미)
-    setTimeout(() => {
-      if (optionRefs.current && optionRefs.current[0]) {
-        optionRefs.current[0].focus();
-      }
-    }, 0);
-  };
-
-  const stopTimer = () => {
-    if (tickRef.current) {
-      clearInterval(tickRef.current);
-      tickRef.current = null;
-    }
-    setRunning(false);
-  };
+  // Removed resetAndStart and stopTimer (no longer needed)
 
   const judge = useMemo(() => {
     return (selectedIdx) => {
@@ -129,7 +106,7 @@ export default function QuizPage() {
   // 카드 클릭: 선택 → 공개 → 결과 → 자동 다음
   const onPickCard = (selectedIdx) => {
     if (phase !== 'select' || answered) return;
-    stopTimer();
+    setRunning(false);
     setPicked(selectedIdx);
     selectAudio.current.play();
     setPhase('choices');
@@ -171,11 +148,19 @@ export default function QuizPage() {
       if (previewTimeoutRef.current) clearTimeout(previewTimeoutRef.current);
       previewTimeoutRef.current = setTimeout(() => {
         setPhase('select');
-        resetAndStart();
+        setAnswered(false);
+        setIsCorrect(null);
+        setRunning(true);
+        setPicked(null);
+        setTimeout(() => {
+          if (optionRefs.current && optionRefs.current[0]) {
+            optionRefs.current[0].focus();
+          }
+        }, 0);
       }, PREVIEW_MS);
     } else {
       // 퀴즈(스텝1) 종료 → 서버에 점수 저장 후 스텝2로 전환
-      stopTimer();
+      setRunning(false);
       try {
         await quizApi.submitRoundScore({
           round,
@@ -210,13 +195,10 @@ export default function QuizPage() {
     <div className="quiz">
     <PageHeader title='CJ 인재상 퀴즈'></PageHeader>
     <div className="quiz-section">
+      <div className="timer-pill">
+        {Math.floor(totalSecondsLeft / 60)}:{String(totalSecondsLeft % 60).padStart(2, '0')}
+    </div>
       <div className='quiz-page'>
-        <div
-          className='timer'
-          style={{ '--remain': Math.max(0, Math.min(1, secondsLeft / SECONDS_PER_QUESTION)) }}
-        >
-          {secondsLeft}s
-        </div>
         {phase !== 'result' && (
           <>
             <h3 className='timer-h3'>Q{idx + 1}. {current.q}</h3>

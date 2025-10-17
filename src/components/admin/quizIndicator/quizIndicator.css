@@ -6,3 +6,15 @@
     background-position: center;
     background-repeat: no-repeat;
 }
+.timer{
+    color: var(--orange02, #FF6E37);
+    text-align: center;
+    font-family: "CJ ONLYONE NEW title";
+    font-size: 10rem;
+    font-style: normal;
+    font-weight: 500;
+
+    position: fixed;
+    bottom: 55vh;
+    right: 37vw;
+}

@@ -83,6 +83,7 @@ export function SlideProvider({ children, config, defaultCooldownMs = 0, blockPo
     // Play slide audio on mount only if user has interacted
     if (hasInteracted && page?.id) {
       const audio = new Audio(`/sounds/narration/merged${page.id}.mp3`);
+      audio.playbackRate = 1.1;
       audio.play().catch(err => {
         if (process.env.NODE_ENV !== 'production') {
           console.warn('Audio playback failed:', err);

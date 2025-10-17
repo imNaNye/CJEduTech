@@ -48,8 +48,9 @@
   background: #fff;
   border-radius: 20px;
   box-shadow: 0 8px 30px rgba(0,0,0,.08);
-  overflow: hidden;
+  overflow: visible;
   background: #f4f6f8;
+  position: relative;
 }
 
 /* ===== 상단 헤더: 좌(타이머) - 중(제목) - 우(스킵) ===== */
@@ -67,16 +68,24 @@
 
 /* 타이머 뱃지(간단 버전) */
 .timer-pill {
-  width: clamp(68px, 6vw, 92px);
-  height: clamp(68px, 6vw, 92px);
+  position: absolute;
+  top: 5vh;
+  left: 5vw;
+  width: clamp(90px, 6vw, 110px);
+  height: clamp(90px, 6vw, 110px);
   border-radius: 50%;
-  display: grid; place-items: center;
-  font-weight: 700; color: var(--orange);
-  background: #fff; border: clamp(3px, .35vw, 4px) solid var(--orange);
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
-  font-size: clamp(14px, 1.6vw, 18px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: clamp(15px, 1.9vw, 20px);
+  color: var(--orange);
+  background: linear-gradient(145deg, #fff 0%, #fffaf5 100%);
+  border: clamp(3px, .35vw, 4px) solid var(--orange);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
   font-family: "CJ ONLYONE NEW title";
-  
+  transition: all 0.3s ease;
+  z-index: 1000;
 }
 
 /* 제목 스타일 */

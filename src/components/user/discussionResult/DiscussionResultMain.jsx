@@ -5,9 +5,9 @@ import "./discussionResult.css";
 import { http } from '@/lib/http' ;
 import { useUser } from '@/contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
-import TalentGroupCard from './TalentGroupCard';
 import { useRoundStep } from '@/contexts/RoundStepContext';
 import OverallRankingCard from './OverallRankingCard';
+import TalentGroupCard from './TalentGroupCard';
 // Dynamically load Chart.js from CDN (no static import)
 async function ensureChartJS(){
   if (typeof window !== 'undefined' && window.Chart) return window.Chart;
@@ -149,6 +149,8 @@ export default function DiscussionResultMain() {
     const id = (avatarMap && avatarMap[nick]) ? String(avatarMap[nick]) : hashNicknameToAvatarId(nick);
     return findAvatarById(id);
   }
+
+  // TopicSummaryCard component removed; use TalentGroupCard instead for topic summaries
   const donutRef = useRef(null);
   const donutChartRef = useRef(null);
 
@@ -573,43 +575,21 @@ function koreanOrdinal(n){
       <div className="dr-scroll-area">
         {/* 전체 랭킹 */}
         <OverallRankingCard ranking={roomResult?.ranking || []} perUser={roomResult?.perUser || {}} avatarMap={avatarMap} />
-        {/* 인재상 그룹 */}
-        <TalentGroupCard
-          trait="정직"
-          members={(roomResult?.groups?.['정직'] || []).map(it => ({
-            nickname: it.nickname,
-            avatar: getAvatarForNickname(it.nickname),
-            topReacted: it.topReacted,
-            totalPersonaLabels: it.totalPersonaLabels,
-          }))}
-        />
-        <TalentGroupCard
-          trait="열정"
-          members={(roomResult?.groups?.['열정'] || []).map(it => ({
-            nickname: it.nickname,
-            avatar: undefined,
-            topReacted: it.topReacted,
-            totalPersonaLabels: it.totalPersonaLabels,
-          }))}
-        />
-        <TalentGroupCard
-          trait="창의"
-          members={(roomResult?.groups?.['창의'] || []).map(it => ({
-            nickname: it.nickname,
-            avatar: undefined,
-            topReacted: it.topReacted,
-            totalPersonaLabels: it.totalPersonaLabels,
-          }))}
-        />
-        <TalentGroupCard
-          trait="존중"
-          members={(roomResult?.groups?.['존중'] || []).map(it => ({
-            nickname: it.nickname,
-            avatar: undefined,
-            topReacted: it.topReacted,
-            totalPersonaLabels: it.totalPersonaLabels,
-          }))}
-        />
+        {/* 토론 주제별 주요 발언 요약 (TalentGroupCard 레이아웃 재사용) */}
+        {(roomResult?.topicSummaries?.topics || []).map((t, idx) => (
+          <TalentGroupCard
+            key={idx}
+            trait={t.topic || `토론 주제 ${idx+1}`}
+            members={(t.summaries || []).map(s => ({
+              nickname: s.nickname,
+              avatar: getAvatarForNickname(s.nickname),
+              // 기존 레이아웃의 메시지 영역을 활용하기 위해 summary를 topReacted.text에 매핑
+              topReacted: { text: s.summary || '' },
+              // 카운트가 필요 없다면 undefined 유지
+              totalPersonaLabels: undefined,
+            }))}
+          />
+        ))}
         {/* 나의 레포트 */}
         <section className="dr-my-report card">
           <div className="dr-card-header">

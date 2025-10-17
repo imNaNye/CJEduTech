@@ -31,7 +31,7 @@ export default function ChatContainer({ nickname, topic }) {
 
     return (
         <div className="chat-container">
-          <PageHeader isShort={true} title={`Video ${videoId+1} : ${localTopic || '토론 주제'}`}/>
+          <PageHeader isShort={true} title={`${localTopic || '토론 주제'}`}/>
             <ChatHistory onTopicChange={handleTopicChange}/>
             <div className="chat-input-area">
                 <ChatInput/>

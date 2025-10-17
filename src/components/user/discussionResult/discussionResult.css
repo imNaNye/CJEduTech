@@ -1,6 +1,8 @@
 .discussion-result-page{
 width: 100vw;
 height: 100vh;
+  word-break: keep-all;     /* 단어 단위 줄바꿈 */
+  white-space: normal;      /* 줄바꿈 허용 */
 background: var(--grey06, #F7F7F7);
 
   background-image: url('../../../assets/images/login/loginBackground.png');

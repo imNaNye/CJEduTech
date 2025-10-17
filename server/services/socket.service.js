@@ -217,6 +217,9 @@ function getRoomState(roomId) {
   let st = roomStates.get(roomId);
   if (!st) {
     st = {
+      isClosing: false, // prevent duplicate expireRoom runs
+      topicBuckets: new Map(),   // Map<topic:string, Map<nickname, Array<{id,text,createdAt}>>>
+      topicSummariesGenerated: false,
       userLastAt: new Map(),
       lastMessageAt: Date.now(),
       topicNextAt: Date.now(),
@@ -393,20 +396,16 @@ function cleanupRoomIfEmpty(io, roomId) {
 
 // ---- Room expiry helpers ----
 async function expireRoom(io, roomId) {
+  // Add guard to prevent duplicate runs
+  const stFlag = getRoomState(roomId);
+  if (stFlag.isClosing) return; // prevent duplicate runs
+  stFlag.isClosing = true;
 
   const ns = io.of('/chat');
   const roomKey = `room:${roomId}`;
-  // 알림 브로드캐스트
-  ns.to(roomKey).emit('room:expired', { roomId, reason: 'max_age', maxAgeMs: ROOM_MAX_AGE_MS });
-
-  // 방의 모든 소켓을 방에서 제거 (글로벌 연결은 유지)
-  const room = ns.adapter.rooms.get(roomKey);
-  if (room) {
-    for (const socketId of room) {
-      const s = ns.sockets.get(socketId);
-      if (s) s.leave(roomKey);
-    }
-  }
+  // 1) 종료 준비 안내 (결과 생성 중)
+  ns.to(roomKey).emit('room:closing', { roomId, reason: 'max_age', maxAgeMs: ROOM_MAX_AGE_MS });
+  // ⚠️ 여기서는 아직 방에서 소켓을 제거하지 않습니다. (결과 준비 완료 신호를 받아야 함)
 
   // stop test bots if running
   const st = roomStates.get(roomId);
@@ -483,6 +482,8 @@ async function expireRoom(io, roomId) {
     rankingArr[i].rank = rank;
   }
   // === Persona grouping (server-provided) ===
+  const groups =  undefined;
+  /*
   const groups = { 정직: [], 열정: [], 창의: [], 존중: [] };
   const ORDER = ['정직','열정','창의','존중'];
   for (const [nick, u] of Object.entries(perUser)) {
@@ -491,7 +492,7 @@ async function expireRoom(io, roomId) {
     for (const k of ORDER){
       const v = Number(counts[k] || 0);
       if (v > bestCnt){ bestCnt = v; best = k; }
-      else if (v === bestCnt && v > 0) { /* keep earlier by ORDER */ }
+      else if (v === bestCnt && v > 0) {  }
     }
 
     // If no labels yet, assign to the smallest group (ties resolved by ORDER priority)
@@ -517,10 +518,106 @@ async function expireRoom(io, roomId) {
       const ub = perUser[b.nickname]?.totalReactions || 0;
       return ub - ua;
     });
-  }
-  const createdAt = Date.now();
+  }*/
 
-  resultsByRoom.set(roomId, { createdAt, roomId, perUser, ranking: rankingArr, groups, avatarMap: avatarIdByNick }); // ✅ 추가
+    // === Topic-wise representative statements via per-user AI (/user-summary) ===
+    let topicSummaries = { topics: [], generatedAt: Date.now(), perUserFeedback: {} };
+    try {
+      const stS = getRoomState(roomId);
+      if (!stS.topicSummariesGenerated) {
+        // Build chat history for AI
+        const chat_history = (recentByRoom.get(roomId) || []).map(m => ({
+          nickname: m.nickname,
+          text: m.text,
+          timestamp: m.createdAt
+        }));
+        // Discussion topics as array of {name, description}
+        const names = Array.isArray(stS.topics) ? stS.topics : [];
+        const discussion_topics = names.map(n => ({ name: String(n || ''), description: '' }));
+
+        // Collect user list (exclude bots)
+        const botNames = Array.isArray(stS.botNicknames) ? new Set(stS.botNicknames) : new Set();
+        const userNicknames = Object.keys(perUser).filter(n => !botNames.has(n));
+
+        // Prepare topic index for aggregation
+        const byTopic = new Map(); // topic -> Array<{ nickname, summary, reason? }>
+        for (const t of names) byTopic.set(String(t), []);
+
+        if (AI_ENDPOINT && userNicknames.length && discussion_topics.length) {
+          for (const nick of userNicknames) {
+            try {
+              const res = await fetch(AI_ENDPOINT + '/user-summary', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...(AI_API_KEY ? { 'Authorization': `Bearer ${AI_API_KEY}` } : {}) },
+                body: JSON.stringify({
+                  user_id: nick,
+                  chat_history,
+                  discussion_topics,
+                  max_statements_per_topic: 1
+                })
+              });
+              if (!res.ok) throw new Error('user-summary http ' + res.status);
+              const data = await res.json();
+              // data.topics: [{ topic, user_statements: [{text, reason}], feedback }]
+              if (data && Array.isArray(data.topics)) {
+                // store per-user feedback
+                if (!topicSummaries.perUserFeedback[nick]) {
+                  topicSummaries.perUserFeedback[nick] = { overall_feedback: data.overall_feedback || '', topics: [] };
+                }
+                for (const t of data.topics) {
+                  const topicName = t?.topic || '';
+                  const arr = byTopic.get(topicName) || [];
+                  const st = Array.isArray(t?.user_statements) && t.user_statements[0];
+                  if (st && st.text) {
+                    arr.push({ nickname: nick, summary: st.text, reason: st.reason });
+                  }
+                  byTopic.set(topicName, arr);
+                  if (t?.feedback) {
+                    topicSummaries.perUserFeedback[nick].topics.push({ topic: topicName, feedback: t.feedback });
+                  }
+                }
+              }
+            } catch (e) {
+              // ignore failure for this user to keep others
+            }
+          }
+        } else {
+          // No AI endpoint → simple fallback taking first message per user per topic from buckets
+          const buckets = stS.topicBuckets instanceof Map ? stS.topicBuckets : new Map();
+          for (const [topic, byUser] of buckets.entries()) {
+            const arr = [];
+            for (const [nick, msgsArr] of byUser.entries()) {
+              const m = (msgsArr || [])[0];
+              if (m && m.text) arr.push({ nickname: nick, summary: m.text });
+            }
+            byTopic.set(topic, arr);
+          }
+        }
+
+        // Build final structure
+        const topicsOut = [];
+        for (const name of names) {
+          const items = byTopic.get(String(name)) || [];
+          topicsOut.push({ topic: String(name), summaries: items });
+        }
+        topicSummaries.topics = topicsOut;
+
+        stS.topicSummariesGenerated = true; // once per room
+      }
+    } catch {}
+
+  // === Generate discussion overall summary BEFORE signaling results ready ===
+  let overallSummaryText = null;
+  try {
+    const mod = await import('./review.service.js');
+    const sum = await mod.generateOverallSummary?.(roomId, { force: true });
+    overallSummaryText = sum?.summaryText || null;
+  } catch (e) {
+    overallSummaryText = null;
+  }
+
+  const createdAt = Date.now();
+  resultsByRoom.set(roomId, { createdAt, roomId, perUser, ranking: rankingArr, groups, topicSummaries, avatarMap: avatarIdByNick, overallSummary: overallSummaryText });
   for (const r of rankingArr) {
     lastResultByUser.set(r.nickname, {
       roomId,
@@ -554,7 +651,9 @@ async function expireRoom(io, roomId) {
     perUser,
     ranking: rankingArr,
     groups,
-    avatarMap: avatarIdByNick // ✅ 추가
+    avatarMap: avatarIdByNick, // ✅ 추가
+    topicSummaries,
+    overallSummary: overallSummaryText,
   };
   const { baseId, round } = decomposeRoomId(roomId);
   const suffix = round !== undefined ? `-r${round}` : '';
@@ -567,15 +666,23 @@ async function expireRoom(io, roomId) {
     console.error('[ARCHIVE] write error:', e?.message || e);
   }
 
-  // 전체 총평을 한 번 생성(성공/실패와 무관하게 이후 정리 진행)
-  const genPromise = import('./review.service.js')
-    .then(mod => mod.generateOverallSummary?.(roomId, { force: false }).catch(() => {}))
-    .catch(() => {});
+  // 2) 결과 준비 완료 알림 (이 신호를 받은 클라이언트가 결과 페이지로 이동)
+  ns.to(roomKey).emit('results:ready', { roomId });
 
-  genPromise.finally(() => {
-    // 데이터 정리 및 봇 중지
-    cleanupRoomIfEmpty(io, roomId);
-  });
+  // 3) 최종 만료 이벤트 브로드캐스트
+  ns.to(roomKey).emit('room:expired', { roomId, reason: 'max_age', maxAgeMs: ROOM_MAX_AGE_MS });
+
+  // 4) 방의 모든 소켓을 방에서 제거 (이제 제거해도 됨)
+  const room = ns.adapter.rooms.get(roomKey);
+  if (room) {
+    for (const socketId of room) {
+      const s = ns.sockets.get(socketId);
+      if (s) s.leave(roomKey);
+    }
+  }
+
+  // 정리: 방 비우기
+  cleanupRoomIfEmpty(io, roomId);
 }
 
 function ensureRoomExpiry(io, roomId) {
@@ -1215,6 +1322,16 @@ export function initChatSocket(io) {
         st.lastMessageAt = now;
         st.userLastAt.set(msg.nickname, now);
         pushRecent(roomId, msg);
+        // --- Save message under current topic bucket ---
+        try {
+          const st4 = getRoomState(roomId);
+          const topicKey = st4.topic || '(주제없음)';
+          if (!st4.topicBuckets) st4.topicBuckets = new Map();
+          if (!st4.topicBuckets.has(topicKey)) st4.topicBuckets.set(topicKey, new Map());
+          const byUser = st4.topicBuckets.get(topicKey);
+          if (!byUser.has(msg.nickname)) byUser.set(msg.nickname, []);
+          byUser.get(msg.nickname).push({ id: msg.id, text: msg.text, createdAt: msg.createdAt });
+        } catch {}
         generateTopicMentAndBroadcast(io,roomId);
         cb?.({ ok: true, serverId: msg.id, createdAt: msg.createdAt });
         io.of("/chat").to(`room:${roomId}`).emit("message:new", { ...msg, reactedUsers: [], reactionsCount: 0 });
@@ -1290,7 +1407,7 @@ function startMentorScheduler(io) {
     for (const [roomId, st] of roomStates.entries()) {
       // 만료된 방은 즉시 만료 처리 후 continue
       if (st.expireAt && now >= st.expireAt) {
-        expireRoom(io, roomId);
+        if (!st.isClosing) expireRoom(io, roomId);
         continue;
       }
 

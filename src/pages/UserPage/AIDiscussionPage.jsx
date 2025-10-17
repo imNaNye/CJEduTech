@@ -30,22 +30,35 @@ export default function AIDiscussionPage(){
     const [autoTimerId, setAutoTimerId] = useState(null);
 
     const { round, setRound, step, setStep,videoId,setVideoId } = useRoundStep();
-    useEffect(() => {
-        // Build initial overlay queue based on videoId
+
+    const buildOverlayList = (vid) => {
         const list = [];
-        if (Number(videoId) === 0) {
-            // Only when videoId==0, show 2-page example first (manual advance)
+        // 1) 토론 주제 리스트 먼저 (비디오 아이디 매핑)
+        const idx = Math.max(0, Math.min(9, Number(vid) || 0));
+        list.push({ src: subjects[idx], auto: true }); // 자동 전환
+        // 2) (videoId === 0)인 경우에만 토론 기능 가이드 2장 보여주기 (수동 전환)
+        if (Number(vid) === 0 || Number(vid) === 3) {
             list.push({ src: example1, auto: false });
             list.push({ src: example2, auto: false });
         }
-        // Then show the subject list image mapped from videoId (0->subject1 ... 9->subject10)
-        const idx = Math.max(0, Math.min(9, Number(videoId) || 0));
-        list.push({ src: subjects[idx], auto: true });
-        setOverlayQueue(list);
+        return list;
+    };
+
+    useEffect(() => {
+        setOverlayQueue(buildOverlayList(videoId));
     }, [videoId]);
 
     const handleOverlayClick = () => {
         setOverlayQueue((prev) => prev.slice(1));
+    };
+
+    const handleShowGuidesAgain = () => {
+        // clear any running timer
+        if (autoTimerId) {
+            clearTimeout(autoTimerId);
+            setAutoTimerId(null);
+        }
+        setOverlayQueue(buildOverlayList(videoId));
     };
 
     useEffect(() => {
@@ -59,7 +72,7 @@ export default function AIDiscussionPage(){
         if (current && current.auto) {
             const id = setTimeout(() => {
                 setOverlayQueue((prev) => prev.slice(1));
-            }, 10000); // 10 seconds
+            }, 60000); // 60 seconds
             setAutoTimerId(id);
         }
         return () => {
@@ -69,6 +82,27 @@ export default function AIDiscussionPage(){
 
     return (
         <div className="ai-discussion-page">
+            {overlayQueue.length === 0 && (
+                <button
+                    type="button"
+                    onClick={handleShowGuidesAgain}
+                    style={{
+                        position: 'fixed',
+                        bottom: 12,
+                        left: 12,
+                        zIndex: 2100,
+                        padding: '8px 12px',
+                        borderRadius: 8,
+                        border: '1px solid #ddd',
+                        background: '#fff',
+                        cursor: 'pointer',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
+                        color:'#333'
+                    }}
+                >
+                    가이드
+                </button>
+            )}
             {overlayQueue.length > 0 ? (
                 <div
                     style={{
@@ -88,7 +122,7 @@ export default function AIDiscussionPage(){
                 >
                     <img
                         src={overlayQueue[0].src}
-                        alt={Number(videoId) === 0 && overlayQueue.length >= 2 ? "토론 채팅방 예시" : "토론 주제 리스트"}
+                        alt={overlayQueue[0].auto ? "토론 주제 리스트" : "토론 기능 가이드"}
                         style={{ maxWidth: "100%", maxHeight: "100%" }}
                     />
                 </div>

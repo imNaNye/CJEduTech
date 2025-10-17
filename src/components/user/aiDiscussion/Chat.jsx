@@ -56,20 +56,19 @@ export default function Chat({ isMine, nickname, text, createdAt, reactionsCount
       <div className={`chat-bubble ${isMine ? 'mine' : 'others'} ${isAIDM ? 'ai-dm' : ''}`}>
         {!isMine && <div className="chat-nickname">{nickname || '익명'}</div>}
         <div className="chat-text">{text}</div>
-        <div className="chat-time">{ts}</div>
         {labels.length > 0 && (
           <div className="chat-ai">
-            {labels.map((l) => {
-              const s = aiScores && typeof aiScores[l] === 'number' ? aiScores[l] : (l === aiLabel && typeof aiScore === 'number' ? aiScore : undefined);
-              return (
-                <span key={l} className="chat-ai-badge">🔖 {l}</span>
-              );
-            })}
+            {labels.map((l) => (
+              <span key={l} className="chat-ai-badge">🔖 {l}</span>
+            ))}
           </div>
         )}
-        <div className={`chat-reaction ${didReact ? 'active' : ''}`}>
-          <span className="heart">♥</span>
-          <span className="count">{reactionsCount}</span>
+        <div className="chat-meta">
+          <div className="chat-time">{ts}</div>
+          <div className={`chat-reaction ${didReact ? 'active' : ''}`}>
+            <span className="heart">♥</span>
+            <span className="count">{reactionsCount}</span>
+          </div>
         </div>
       </div>
       {isMine && <div className="chat-profile-image"  style={{ visibility: 'hidden' }} />}

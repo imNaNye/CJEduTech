@@ -17,7 +17,7 @@ function formatTime(iso) {
 }
 
 // phase: idle → thinking → message
-export default function AIChat({ onTopicChange = () => {} }) {
+export default function AIChat({ onTopicChange = () => {}, absoluteOnScroll = false }) {
   const [phase, setPhase] = useState("idle");
   const [currentMent, setCurrentMent] = useState(null); // { id, type, text, createdAt }
   const [dots, setDots] = useState(".");
@@ -118,7 +118,15 @@ export default function AIChat({ onTopicChange = () => {} }) {
 
   // 항상 상주: idle일 때도 배지와 말풍선 프레임은 보여줌
   return (
-    <div className={`ai-chat ai-chat--${phase}`} onClick={() => setHidden(prev => !prev)} style={{ display: hidden ? 'none' : 'flex' }}>
+    <div
+      className={`ai-chat ai-chat--${phase} ${absoluteOnScroll ? 'ai-chat--abs' : ''}`}
+      onClick={() => setHidden(prev => !prev)}
+      style={{
+        display: hidden ? 'none' : 'flex',
+        position: absoluteOnScroll ? 'absolute' : undefined,
+        left: absoluteOnScroll ? '3%' : undefined,
+      }}
+    >
       <img className="badge-img" src={aiIcon} alt="aiIcon"/>
 
       {/* 메시지는 유지 표시 (thinking 중에도) */}

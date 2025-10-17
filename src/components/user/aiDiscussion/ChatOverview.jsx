@@ -200,13 +200,26 @@ export default function ChatOverView(){
     socket.on("message:new", handleNew);
     socket.on("reaction:update", handleReactionUpdate);
     socket.on("message:ai", handleAi);
-    socket.on('room:expired', ({ roomId }) => {
-      try {
+
+    socket.on('room:closing', ({ roomId }) => {
+      // UI에 "결과 준비 중…" 로딩 상태를 띄우기
+      //setResultLoading(true);
+    });
+
+    socket.on('results:ready', ({ roomId }) => {
+      // 이제 안전하게 결과 페이지로 이동
+      //navigate(`/user/discussion/result?roomId=${encodeURIComponent(roomId)}`);
+            try {
         sessionStorage.setItem('lastRoomId', roomId || '');
         sessionStorage.setItem('myNickname', myNickRef.current || '');
       } finally {
         navigate('/user/discussionResult');
       }
+    });
+
+    // room:expired는 이제 이동 트리거가 아니라, 화면에서 방 상태를 종료 처리하는 용도로만 사용
+    socket.on('room:expired', ({ roomId }) => {
+      //setRoomEnded(true);
     });
     return () => {
       socket.off("room:recent", handleRecent);

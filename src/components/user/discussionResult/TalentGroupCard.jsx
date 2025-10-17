@@ -64,8 +64,7 @@ export default function TalentGroupCard({ trait='정직', members=[], maxRows })
   return (
     <section className="tg-card card">
       <header className="tg-header">
-        <img className="tg-badge" src={icon} alt={`${trait} 뱃지`} />
-        <h3 className="tg-title">〈{trait}〉 인재상 그룹</h3>
+        <h3 className="tg-title">{trait}</h3>
       </header>
 
       <div className="tg-divider" />

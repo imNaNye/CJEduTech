@@ -24,6 +24,13 @@ export default function ChatHistory({ onTopicChange = () => {} }) {
 
   const [messages, setMessages] = useState([]);
   const [autoScroll, setAutoScroll] = useState(false);
+  const [hasScroll, setHasScroll] = useState(false);
+  const updateHasScroll = () => {
+    const el = historyRef.current;
+    if (!el) return;
+    const scrollable = el.scrollHeight > el.clientHeight + 1; // allow tiny rounding error
+    setHasScroll(scrollable);
+  };
   const roomId = "general";
 
   const bottomRef = useRef(null);
@@ -65,6 +72,7 @@ export default function ChatHistory({ onTopicChange = () => {} }) {
     }
     // store new height for potential future calculations
     prevScrollHeightRef.current = el.scrollHeight;
+    updateHasScroll();
   }, [messages, autoScroll]);
 
   useEffect(() => {
@@ -79,12 +87,14 @@ export default function ChatHistory({ onTopicChange = () => {} }) {
           prevScrollHeightRef.current = historyRef.current.scrollHeight;
         }
       });
+      requestAnimationFrame(() => updateHasScroll());
     });
 
     socket.on("message:new", (newMessage) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
       // 새 메시지는 무조건 하단으로 이동
       setAutoScroll(true);
+      requestAnimationFrame(() => updateHasScroll());
     });
 
     socket.on("reaction:update", ({ messageId, reactedUsers, reactionsCount }) => {
@@ -135,9 +145,15 @@ export default function ChatHistory({ onTopicChange = () => {} }) {
     };
   }, []);
 
+  useEffect(() => {
+    const onResize = () => updateHasScroll();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   return (
     <div className="chat-history" ref={historyRef}>
-      <AIChat onTopicChange={onTopicChange}/>
+      <AIChat onTopicChange={onTopicChange} absoluteOnScroll={hasScroll} />
       {messages.map((msg) => (
         <div
           key={msg.id}

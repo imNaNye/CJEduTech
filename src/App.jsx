@@ -22,6 +22,13 @@ import AdminSessionPage from './pages/AdminPage/SessionPage.jsx';
 import GamePage from './pages/UserPage/GamePage.jsx';
 import AfterSlidePage from './pages/UserPage/AfterSlidePage.jsx';
 
+
+import AdminRoundIndicatorPage from './pages/AdminPage/AdminRoundIndicatorPage.jsx';
+import AdminAIDiscussionPage from './pages/AdminPage/AdminAIDiscussionPage.jsx';
+import AdminDiscussionResultPage from './pages/AdminPage/AdminDiscussionResultPage.jsx';
+import AdminQuizPage from './pages/AdminPage/AdminQuizPage.jsx';
+import AdminGamePage from './pages/AdminPage/AdminGamePage.jsx';
+
 function RoundStepLayout() {
   return (
     <RoundStepProvider>
@@ -37,24 +44,34 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/user/selectAvatar" element={<SelectAvatarPage />} />
-            <Route path="/user/onboarding" element={<OnBoardingPage/>} />
-            <Route path="/user/donorsOnboarding" element={<DonorsOnboardingPage/>} />
-            <Route path="/user/slide" element={<SlideRoute />} />
-            <Route path="/user/afterSlide" element={<AfterSlidePage/>}/>
-            <Route path="/user/roundIndicator" element={<RoundIndicatorPage />} />
-            <Route path="/user/quiz" element={<QuizPage />} />
-            <Route path="/user/quizResult" element={<QuizResultPage />} />
-            <Route path="/user/game" element={<GamePage/>}/>
-            <Route path="/user/video" element={<VideoPage />} />
-            <Route path="/user/aiDiscussion" element={<AIDiscussionPage />} />
-            <Route path="/user/discussionResult" element={<DiscussionResultPage />} />
-            <Route path="/user/finalResult" element={<FinalResultPage />} />
-            <Route path="/user/loadResult" element={<LoadResultPage />} />
 
-            <Route path="/user/end" element={<EndPage />} />
-          
-          <Route path="/admin/session" element={<AdminSessionPage />} />
+          <Route path="/user/quizResult" element={<QuizResultPage />} />{/* 미사용 */}
+
+          <Route path="/user/selectAvatar" element={<SelectAvatarPage />} />{/* 수강자 */}
+          <Route path="/user/quiz" element={<QuizPage />} />{/* 수강자 */}
+          <Route path="/user/game" element={<GamePage/>}/>{/* 수강자 */}
+          <Route path="/user/aiDiscussion" element={<AIDiscussionPage />} />{/* 수강자 */}
+          <Route path="/user/discussionResult" element={<DiscussionResultPage />} />{/* 수강자 */}
+          <Route path="/user/finalResult" element={<FinalResultPage />} />{/* 수강자 */}
+          <Route path="/user/loadResult" element={<LoadResultPage />} />{/* 수강자 */}
+          <Route path="/user/roundIndicator" element={<RoundIndicatorPage />} />{/* 수강자 (신규?) */}
+
+
+          <Route path="/admin/session" element={<AdminSessionPage />} />{/* 강의자용 로그인 */}
+          <Route path="/admin/onboarding" element={<OnBoardingPage/>} /> {/* 강의자 */}
+          <Route path="/admin/donorsOnboarding" element={<DonorsOnboardingPage/>} />{/* 강의자 */}
+          <Route path="/admin/slide" element={<SlideRoute />} />{/* 강의자 */}
+          <Route path="/admin/afterSlide" element={<AfterSlidePage/>}/>{/* 강의자 */}
+          <Route path="/admin/quiz" element={<AdminQuizPage />} />{/* 강의자용 가이드(신규) */}
+          <Route path="/admin/game" element={<AdminGamePage/>}/>{/* 강의자용 가이드(신규) */}
+          <Route path="/admin/roundIndicator" element={<AdminRoundIndicatorPage />} />{/* 강의자용 가이드 (신규?) */}
+          <Route path="/admin/video" element={<VideoPage />} />{/* 강의자 */}
+          <Route path="/admin/aiDiscussion" element={<AdminAIDiscussionPage />} />{/* 강의자용 신규 */}
+          <Route path="/admin/discussionResult" element={<AdminDiscussionResultPage />} />{/* 강의자용 신규 */}
+
+          <Route path="/admin/end" element={<EndPage />} />{/* 전체 */}
+          <Route path="/user/end" element={<EndPage />} />{/* 전체 */}
+
           <Route path="/test" element={<TestApi />} />
         </Routes>
       </BrowserRouter>

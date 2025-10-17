@@ -29,6 +29,9 @@ import AdminDiscussionResultPage from './pages/AdminPage/AdminDiscussionResultPa
 import AdminGamePage from './pages/AdminPage/AdminGamePage.jsx';
 import SlideIndicatorPage from './pages/AdminPage/SlideIndicatorPage.jsx';
 import QuizIndicatorPage from './pages/AdminPage/QuizIndicatorPage.jsx';
+import GameIndicatorPage from './pages/AdminPage/GameIndicatorPage.jsx';
+import GameIndicatorPage2 from './pages/AdminPage/GameIndicatorPage2.jsx';
+import VideoIndicatorPage from './pages/AdminPage/VideoIndicatorPage.jsx';
 
 function RoundStepLayout() {
   return (
@@ -65,8 +68,11 @@ function App() {
           <Route path="/admin/slide" element={<SlideRoute />} />{/* 강의자 */}
           <Route path="/admin/afterSlide" element={<AfterSlidePage/>}/>{/* 강의자 */}
           <Route path="/admin/quizIndicator" element={<QuizIndicatorPage/>}/>
+          <Route path="/admin/gameIndicator" element={<GameIndicatorPage/>}/>
+          <Route path="/admin/gameIndicator2" element={<GameIndicatorPage2/>}/>
           <Route path="/admin/game" element={<AdminGamePage/>}/>{/* 강의자용 가이드(신규) */}
           <Route path="/admin/roundIndicator" element={<AdminRoundIndicatorPage />} />{/* 강의자용 가이드 (신규?) */}
+          <Route path="/admin/videoIndicator" element={<VideoIndicatorPage/>}/>
           <Route path="/admin/video" element={<VideoPage />} />{/* 강의자 */}
           <Route path="/admin/aiDiscussion" element={<AdminAIDiscussionPage />} />{/* 강의자용 신규 */}
           <Route path="/admin/discussionResult" element={<AdminDiscussionResultPage />} />{/* 강의자용 신규 */}

@@ -1,0 +1,38 @@
+.game-indicator-page{
+    width: 100vw;
+    height: 100vh;
+    background: url('../../../assets/images/admin/gameIndicator.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.next-button{
+    position: fixed;
+    bottom: 5vh;
+    right: 4vw;
+    border-radius: 13px;
+    background: var(--orange02, #FF6E37);
+    justify-content: center;
+    align-items: center;
+    font-family: "CJ ONLYONE NEW body";
+    font-size: 3vh;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+.game-indicator-page2{
+    width: 100vw;
+    height: 100vh;
+    background: url('../../../assets/images/admin/gameIndicator2.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.video-indicator-page{
+    width: 100vw;
+    height: 100vh;
+    background: url('../../../assets/images/admin/videoIndicator.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}

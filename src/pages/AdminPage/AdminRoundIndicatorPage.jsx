@@ -23,9 +23,9 @@ export default function RoundIndicatorPage(){
             } else if(step === 2){
                 navigate('/admin/quizIndicator');
             } else if(step === 3){
-                navigate('/admin/game');
+                navigate('/admin/gameIndicator');
             } else if(step === 4){
-                navigate('/admin/video');
+                navigate('/admin/videoIndicator');
             }
         }, 6000);
 

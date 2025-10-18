@@ -12,6 +12,8 @@
   --board-h: 900px;    /* 보드 세로 */
   --card-w: clamp(336px, 18vmin, 360px);
   --card-h: calc(var(--card-w) * 1.5);
+  word-break: keep-all;     /* 단어 단위 줄바꿈 */
+  white-space: normal;      /* 줄바꿈 허용 */
 }
 
 .quiz {

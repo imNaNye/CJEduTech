@@ -10,6 +10,8 @@
   box-sizing: border-box;
   background: #FAFAFA;
   height: 6vh;
+  position: relative;
+  z-index: 100;
 }
 .page-header-short {
   display: flex;

@@ -1367,6 +1367,17 @@ export function initChatSocket(io) {
       await generateMentAndBroadcast(io, targetRoom);
     });
 
+    // 수동 트리거: 클라이언트가 다음 토론 주제 요청
+    socket.on("room:next", async ({ roomId: reqRoomId }) => {
+
+            const targetRoom = reqRoomId || joinedRoomId;
+            console.log("next request: ",targetRoom);
+
+            if (!targetRoom) return;
+            const changed = await setNextTopic(io, targetRoom);
+            await cb?.({ ok: changed, command: 'nexttopic' });
+    });
+
     // 사용자가 토론 종료 요청
     socket.on('room:end', ({ roomId: reqRoomId }) => {
       const targetRoom = reqRoomId || joinedRoomId;

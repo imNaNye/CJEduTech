@@ -285,16 +285,20 @@ function broadcastCurrentTopic(io, roomId){
   io.of('/chat').to(`room:${roomId}`).emit('ai:ment', payload);
 }
 
-function setNextTopic(io, roomId){
+function setNextTopic(io, roomId, dir = +1){
   const st = getRoomState(roomId);
   const topics = Array.isArray(st.topics) ? st.topics : [];
   if (!topics.length) return false;
 
   const cur = (typeof st.topicIndex === 'number') ? st.topicIndex : -1;
-  // If there is no next topic, do nothing (stay on current and wait)
-  if (cur + 1 >= topics.length) return false;
+  const step = (dir === -1) ? -1 : +1;
 
-  st.topicIndex = cur + 1;
+  // Compute next index without wrapping
+  let nextIdx = (cur === -1) ? (step > 0 ? 0 : -1) : (cur + step);
+
+  if (nextIdx < 0 || nextIdx >= topics.length) return false; // out of range → no change
+
+  st.topicIndex = nextIdx;
   st.topic = topics[st.topicIndex];
   broadcastCurrentTopic(io, roomId);
   return true;
@@ -1367,15 +1371,12 @@ export function initChatSocket(io) {
       await generateMentAndBroadcast(io, targetRoom);
     });
 
-    // 수동 트리거: 클라이언트가 다음 토론 주제 요청
-    socket.on("room:next", async ({ roomId: reqRoomId }) => {
-
+    // 수동 트리거: 클라이언트가 다음/이전 토론 주제 요청
+    socket.on("room:next", async ({ roomId: reqRoomId, dir }) => {
             const targetRoom = reqRoomId || joinedRoomId;
-            console.log("next request: ",targetRoom);
-
+            console.log("next request: ", targetRoom, 'dir=', dir);
             if (!targetRoom) return;
-            const changed = await setNextTopic(io, targetRoom);
-            await cb?.({ ok: changed, command: 'nexttopic' });
+            const changed = await setNextTopic(io, targetRoom, dir === -1 ? -1 : +1);
     });
 
     // 사용자가 토론 종료 요청

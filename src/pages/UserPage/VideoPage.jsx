@@ -67,7 +67,7 @@ export default function VideoPage({ onComplete }) {
           setClickCount(prev => {
             const next = prev + 1;
             if (next >= 10) {
-              navigate('/user/aiDiscussion');
+              navigate('/admin/aiDiscussion');
             }
             return next;
           });
@@ -150,7 +150,7 @@ export default function VideoPage({ onComplete }) {
           onClick={() => {
             if (!videoEnded) return;
             else {
-              navigate('/user/aiDiscussion');
+              navigate('/admin/aiDiscussion');
             }
           }}
         >

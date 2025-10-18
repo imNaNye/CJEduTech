@@ -99,6 +99,11 @@ export default function AdminAIDiscussionPage(){
                     console.log('[Admin] socket ack: room:next', ack);
                 });
                 console.log('[Admin] socket emit: room:next', roomId);
+            }else if (action === 'prev') {
+                socket.emit('room:next', { dir:-1  }, (ack) => {
+                    console.log('[Admin] socket ack: room:next', ack);
+                });
+                console.log('[Admin] socket emit: room:next', roomId);
             }
         } catch (e) {
             console.warn('[Admin] socket emit failed, trying HTTP fallback:', action, e);
@@ -124,7 +129,7 @@ export default function AdminAIDiscussionPage(){
         <div className="ai-discussion-page">
             {/* Admin control bar */}
             <div style={{
-                position:'fixed', top: 12, right: 12, zIndex: 2100,
+                position:'fixed', bottom: 12, right: 12, zIndex: 2100,
                 display: 'flex', gap: 8,
                 background: '#fff', border: '1px solid #e5e5e5', borderRadius: 8,
                 padding: '8px 10px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
@@ -142,6 +147,12 @@ export default function AdminAIDiscussionPage(){
                     title="AI 멘트(요약/격려) 생성 요청"
                 >AI 멘트 생성</button>
                 <button
+                    type="button"
+                    onClick={() => sendAdminAction('prev')}
+                    style={{ padding:'8px 10px', borderRadius:6, border:'1px solid #ddd', background:'#e8f5e9', cursor:'pointer' }}
+                    title="이전 토론 주제 이동"
+                >이전 토론주제</button>
+                                <button
                     type="button"
                     onClick={() => sendAdminAction('next')}
                     style={{ padding:'8px 10px', borderRadius:6, border:'1px solid #ddd', background:'#e8f5e9', cursor:'pointer' }}

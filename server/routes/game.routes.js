@@ -31,4 +31,33 @@ router.post('/submit', async (req, res, next) => {
   }
 });
 
+
+// GET /api/game/stats/element-traits
+router.get('/stats/element-traits', async (req, res, next) => {
+  try {
+    const { getElementTraitStats } = await import('../services/game.service.js');
+    const data = await getElementTraitStats();
+    res.json({ ok: true, ...data });
+  } catch (err) { next(err); }
+});
+
+// GET /api/game/stats/overview
+router.get('/stats/overview', async (req, res, next) => {
+  try {
+    const { getOverviewStats } = await import('../services/game.service.js');
+    const data = await getOverviewStats();
+    res.json({ ok: true, ...data });
+  } catch (err) { next(err); }
+});
+
+
+// GET /api/game/stats/progress — started vs submitted, and incomplete sessions
+router.get('/stats/progress', async (req, res, next) => {
+  try {
+    const { getProgressStats } = await import('../services/game.service.js');
+    const data = await getProgressStats();
+    res.json({ ok: true, ...data });
+  } catch (err) { next(err); }
+});
+
 export default router;

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import PageHeader from "../../components/common/PageHeader";
-import GameMain from "../../components/user/game/GameMain";
+import GameResult from "../../components/user/game/GameResult";
 import '../../components/user/game/game.css'
 
-export default function GamePage(){
+export default function AdminGamePage(){
     useEffect(() => {
         const handleClick = () => {
             const audio = new Audio('/sounds/narration/gameintro.mp3');
@@ -19,7 +19,7 @@ export default function GamePage(){
     return(
         <div className="Gamepage">
             <PageHeader title="CJ 인성적 요소 구분 게임"/>
-            <GameMain/>
+            <GameResult/>
         </div>
     )
 }

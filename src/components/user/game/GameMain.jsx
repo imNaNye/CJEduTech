@@ -42,6 +42,7 @@ export const GameService = {
 import { useMemo, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRoundStep } from '../../../contexts/RoundStepContext';
+import { useUser } from "../../../contexts/UserContext";
 import guide1 from "@/assets/images/game/guide1.png";
 import "./game.css";
 
@@ -58,6 +59,7 @@ const TRAIT_DESCS = {
   creativity: "고정관념을 넘어 새로운 관점과 해법을 제시하는 태도.",
   respect: "타인의 다양성과 권리를 인정하고 배려하는 태도.",
 };
+
 // 게임 카테고리(인성 → 태도 → 기능)
 const CATEGORIES = [
   {
@@ -65,14 +67,14 @@ const CATEGORIES = [
     label: "인성적 요소",
     color: "#ffefe4",
     items: [
-      { id: "이해심", desc: "상대의 입장을 이해하고 배려하는 마음." },
-      { id: "유머감각", desc: "분위기를 부드럽게 전환시키는 표현력." },
-      { id: "끈기", desc: "끝까지 포기하지 않고 해내는 태도." },
-      { id: "성실함", desc: "주어진 일을 꾸준히 책임감 있게 수행." },
-      { id: "다재다능함", desc: "여러 업무를 유연히 소화하는 역량." },
-      { id: "배려심", desc: "타인을 먼저 생각하고 양보하는 태도." },
-      { id: "관찰력", desc: "상황의 핵심을 빠르게 포착." },
-      { id: "단호함", desc: "원칙에 따라 과감히 의사결정." },
+      { id: "이해심", desc: "이런 저런 상황과 사람은 늘 있을 수 있다고 받아들이는 여유" },
+      { id: "유머감각", desc: "분위기를 부드럽게 전환시킬 수 있는 재치있는 표현력" },
+      { id: "끈기", desc: "주어진 과업과 직무를 쉽게 포기하지 않고 끝까지 해내는 힘" },
+      { id: "성실함", desc: "맡은 일을 끝까지 책임지고 완성도 높게 수행하는 자세" },
+      { id: "정직함", desc: "문제를 숨기지 않고 해결을 위해 최선을 다하는 자세" },
+      { id: "배려심", desc: "고객, 동료 등의 입장을 헤아리고 먼저 생각하는 마음" },
+      { id: "책임감", desc: "고객요청에 스스로 책임지고 마무리하는 태도" },
+      { id: "절제력", desc: "스트레스 상황에 감정이나 말, 행동을 자제하는 힘" },
     ],
   },
   {
@@ -80,11 +82,11 @@ const CATEGORIES = [
     label: "태도적 요소",
     color: "#ffe6d5",
     items: [
-      { id: "정직함", desc: "사실에 근거해 투명하게 행동." },
-      { id: "책임감", desc: "결과를 스스로 감당하려는 자세." },
-      { id: "절제력", desc: "감정과 욕구를 조절하는 힘." },
-      { id: "부지런함", desc: "주도적으로 움직이고 실행." },
-      { id: "신중함", desc: "충분한 검토 후 결정을 내림." },
+      { id: "단호함", desc: "어느 경우에도 원칙과 규정을 잘 지키며 흔들리지 않는 태도" },
+      { id: "신중함", desc: "실수를 줄이고 일의 완성도를 높이기 위한 세심한 판단과 태도" },
+      { id: "유연함", desc: "고정된 방식에 갇히지 않고 상황 변화에 적응하는 능력" },
+      { id: "부지런함", desc: "맡은 일을 한 발 앞서 준비하는 태도" },
+      { id: "관찰력", desc: "상황 변화나 고객, 팀 동료 특성을 빠르게 파악하는 능력" },
     ],
   },
   {
@@ -92,12 +94,12 @@ const CATEGORIES = [
     label: "기능적 요소",
     color: "#ffe0a8",
     items: [
-      { id: "위기관리능력", desc: "예상 밖 상황을 침착히 수습." },
-      { id: "시간관리능력", desc: "우선순위와 일정 운용 능력." },
-      { id: "설득력", desc: "타인을 논리적으로 이끄는 능력." },
-      { id: "팀워크능력", desc: "협업을 통해 성과를 창출." },
-      { id: "유연함", desc: "상황 변화에 맞춰 접근 방식을 조정." },
-      { id: "창의성", desc: "기존 틀을 넘어 새로운 해법을 제시." },
+      { id: "위기관리능력", desc: "예상치 못한 돌발 상황을 침착하게 수습하는 능력" },
+      { id: "시간관리능력", desc: "제한된 시간 안에 효율적으로 일처리를 조율하는 능력" },
+      { id: "설득력", desc: "상대를 납득시키고 긍정적으로 이끄는 능력" },
+      { id: "팀워크능력", desc: "팀원 간 협업에 본인의 역할을 잘 인지하고 발휘하는 능력" },
+      { id: "창의성", desc: "틀에 얽매이지 않고 새롭고 효과적인 해결책을 제시하는 능력" },
+      { id: "다재다능함", desc: "다양한 업무를 효율적이고 유연하게 처리할 수 있는 능력" },
     ],
   },
 ];
@@ -110,6 +112,7 @@ const makeEmptySelections = () =>
   }, {});
 
 export default function GameMain() {
+  const {isAdmin} = useUser();
   const [step, setLevel] = useState("guide"); // guide | play | mid | final | wait
   const [phaseIdx, setPhaseIdx] = useState(0); // 0: 인성, 1: 태도, 2: 기능
   const [hovered, setHovered] = useState(null); // {id}
@@ -333,7 +336,11 @@ export default function GameMain() {
           onClick={() => {
             console.log("다음 페이지로 이동 트리거");
             setStep(4);
+            if (isAdmin){
+              navigate('/admin/roundIndicator');
+            } else{
             navigate("/user/roundIndicator", { replace: true });
+            }
           }}
         >
           다음으로

@@ -129,3 +129,150 @@ export async function saveGameSubmit({ nickname, sessionId, selectionsByCategory
 export function _getMemoryDB() {
   return memoryDB;
 }
+
+// ---------------- Stats helpers ----------------
+async function _fetchAllSubmissionsRaw() {
+  await ensureTables();
+  if (usingMemory) {
+    return memoryDB.submissions.map(s => ({
+      nickname: s.nickname,
+      selections_json: s.selections_json || {},
+      merged_json: s.merged_json || {},
+      created_at: s.created_at,
+    }));
+  }
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query(
+      `SELECT nickname, selections_json, merged_json, created_at FROM game_submissions`
+    );
+    return rows.map(r => ({
+      nickname: r.nickname,
+      selections_json: (typeof r.selections_json === 'string') ? JSON.parse(r.selections_json || '{}') : r.selections_json || {},
+      merged_json: (typeof r.merged_json === 'string') ? JSON.parse(r.merged_json || '{}') : r.merged_json || {},
+      created_at: r.created_at,
+    }));
+  } finally {
+    conn.release();
+  }
+}
+
+/**
+ * Build per-element per-trait stats with user lists.
+ * Result shape:
+ * {
+ *   items: [
+ *     { id: '정직함', category: 'personal', counts: {integrity:2, passion:0, creativity:1, respect:0}, users: {integrity:['홍길동'], ...} }
+ *   ],
+ *   totals: { submissions: N, users: M }
+ * }
+ */
+export async function getElementTraitStats() {
+  const subs = await _fetchAllSubmissionsRaw();
+  const usersSet = new Set(subs.map(s => s.nickname));
+  const byItem = new Map(); // id -> { id, category, counts, users }
+
+  const traitKeys = ['integrity','passion','creativity','respect'];
+  const ensureRow = (id, category) => {
+    if (!byItem.has(id)) {
+      const counts = Object.fromEntries(traitKeys.map(k => [k, 0]));
+      const users = Object.fromEntries(traitKeys.map(k => [k, new Set()]));
+      byItem.set(id, { id, category: category || null, counts, users });
+    }
+    return byItem.get(id);
+  };
+
+  // Traverse each submission selections_json
+  subs.forEach(({ nickname, selections_json }) => {
+    if (!selections_json || typeof selections_json !== 'object') return;
+    Object.entries(selections_json).forEach(([categoryKey, traitObj]) => {
+      if (!traitObj || typeof traitObj !== 'object') return;
+      traitKeys.forEach(traitKey => {
+        const arr = traitObj[traitKey] || [];
+        if (!Array.isArray(arr)) return;
+        arr.forEach((itemId) => {
+          const row = ensureRow(itemId, categoryKey);
+          row.counts[traitKey] += 1;
+          row.users[traitKey].add(nickname || '게스트');
+        });
+      });
+    });
+  });
+
+  // finalize sets to arrays and sorting
+  const items = Array.from(byItem.values()).map(r => ({
+    id: r.id,
+    category: r.category,
+    counts: r.counts,
+    users: Object.fromEntries(
+      Object.entries(r.users).map(([k, set]) => [k, Array.isArray(set) ? set : Array.from(set || [])])
+    ),
+  }));
+
+  // sort items by total assignments desc
+  items.sort((a,b) => {
+    const sa = Object.values(a.counts).reduce((p,c)=>p+c,0);
+    const sb = Object.values(b.counts).reduce((p,c)=>p+c,0);
+    return sb - sa;
+  });
+
+  return {
+    items,
+    totals: { submissions: subs.length, users: usersSet.size }
+  };
+}
+
+/** Basic overview */
+export async function getOverviewStats() {
+  const subs = await _fetchAllSubmissionsRaw();
+  const usersSet = new Set(subs.map(s => s.nickname));
+  return { submissions: subs.length, users: usersSet.size };
+}
+
+// Progress stats: started vs submitted vs incomplete
+export async function getProgressStats() {
+  await ensureTables();
+  if (usingMemory) {
+    const sessions = memoryDB.sessions.map(s => ({
+      session_id: s.session_id,
+      nickname: s.nickname,
+      started_at: s.started_at,
+      created_at: s.created_at,
+    }));
+    const submissions = memoryDB.submissions.map(s => ({
+      session_id: s.session_id,
+      nickname: s.nickname,
+      submitted_at: s.submitted_at,
+      created_at: s.created_at,
+    }));
+    const submittedIds = new Set(submissions.map(x => x.session_id));
+    const incompletes = sessions.filter(s => !submittedIds.has(s.session_id));
+    return { sessions, submissions, incompletes };
+  }
+  const conn = await pool.getConnection();
+  try {
+    const [sessRows] = await conn.query(
+      `SELECT session_id, nickname, started_at, created_at FROM game_sessions`
+    );
+    const [subRows] = await conn.query(
+      `SELECT session_id, nickname, submitted_at, created_at FROM game_submissions`
+    );
+    const sessions = sessRows.map(r => ({
+      session_id: r.session_id,
+      nickname: r.nickname,
+      started_at: Number(r.started_at) || null,
+      created_at: r.created_at,
+    }));
+    const submissions = subRows.map(r => ({
+      session_id: r.session_id,
+      nickname: r.nickname,
+      submitted_at: Number(r.submitted_at) || null,
+      created_at: r.created_at,
+    }));
+    const submittedIds = new Set(submissions.map(x => x.session_id));
+    const incompletes = sessions.filter(s => !submittedIds.has(s.session_id));
+    return { sessions, submissions, incompletes };
+  } finally {
+    conn.release();
+  }
+}

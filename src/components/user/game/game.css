@@ -195,7 +195,14 @@ letter-spacing: 0.769px;}
 .cjgame-chip--flip { perspective: 800px; transform-style: preserve-3d; transition: transform 0.5s ease; }
 .cjgame-chip-face {  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 12px 14px; border-radius: inherit; backface-visibility: hidden; }
 .cjgame-chip-front { transform: rotateY(0deg); }
-.cjgame-chip-back { transform: rotateY(180deg); background: #fff; color: #000; font-weight: 700; line-height: 1.3; text-align: center; /* two-line clamp */ display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cjgame-chip-back {font-size: 14px;
+  padding: 5px;
+   transform: rotateY(180deg); 
+   background: #fff; 
+   color: #000; 
+   font-weight: 700; 
+   line-height: 1.3; 
+   text-align: center;  -webkit-box-orient: vertical; overflow: hidden; }
 .cjgame-chip--flip.is-desc { transform: rotateY(180deg); }
 .cjgame-chip.is-desc { background: #fff; border-color: #ddd; }
 
@@ -218,3 +225,127 @@ letter-spacing: 0.769px;}
 
 /* helper for chip placer wrapper */
 .cjgame-chip-placer { will-change: transform;transition: transform 0.5s ease; }
+
+/* ===== 관리자 결과 테이블/헤더 가독성 수정 ===== */
+.cjgame-result-page,
+.cjgame-result-page .cjgame-title,
+.cjgame-result-page .cjgame-subtitle,
+.cjgame-result-card,
+.cjgame-result-card-header {
+  color: #222 !important;
+}
+
+.cjgame-result-card-header.trait-integrity,
+.cjgame-result-card-header.trait-passion,
+.cjgame-result-card-header.trait-creativity,
+.cjgame-result-card-header.trait-respect {
+  color: #222 !important;
+}
+/* ===== Admin dashboard: compact table & side panel ===== */
+.cjgame-admin-table th,
+.cjgame-admin-table td {
+  font-size: 14px;
+  line-height: 1.35;
+}
+.cjgame-admin-table .cell-count {
+  transition: background-color .15s ease, transform .05s ease;
+}
+.cjgame-admin-table .cell-count:hover {
+  background: rgba(0,0,0,0.04);
+}
+
+/* Fixed side panel for selected cell detail */
+.cjgame-sidepanel {
+  position: fixed;
+  right: 20px;
+  top: 96px;
+  width: 320px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+  min-height: 0;
+}
+.cjgame-sidepanel-header {
+  padding: 12px 14px;
+  font-weight: 800;
+  border-bottom: 1px solid #eee;
+}
+.cjgame-sidepanel-body {
+  padding: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-height: 0;
+}
+.cjgame-sidepanel-footer {
+  padding: 10px 12px;
+  border-top: 1px solid #eee;
+  text-align: right;
+}
+
+/* Make room on the right when side panel is open (best-effort) */
+.cjgame-result-page { 
+  padding: 50px;
+  padding-right: 360px; }
+@media (max-width: 1200px) {
+  .cjgame-result-page { padding-right: 24px; }
+  .cjgame-sidepanel { position: static; width: 100%; max-height: none; }
+}
+
+/* Admin two-column layout */
+.cjgame-layout { display:flex; gap:16px; align-items: stretch; }
+.cjgame-table-scroll { max-height: 60vh; overflow: auto; }
+
+/* Sticky first two columns inside the scroll container */
+.cjgame-admin-table td:first-child { position: sticky; left: 0; background: #fff; z-index: 1; }
+.cjgame-admin-table td:nth-child(2) { position: sticky; left: 220px; background: #fff; z-index: 1; }
+/* ===== Admin table fixes: stable widths + sticky first 2 columns & header layering ===== */
+.cjgame-table-scroll { position: relative; }
+.cjgame-admin-table { table-layout: fixed; }
+.cjgame-admin-table th, .cjgame-admin-table td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* enforce fixed widths for first two columns */
+.cjgame-admin-table th:nth-child(1), .cjgame-admin-table td:nth-child(1) { width: 220px; min-width: 220px; max-width: 220px; text-align: left;}
+.cjgame-admin-table th:nth-child(2), .cjgame-admin-table td:nth-child(2) { width: 160px; min-width: 160px; max-width: 160px; text-align: center; }
+
+/* sticky columns */
+.cj-sticky-col-1 { position: sticky; left: 0; background: #fff; z-index: 2; }
+.cj-sticky-col-2 { position: sticky; left: 220px; background: #fff; z-index: 2; }
+
+/* header should be above sticky columns */
+.cjgame-admin-table thead th { position: sticky; top: 0; z-index: 3; }
+.cjgame-admin-table thead .cj-sticky-col-1 { left: 0; }
+.cjgame-admin-table thead .cj-sticky-col-2 { left: 220px; }
+
+/* ===== Admin table: trait columns width & horizontal scroll support ===== */
+.cjgame-admin-table { min-width: 500px; }
+.cjgame-admin-table th.trait-integrity,
+.cjgame-admin-table td.trait-integrity,
+.cjgame-admin-table th.trait-passion,
+.cjgame-admin-table td.trait-passion,
+.cjgame-admin-table th.trait-creativity,
+.cjgame-admin-table td.trait-creativity,
+.cjgame-admin-table th.trait-respect,
+.cjgame-admin-table td.trait-respect {
+  width: 60px; min-width: 60px; max-width: 60px; text-align: center;
+}
+
+/* ensure numbers are visible */
+.cjgame-admin-table td.cell-count { color: #222; font-variant-numeric: tabular-nums; }
+
+/* ==== Admin table: disable sticky columns & header for full scroll ==== */
+.cjgame-admin-table thead th { position: static !important; top: auto !important; z-index: auto !important; }
+.cj-sticky-col-1, .cj-sticky-col-2 { position: static !important; left: auto !important; z-index: auto !important; background: inherit !important; }
+.cjgame-admin-table td:first-child,
+.cjgame-admin-table td:nth-child(2) { position: static !important; left: auto !important; z-index: auto !important; background: inherit !important; }
+
+/* Ensure both directions scroll if needed */
+.cjgame-table-scroll { overflow: auto; }

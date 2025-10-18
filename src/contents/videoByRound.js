@@ -1,6 +1,6 @@
 // src/contents/videoByRound.js
-import r1_1 from '/videos/round1_1.mp4';
-import r1_2 from '/videos/round1_2.mp4';
+import r1_1 from '/videos/round1_1.mov';
+import r1_2 from '/videos/round1_2.mov';
 import r1_3 from '/videos/round1_3.mov';
 import r2_1 from '/videos/round2_1.mov';
 import r2_2 from '/videos/round2_2.mov';

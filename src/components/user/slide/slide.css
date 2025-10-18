@@ -133,6 +133,8 @@
   padding: clamp(10px, 1.8vw, 18px);
   position: relative;
   overflow: visible; /* 내용이 많아도 카드 높이 고정 */
+  word-break: keep-all; 
+  white-space: normal;
   min-height: 0;    /* grid/min-content 팽창 방지 */
 }
 

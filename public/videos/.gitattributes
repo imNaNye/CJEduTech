@@ -1,0 +1,10 @@
+round1_1.mov filter=lfs diff=lfs merge=lfs -text
+round1_2.mov filter=lfs diff=lfs merge=lfs -text
+round1_3.mov filter=lfs diff=lfs merge=lfs -text
+round2_1.mov filter=lfs diff=lfs merge=lfs -text
+round2_2.mov filter=lfs diff=lfs merge=lfs -text
+round2_3.mp4 filter=lfs diff=lfs merge=lfs -text
+round3_1.mov filter=lfs diff=lfs merge=lfs -text
+round3_2.mov filter=lfs diff=lfs merge=lfs -text
+round3_3.mov filter=lfs diff=lfs merge=lfs -text
+round3_4.mov filter=lfs diff=lfs merge=lfs -text

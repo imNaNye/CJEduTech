@@ -52,7 +52,7 @@ export default function QuizIndicatorPage(){
                     {formatTime(timeLeft)}
                 </div>
             )}
-            <PageHeader/>
+            <PageHeader title="STEP2 퀴즈풀이"/>
             {!isAdmin && (
                 <div className="user-indicator-footer">
                     퍼실리테이터의 안내 후 다음으로 버튼을 눌러주세요.

@@ -54,10 +54,10 @@ const TRAITS = [
   { key: "respect", label: "존중" },
 ];
 const TRAIT_DESCS = {
-  integrity: "사실과 원칙에 기반해 투명하게 행동하고 신뢰를 쌓는 태도.",
-  passion: "목표를 향해 주도적으로 몰입하고 끈기 있게 실행하는 태도.",
-  creativity: "고정관념을 넘어 새로운 관점과 해법을 제시하는 태도.",
-  respect: "타인의 다양성과 권리를 인정하고 배려하는 태도.",
+  integrity: "비효율과 부정을 용납하지 않는다.",
+  passion: "최고와 완벽을 추구한다.",
+  creativity: "끊임없이 변화하고 혁신한다.",
+  respect: "서로 이해하고 배려한다.",
 };
 
 // 게임 카테고리(인성 → 태도 → 기능)

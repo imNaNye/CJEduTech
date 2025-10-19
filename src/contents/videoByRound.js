@@ -9,7 +9,7 @@ import r3_1 from '/videos/round3_1.mov';
 import r3_2 from '/videos/round3_2.mov';
 import r3_3 from '/videos/round3_3.mov';
 import r3_4 from '/videos/round3_4.mov';
-
+ 
 export const videoByRound = {
   1: [
     { title: 'ep1 - 갓 구운 빵의 비밀', src: r1_1 },

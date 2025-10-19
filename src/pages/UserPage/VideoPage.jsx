@@ -16,6 +16,10 @@ export default function VideoPage({ onComplete }) {
   const [muted, setMuted] = useState(true);
   const [clickCount, setClickCount] = useState(0);
   const navigate = useNavigate();
+  const API_BASE = import.meta.env?.VITE_API_URL || '';
+  // 별도의 동영상 CDN/S3/CloudFront를 사용할 경우 .env에 VITE_VIDEO_BASE 를 지정하세요.
+  // 지정하지 않으면 API_BASE를 기본 프리픽스로 사용합니다.
+  const VIDEO_BASE = import.meta.env?.VITE_VIDEO_BASE || API_BASE;
   const unmuteAndPlay = () => {
     setMuted(false);
     const v = videoRef.current;
@@ -29,6 +33,7 @@ export default function VideoPage({ onComplete }) {
   };
   const playlist = videoByRound[round] || [];
   const content = playlist[videoId];
+  const videoSrc = content?.src?.startsWith('http') ? content.src : `${VIDEO_BASE}${content?.src || ''}`;
 
   useEffect(() => {
     setVideoEnded(false);
@@ -98,7 +103,7 @@ export default function VideoPage({ onComplete }) {
             className="video-element"
             key={`${round}-${videoId}`}
             ref={videoRef}
-            src={content.src}
+            src={videoSrc}
             autoPlay
             playsInline
             muted={muted}

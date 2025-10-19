@@ -39,7 +39,8 @@ router.post('/:roomId/multi-final-result', async (req, res) => {
     const nickname = req.body?.nickname || req.query?.nickname || '';
     const videoIds = Array.isArray(req.body?.videoIds) ? req.body.videoIds : [];
     if (!videoIds.length) return res.status(400).json({ error: 'videoIds_required' });
-    const result = await generateMultiVideoFinalResult(roomId, nickname, videoIds);
+    const force = String(req.query?.force || '').toLowerCase() === 'true';
+    const result = await generateMultiVideoFinalResult(roomId, nickname, videoIds, { force });
     return res.json(result);
   } catch (e) {
     return res.status(500).json({ error: 'multi_final_result_failed', message: e?.message });

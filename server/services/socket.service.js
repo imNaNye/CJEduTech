@@ -525,7 +525,7 @@ async function expireRoom(io, roomId) {
   }*/
 
     // === Topic-wise representative statements via per-user AI (/user-summary) ===
-    let topicSummaries = { topics: [], generatedAt: Date.now(), perUserFeedback: {} };
+    let topicSummaries = { topics: [], generatedAt: Date.now() };
     try {
       const stS = getRoomState(roomId);
       if (!stS.topicSummariesGenerated) {
@@ -544,7 +544,7 @@ async function expireRoom(io, roomId) {
         const userNicknames = Object.keys(perUser).filter(n => !botNames.has(n));
 
         // Prepare topic index for aggregation
-        const byTopic = new Map(); // topic -> Array<{ nickname, summary, reason? }>
+        const byTopic = new Map(); // topic -> Array<{ nickname, summary, relevance }>
         for (const t of names) byTopic.set(String(t), []);
 
         if (AI_ENDPOINT && userNicknames.length && discussion_topics.length) {
@@ -557,28 +557,22 @@ async function expireRoom(io, roomId) {
                   user_id: nick,
                   chat_history,
                   discussion_topics,
-                  max_statements_per_topic: 1
+                  max_statements_per_topic: 1 // ignored by new summarizer but kept for clarity
                 })
               });
               if (!res.ok) throw new Error('user-summary http ' + res.status);
               const data = await res.json();
-              // data.topics: [{ topic, user_statements: [{text, reason}], feedback }]
+              // data.topics: [{ topic, relevance_score, related_statements: [], summary }]
               if (data && Array.isArray(data.topics)) {
-                // store per-user feedback
-                if (!topicSummaries.perUserFeedback[nick]) {
-                  topicSummaries.perUserFeedback[nick] = { overall_feedback: data.overall_feedback || '', topics: [] };
-                }
                 for (const t of data.topics) {
                   const topicName = t?.topic || '';
                   const arr = byTopic.get(topicName) || [];
-                  const st = Array.isArray(t?.user_statements) && t.user_statements[0];
-                  if (st && st.text) {
-                    arr.push({ nickname: nick, summary: st.text, reason: st.reason });
+                  const relevance = typeof t?.relevance_score === 'number' ? t.relevance_score : 0;
+                  const summaryText = (t?.summary && String(t.summary)) || (Array.isArray(t?.related_statements) && t.related_statements[0]) || '';
+                  if (summaryText) {
+                    arr.push({ nickname: nick, summary: summaryText, relevance });
                   }
                   byTopic.set(topicName, arr);
-                  if (t?.feedback) {
-                    topicSummaries.perUserFeedback[nick].topics.push({ topic: topicName, feedback: t.feedback });
-                  }
                 }
               }
             } catch (e) {
@@ -592,16 +586,16 @@ async function expireRoom(io, roomId) {
             const arr = [];
             for (const [nick, msgsArr] of byUser.entries()) {
               const m = (msgsArr || [])[0];
-              if (m && m.text) arr.push({ nickname: nick, summary: m.text });
+              if (m && m.text) arr.push({ nickname: nick, summary: m.text, relevance: 0 });
             }
             byTopic.set(topic, arr);
           }
         }
 
-        // Build final structure
+        // Build final structure (sort by relevance desc per topic)
         const topicsOut = [];
         for (const name of names) {
-          const items = byTopic.get(String(name)) || [];
+          const items = (byTopic.get(String(name)) || []).sort((a,b) => (b.relevance||0) - (a.relevance||0));
           topicsOut.push({ topic: String(name), summaries: items });
         }
         topicSummaries.topics = topicsOut;
@@ -917,6 +911,11 @@ if (AI_ENDPOINT) {
 }
 
 if (!q || !q.question) return false;
+  if (!q.question || q.question === '결과 없음' || q.question.toLowerCase().includes('결과 없음') || q.question === '결과없음' || q.question.toLowerCase().includes('결과없음')) {
+    console.log(`[AI Ment] No valid result for room ${roomId}, skipping broadcast`);
+    return;
+  }
+  
 const payload = {
   id: randomUUID(),
   type: 'topic_comment',
@@ -1145,13 +1144,22 @@ export function initChatSocket(io) {
        socket.join(`room:${composed}`);
        if (prevRoom) setTimeout(() => cleanupRoomIfEmpty(io, prevRoom), 0);
 
-      // ensure room state exists & save current video id
+      // ensure room state exists & save current video id (do not override once set)
       const stForJoin = getRoomState(composed);
-      const hasVideoId = (videoId !== undefined && videoId !== null);
-      if (hasVideoId) {
-        stForJoin.videoId = videoId; // 0~9 숫자/문자 모두 허용
+      const incomingHas = (videoId !== undefined && videoId !== null);
+      const alreadyHas = (typeof stForJoin.videoId !== 'undefined');
+      if (incomingHas) {
+        if (!alreadyHas) {
+          // First setter wins: establish room's videoId
+          stForJoin.videoId = videoId; // 0~9 숫자/문자 모두 허용
+          console.log('[room:join] videoId set (initial)=', videoId);
+        } else {
+          // Late joiners often send default 0 → ignore to avoid clobbering
+          console.log('[room:join] videoId ignored (already set)=', stForJoin.videoId, ' incoming=', videoId);
+        }
+      } else {
+        console.log('[room:join] no incoming videoId; keep existing=', alreadyHas ? stForJoin.videoId : '(unset)');
       }
-      console.log('[room:join] videoId incoming=', videoId, 'stored=', hasVideoId ? stForJoin.videoId : '(skipped)');
 
       // Preload topics only (first topic will be announced by scheduler ~10s after creation)
       ensureRoomTopics(composed);

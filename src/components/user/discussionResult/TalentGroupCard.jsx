@@ -36,7 +36,7 @@ function rankSuffix(n){
  *    ※ members는 topReacted.reactionsCount 내림차순으로 정렬해 1..N 순위 부여
  *  - maxRows?: number  // (옵션) 시각적 제한. 스크롤은 기본 활성화
  */
-export default function TalentGroupCard({ trait='정직', members=[], maxRows }) {
+export default function TalentGroupCard({ trait='정직', members=[], hideLikes=false  }) {
   const icon = BADGE_BY_TRAIT[trait];
 
   const list = useMemo(() => {
@@ -85,10 +85,12 @@ export default function TalentGroupCard({ trait='정직', members=[], maxRows })
             <div className="tg-right">
               <div className="tg-name-row">
                 <span className="tg-name">{m.nickname}</span>
+                {(!hideLikes) && (
                 <span className="tg-like-pill">
                   <img src={likeIcon} alt="likes" />
                   {m.topReacted?.reactionsCount ?? 0}
                 </span>
+                )}
               </div>
                 {(() => {
                   const stableKey = `${trait}-${m.nickname}-${m.rank}`;

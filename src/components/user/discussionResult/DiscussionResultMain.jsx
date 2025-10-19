@@ -580,6 +580,7 @@ function koreanOrdinal(n){
           <TalentGroupCard
             key={idx}
             trait={t.topic || `토론 주제 ${idx+1}`}
+            hideLikes={true}
             members={(t.summaries || []).map(s => ({
               nickname: s.nickname,
               avatar: getAvatarForNickname(s.nickname),

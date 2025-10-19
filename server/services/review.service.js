@@ -8,6 +8,8 @@ const AI_BASE = process.env.AI_SERVER_BASE || process.env.AI_BASE || 'http://loc
 const overallSummaryCache = new Map();
 // in-memory cache: `${baseRoomId}|${nickname}` -> final result blob
 const finalResultCache = new Map();
+// in-memory cache: `${baseRoomId}|${nickname}|mvid=sortedIds` -> multi video final result blob
+const multiFinalResultCache = new Map();
 
 function toBaseRoomId(roomId){
   // strip optional __r{n}
@@ -284,10 +286,19 @@ export async function generateOverallSummary(roomId, opts = {}) {
 }
 
 // Aggregate across multiple videoIds
-export async function generateMultiVideoFinalResult(roomId, nickname, videoIds = []) {
+export async function generateMultiVideoFinalResult(roomId, nickname, videoIds = [], opts = {}) {
   if (!Array.isArray(videoIds) || !videoIds.length)
     throw new Error('videoIds_required');
   try { console.info('[MultiFinalResult][request]', { roomId, nickname, videoIds }); } catch {}
+
+    const baseId = toBaseRoomId(roomId);
+    const sortedKey = videoIds.map(v => String(v)).sort().join(',');
+    const key = `${baseId}|${nickname||''}|mvid=${sortedKey}`;
+    const force = !!opts.force;
+    if (!force && multiFinalResultCache.has(key)) {
+      const cached = multiFinalResultCache.get(key);
+      return { roomId: baseId, nickname, cached: true, ...cached };
+    }
 
   const allResults = [];
   for (const vid of videoIds) {
@@ -330,8 +341,8 @@ export async function generateMultiVideoFinalResult(roomId, nickname, videoIds =
   }
 
   if (!allResults.length) {
-    return {
-      roomId,
+    const empty = {
+      roomId:baseId,
       nickname,
       createdAt: new Date().toISOString(),
       sections: {
@@ -343,6 +354,8 @@ export async function generateMultiVideoFinalResult(roomId, nickname, videoIds =
         ranking: [],
       }
     };
+      multiFinalResultCache.set(key, empty);
+      return { cached: false, ...empty };
   }
 
   const mergedLabels = { '정직':0,'창의':0,'존중':0,'열정':0 };
@@ -470,8 +483,8 @@ export async function generateMultiVideoFinalResult(roomId, nickname, videoIds =
       .map(m => ({ text: m.text, reactionsCount: m.reactionsCount || 0, createdAt: m.createdAt, round_number: m.round_number }));
   } catch {}
 
-  return {
-    roomId,
+  const result = {
+    roomId: baseId,
     nickname,
     createdAt: new Date().toISOString(),
     sections: {
@@ -487,4 +500,6 @@ export async function generateMultiVideoFinalResult(roomId, nickname, videoIds =
       ranking,
     }
   };
+  multiFinalResultCache.set(key, result);
+  return { cached: false, ...result };
 }

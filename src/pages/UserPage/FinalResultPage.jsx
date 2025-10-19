@@ -51,6 +51,13 @@ export default function FinalResultPage() {
   const roomId = useMemo(() => search.get('roomId') || location.state?.roomId || localStorage.getItem('roomId') || 'general', [location.search, location.state]);
   const nickname = useMemo(() => search.get('nickname') || location.state?.nickname || localStorage.getItem('nickname') || '', [location.search, location.state]);
   const learnedAtStr = useMemo(() => new Date().toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' }), []);
+  const { avatarUrl,isAdmin } = useUser();
+  // admin override via URL param: ?admin or ?admin=1
+  const isAdminEffective = isAdmin || search.has('admin');
+
+  // Admin-controlled nickname selection
+  const [adminTargetNick, setAdminTargetNick] = useState(nickname);
+  const effectiveNick = (isAdminEffective ? (adminTargetNick || nickname) : nickname);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -221,11 +228,11 @@ export default function FinalResultPage() {
       try {
         // 멀티 비디오 통합 결과 호출
         const created = await http.post(`/api/review/${encodeURIComponent(roomId)}/multi-final-result`, {
-          nickname: nickname || '',
+          nickname: effectiveNick || '',
           videoIds: selectedVideoSet,
         });
         console.log('[FinalResultPage] multi-final-result:', created);
-        if (!aborted) setData(fillSectionsWithMockIfSparse(created, nickname));
+        if (!aborted) setData(fillSectionsWithMockIfSparse(created, effectiveNick));
       } catch (e) {
         if (!aborted) {
           setData({ sections: buildMockSections() });
@@ -249,7 +256,7 @@ export default function FinalResultPage() {
     }
     fetchData();
     return () => { aborted = true };
-  }, [roomId, nickname]);
+  }, [roomId, effectiveNick]);
 
   // Log when data/quiz states are updated (for real API integration later)
   useEffect(() => {
@@ -300,7 +307,6 @@ export default function FinalResultPage() {
 
   const top3 = sections?.top3Statements || [];
   const aiSummary = sections?.aiSummary || '';
-  const { avatarUrl } = useUser();
   // 유틸
   const pct = (v) => typeof v === 'number' ? `${v}%` : (Number(v)||0)+"%";
   const p = personaIntegrated.percentages;
@@ -687,7 +693,7 @@ export default function FinalResultPage() {
     return (
       <div className="final-result-page">
         <div className="frp-topbar">
-          <h2 className="frp-topbar__title">{nickname ? `${nickname}의 학습 레포트` : '학습 레포트'}</h2>
+          <h2 className="frp-topbar__title">{effectiveNick ? `${effectiveNick}의 학습 레포트` : '학습 레포트'}</h2>
           <div className="frp-topbar__date">학습일: {learnedAtStr}</div>
         </div>
         <div style={{padding:20}}>결과를 불러오는 중…</div>
@@ -698,7 +704,7 @@ export default function FinalResultPage() {
     return (
       <div className="final-result-page">
         <div className="frp-topbar">
-          <h2 className="frp-topbar__title">{nickname ? `${nickname}의 학습 레포트` : '학습 레포트'}</h2>
+          <h2 className="frp-topbar__title">{effectiveNick ? `${effectiveNick}의 학습 레포트` : '학습 레포트'}</h2>
           <div className="frp-topbar__date">학습일: {learnedAtStr}</div>
         </div>
         <div style={{padding:20,color:'#c0392b'}}>{error}</div>
@@ -707,11 +713,30 @@ export default function FinalResultPage() {
   }
 
   return (
-    
     <div className="final-result-page">
-            <PageHeader title={"전체 결과 대시보드"} />
+      <PageHeader title={"전체 결과 대시보드"} />
       <div className="frp-topbar">
-        <h2 className="frp-topbar__title">{nickname ? `${nickname}의 학습 레포트` : '학습 레포트'}</h2>
+        {isAdminEffective && (
+          <div className="frp-admin-switcher" style={{ position:'absolute', left:0, top:0, display:'flex', alignItems:'center', gap:8 }}>
+            <label htmlFor="frp-admin-nick" className="frp-admin-switcher__label" style={{ fontSize:12, color:'#666' }}></label>
+            <select
+              id="frp-admin-nick"
+              className="frp-admin-switcher__select"
+              value={adminTargetNick || ''}
+              onChange={(e)=> setAdminTargetNick(e.target.value)}
+              style={{ padding:'6px 10px', border:'1px solid #ddd', borderRadius:6 }}
+            >
+              {Array.isArray(sections?.ranking) && sections.ranking.length > 0 ? (
+                sections.ranking.map((r, idx) => (
+                  <option key={`${r.nickname}-${idx}`} value={r.nickname}>{r.nickname}</option>
+                ))
+              ) : (
+                <option value={nickname || ''}>{nickname || '나'}</option>
+              )}
+            </select>
+          </div>
+        )}
+        <h2 className="frp-topbar__title">{effectiveNick ? `${effectiveNick}의 학습 레포트` : '학습 레포트'}</h2>
         <div className="frp-topbar__date">학습일: {learnedAtStr}</div>
       </div>
 

@@ -267,3 +267,9 @@ line-height: normal;
 .target-card .card-face.back {
   transform: rotateY(180deg);
 }
+
+.highlighted {
+    border: 2px solid var(--orange04, #FFCE7B);
+    background: rgba(255, 227, 179, 0.30);
+    box-shadow: 0 0 4px 0 #FF6620;
+}

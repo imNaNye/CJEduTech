@@ -1,20 +1,64 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSlides } from './SlideProvider'
 
 export default function ClickableTarget({ id, as: Tag = 'button', className = '', children }) {
   const { page, flipping } = useSlides()
+  const [localFlipped, setLocalFlipped] = useState(false)
+  const [highlighted, setHighlighted] = useState(false)
 
   const content = page?.targets?.[id] ?? null
   const title = content?.title ?? id
   const postText = content?.postText ?? ''
   const image = content?.image ?? ''
 
-  const isFlipped = Boolean(flipping)
+  // Determine this target's index relative to the page's requiredTargets (fallback to keys order)
+  const targetIndex = (() => {
+    if (!page) return -1
+    if (Array.isArray(page.requiredTargets)) return page.requiredTargets.indexOf(id)
+    // fallback: try to find index in Object.keys(page.targets)
+    const keys = page.targets ? Object.keys(page.targets) : []
+    return keys.indexOf(id)
+  })()
+
+  // Combined flipped state: global flipping OR per-target local flip event
+  const isFlipped = Boolean(flipping) || localFlipped
+
+  // Reset local flip whenever page changes or id changes
+  useEffect(() => {
+    setLocalFlipped(false)
+  }, [page?.id, id])
+
+  // Listen for flip, highlight, and unhighlight events for this target index
+  useEffect(() => {
+    if (targetIndex < 0) return undefined
+
+    const eventName = `flipTarget-${targetIndex}`
+    const handler = () => setLocalFlipped(true)
+
+    const highlightEventName = `highlightTarget-${targetIndex}`
+    const unhighlightEventName = `unhighlightTarget-${targetIndex}`
+    const highlightHandler = () => {
+      setHighlighted(true)
+    }
+    const unhighlightHandler = () => {
+      setHighlighted(false)
+    }
+
+    window.addEventListener(eventName, handler)
+    window.addEventListener(highlightEventName, highlightHandler)
+    window.addEventListener(unhighlightEventName, unhighlightHandler)
+    return () => {
+      window.removeEventListener(eventName, handler)
+      window.removeEventListener(highlightEventName, highlightHandler)
+      window.removeEventListener(unhighlightEventName, unhighlightHandler)
+    }
+  }, [targetIndex])
 
   const classes = [
     'target-card',
     className,
-    isFlipped ? 'flipped' : ''
+    isFlipped ? 'flipped' : '',
+    highlighted ? 'highlighted' : ''
   ]
     .filter(Boolean)
     .join(' ')
@@ -25,15 +69,6 @@ export default function ClickableTarget({ id, as: Tag = 'button', className = ''
     width: '100%',
     height: '100%',
     perspective: '1000px',
-  }
-
-  const innerStyle = {
-    position: 'relative',
-    width: '100%',
-    height: '100%',
-    transformStyle: 'preserve-3d',
-    transition: 'transform 0.6s',
-    transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
   }
 
   const faceBase = {
@@ -62,16 +97,18 @@ export default function ClickableTarget({ id, as: Tag = 'button', className = ''
   return (
     <Tag type="button" className={classes} disabled aria-disabled="true" style={{ position: 'relative' }}>
       <div style={containerStyle}>
-        <div className="card-inner" style={innerStyle}>
-          <div className="card-face front" style={frontStyle}>
-            {image ? <img className="icon" src={image} alt="" /> : <div className="icon" />}
-            <div className="label">{title}</div>
-          </div>
-
-          <div className="card-face back" style={backStyle}>
-            <div className="desc">{postText}</div>
-            <div className="label">{title}</div>
-          </div>
+        <div className="card-inner" style={{ position: 'relative', width: '100%', height: '100%' }}>
+          {!isFlipped ? (
+            <div className="card-face front" style={frontStyle}>
+              {image ? <img className="icon" src={image} alt="" /> : <div className="icon" />}
+              <div className="label">{title}</div>
+            </div>
+          ) : (
+            <div className="card-face back" style={backStyle}>
+              <div className="desc">{postText}</div>
+              <div className="label">{title}</div>
+            </div>
+          )}
         </div>
       </div>
 

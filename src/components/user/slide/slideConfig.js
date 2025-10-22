@@ -6,6 +6,7 @@ export const SlideConfig = [
         timeoutSec: 47,
         requiredTargets: ['ability.a', 'ability.b', 'ability.c'],
         targets: abilityTargets,
+        flipTimings: [4,7,10],
         data: {
             title: '3가지 <span class="highlight">핵심 구성요소</span>',
             text: '<strong>건강한 사회인</strong>으로써 갖추어야 할 <strong>기본 역량</strong>'
@@ -17,6 +18,7 @@ export const SlideConfig = [
         requiredTargets: ['character.a', 'character.b', 'character.c', 'character.d',
             'character.e', 'character.f', 'character.g', 'character.h'
         ],
+        flipTimings:[4,7,10,11,13,18,23,30],
         targets: characterTargets,
         data: {
             title: '8가지 <span class="highlight">주요 구성요소</span>',

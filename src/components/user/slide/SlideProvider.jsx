@@ -91,9 +91,23 @@ export function SlideProvider({ children, config, defaultCooldownMs = 0, blockPo
       });
     }
 
-    const flipTimeout = setTimeout(() => {
-      setFlipping(true);
-    }, 3000);
+
+    const flipTimers = [];
+    if (Array.isArray(page.flipTimings)) {
+      page.flipTimings.forEach((sec, index) => {
+        const timer = setTimeout(() => {
+          const flipEvent = new CustomEvent(`flipTarget-${index}`);
+          window.dispatchEvent(flipEvent);
+          const highlightEvent = new CustomEvent(`highlightTarget-${index}`);
+          window.dispatchEvent(highlightEvent);
+          if (index > 0) {
+            const unhighlightEvent = new CustomEvent(`unhighlightTarget-${index - 1}`);
+            window.dispatchEvent(unhighlightEvent);
+          }
+        }, sec * 1000);
+        flipTimers.push(timer);
+      });
+    }
 
     const autoAdvanceTimeout = setTimeout(() => {
       const isLastPage = pageIndex >= config.length - 1;
@@ -106,8 +120,8 @@ export function SlideProvider({ children, config, defaultCooldownMs = 0, blockPo
     }, (page.timeoutSec ?? 7) * 1000);
 
     return () => {
-      clearTimeout(flipTimeout);
       clearTimeout(autoAdvanceTimeout);
+      flipTimers.forEach(clearTimeout);
     };
   }, [pageIndex, page, hasInteracted]);
 

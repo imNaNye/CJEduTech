@@ -11,6 +11,7 @@ export default function UserSessionPage(){
 
     useEffect(() => {
         setIsAdmin(false);
+        localStorage.removeItem("isAdmin");
         let start = Date.now();
         const interval = setInterval(() => {
             const elapsed = Date.now() - start;

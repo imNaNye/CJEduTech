@@ -11,8 +11,10 @@ export function UserProvider({ children }) {
   useEffect(() => {
     const storedNickname = localStorage.getItem('nickname');
     const storedAvatarUrl = localStorage.getItem('avatarUrl');
+    const storedIsAdmin = localStorage.getItem('isAdmin');
     if (storedNickname) setNickname(storedNickname);
     if (storedAvatarUrl) setAvatarUrl(storedAvatarUrl);
+    if (storedIsAdmin) setIsAdmin(true);
     if (isAdmin) setNickname('admin');
   }, []);
 

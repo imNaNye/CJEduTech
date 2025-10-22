@@ -33,6 +33,7 @@ export default function VideoPage({ onComplete }) {
   };
   const playlist = videoByRound[round] || [];
   const content = playlist[videoId];
+  localStorage.setItem("videoId",videoId);
   const videoSrc = content?.src?.startsWith('http') ? content.src : `${VIDEO_BASE}${content?.src || ''}`;
 
   useEffect(() => {

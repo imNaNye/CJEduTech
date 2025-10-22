@@ -4,6 +4,7 @@ import Chat from "./Chat";
 import { useRoundStep } from '@/contexts/RoundStepContext';
 import AIChat from "./AIChat";
 import aiIcon from "@/assets/images/discussion/AI_icon.png";
+import {useUser} from  '@/contexts/UserContext.jsx'
 function generateRandomNickname() {
   const adjectives = ["빠른", "멋진", "똑똑한", "용감한", "행복한"];
   const animals = ["호랑이", "토끼", "독수리", "사자", "여우"];
@@ -38,13 +39,13 @@ export default function ChatHistory({ onTopicChange = () => {} }) {
   const prevScrollHeightRef = useRef(0);
 
   const { round, setRound, step, setStep,videoId, setVideoId } = useRoundStep();
-
+const{isAdmin} = useUser();
   const isNearBottom = () => {
     if (!historyRef.current) return false;
     const { scrollTop, scrollHeight, clientHeight } = historyRef.current;
     return scrollHeight - (scrollTop + clientHeight) < 50; // within 50px
   };
-
+ 
   const forceScrollToBottom = () => {
     const el = historyRef.current;
     if (!el) return;
@@ -76,8 +77,8 @@ export default function ChatHistory({ onTopicChange = () => {} }) {
   }, [messages, autoScroll]);
 
   useEffect(() => {
-    console.log("채팅방 입장 : ",roomId," 라운드 : ",round, "videoId : ",videoId);
-    socket.emit("room:join", { roomId,round,videoId});
+    console.log("채팅방 입장 : ",roomId," 라운드 : ",round, "videoId : ",videoId,"isAdmin : ",isAdmin);
+    socket.emit("room:join", { roomId,round,videoId,isAdmin});
 
     socket.on("room:recent", (payload) => {
       setMessages(payload.messages || []);

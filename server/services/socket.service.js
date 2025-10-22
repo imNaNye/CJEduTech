@@ -144,7 +144,7 @@ async function writeJSON(file, obj){ await ensureDir(path.dirname(file)); await 
 async function readJSON(file){ const buf = await fs.readFile(file, 'utf-8'); return JSON.parse(buf); }
 
 // ===== Room lifetime =====
-const ROOM_MAX_AGE_MS = Number(process.env.ROOM_MAX_AGE_MS || 25 * 60 * 1000); // 기본 25분
+const ROOM_MAX_AGE_MS = Number(process.env.ROOM_MAX_AGE_MS || 60 * 60 * 1000); // 기본 60분
 
 // ===== Test Bot (per-room, optional, multi-bot) =====
 const BOT_ENABLED = false;
@@ -272,7 +272,10 @@ async function ensureRoomTopics(roomId){
 
 function broadcastCurrentTopic(io, roomId){
   const st = getRoomState(roomId);
-  const text = st.topic || '';
+  if(!st.topics) return;
+  const text = "주제 "+(st.topicIndex+1)+"/"+st.topics.length+" : "+st.topic || '';
+  console.log("New Topic : ",st.topicIndex,st.topic);
+  if(st.topicIndex<0) return;
   if (!text) return;
   const payload = {
     roomId,
@@ -285,7 +288,7 @@ function broadcastCurrentTopic(io, roomId){
   io.of('/chat').to(`room:${roomId}`).emit('ai:ment', payload);
 }
 
-function setNextTopic(io, roomId, dir = +1){
+function setNextTopic(io, roomId, dir = +1,default_topic = false){
   const st = getRoomState(roomId);
   const topics = Array.isArray(st.topics) ? st.topics : [];
   if (!topics.length) return false;
@@ -299,6 +302,7 @@ function setNextTopic(io, roomId, dir = +1){
   if (nextIdx < 0 || nextIdx >= topics.length) return false; // out of range → no change
 
   st.topicIndex = nextIdx;
+  if (default_topic) st.topicIndex = 0;
   st.topic = topics[st.topicIndex];
   broadcastCurrentTopic(io, roomId);
   return true;
@@ -1134,36 +1138,65 @@ export function initChatSocket(io) {
   io.of("/chat").on("connection", (socket) => {
     let joinedRoomId = null;
 
-    socket.on("room:join", ({ roomId, round, videoId }) => {
-    if (!roomId) return;
-      
-       const composed = composeRoomId(roomId, round);
-       let prevRoom = joinedRoomId;
-       if (prevRoom) socket.leave(`room:${prevRoom}`);
-       joinedRoomId = composed;
-       socket.join(`room:${composed}`);
-       if (prevRoom) setTimeout(() => cleanupRoomIfEmpty(io, prevRoom), 0);
+    socket.on("room:join", async ({ roomId, round, videoId, isAdmin }) => {
+      console.log(isAdmin);
+      if (!roomId) return;
+
+      const composed = composeRoomId(roomId, round);
+      let prevRoom = joinedRoomId;
+      if (prevRoom) socket.leave(`room:${prevRoom}`);
+      joinedRoomId = composed;
+      socket.join(`room:${composed}`);
+      if (prevRoom) setTimeout(() => cleanupRoomIfEmpty(io, prevRoom), 0);
 
       // ensure room state exists & save current video id (do not override once set)
       const stForJoin = getRoomState(composed);
-      const incomingHas = (videoId !== undefined && videoId !== null);
-      const alreadyHas = (typeof stForJoin.videoId !== 'undefined');
-      if (incomingHas) {
-        if (!alreadyHas) {
-          // First setter wins: establish room's videoId
+      if (isAdmin) {
+        const incomingHas = (videoId !== undefined && videoId !== null);
+        const alreadyHas = (typeof stForJoin.videoId !== 'undefined');
+        if (incomingHas) {
           stForJoin.videoId = videoId; // 0~9 숫자/문자 모두 허용
           console.log('[room:join] videoId set (initial)=', videoId);
+
+          // 🔁 Reset topic sequence and buckets
+          stForJoin.topics = undefined; // force reload via ensureRoomTopics (by videoId)
+          stForJoin.topic = undefined;
+          stForJoin.topicIndex = -1;
+          stForJoin.topicBuckets = new Map();
+          stForJoin.topicSummariesGenerated = false; // allow regeneration at expire
+          // schedule first topic broadcast ~10s later
+          const now = Date.now();
+          stForJoin.topicNextAt = now + 10000; // 10s
+
+          // ⏱ Reset room timer (remaining time)
+          stForJoin.createdAt = now;
+          stForJoin.expireAt = now + ROOM_MAX_AGE_MS;
+          if (stForJoin.expireTimer) { clearTimeout(stForJoin.expireTimer); stForJoin.expireTimer = null; }
+          ensureRoomExpiry(io, composed);
+
+          // Preload topics for new video (no broadcast yet)
+          await ensureRoomTopics(composed);
+          // 🔊 Immediately broadcast the first topic after setup
+          setNextTopic(io, composed,0,true);
+          // // Do not broadcast current topic here; scheduler will announce after topicNextAt
+
+          // Notify clients about refreshed time
+          io.of('/chat').to(`room:${composed}`).emit('room:time', {
+            roomId: composed,
+            expireAt: stForJoin.expireAt,
+            now: Date.now(),
+            remainingMs: Math.max(0, (stForJoin.expireAt || Date.now()) - Date.now()),
+          });
         } else {
-          // Late joiners often send default 0 → ignore to avoid clobbering
-          console.log('[room:join] videoId ignored (already set)=', stForJoin.videoId, ' incoming=', videoId);
+          console.log('[room:join] no incoming videoId; keep existing=', alreadyHas ? stForJoin.videoId : '(unset)');
         }
       } else {
-        console.log('[room:join] no incoming videoId; keep existing=', alreadyHas ? stForJoin.videoId : '(unset)');
+        console.log('[room:join] non-admin user; videoId change not allowed');
       }
 
       // Preload topics only (first topic will be announced by scheduler ~10s after creation)
       ensureRoomTopics(composed);
-      broadcastCurrentTopic(io,composed);
+      broadcastCurrentTopic(io, composed);
       // start per-room test bot
       ensureRoomBot(io, composed);
 
@@ -1174,10 +1207,10 @@ export function initChatSocket(io) {
       const recent = base.map(m => {
         const set = reactionsByMsg.get(m.id) ?? new Set();
         const ai = aiByMsg.get(m.id) || {};
-        return { 
-          ...m, 
+        return {
+          ...m,
           avatarId: m.avatarId || m.avatar,
-          reactedUsers: Array.from(set), 
+          reactedUsers: Array.from(set),
           reactionsCount: set.size,
           aiLabels: ai.labels,
           aiScores: ai.scores,
@@ -1284,6 +1317,8 @@ export function initChatSocket(io) {
         // 1) /종료 : expire room immediately
         // 2) /멘트 : send next topic-related AI ment from prebuilt queue
         // 3) /참여 : request encourage AI ment(s) for silent users
+
+        /*
         if (trimmed.startsWith('/')){
           const cmd = trimmed.replace(/^\s*\/(.*)$/,'$1').trim();
           if (cmd === '종료' || cmd.toLowerCase() === 'end'){
@@ -1311,7 +1346,7 @@ export function initChatSocket(io) {
           }
           // unknown slash command -> ignore as command and continue to post as normal message
         }
-
+          */
         // guard if room is expired
         const stGuard = roomStates.get(roomId);
         if (stGuard && stGuard.expireAt && Date.now() >= stGuard.expireAt) {
@@ -1421,6 +1456,7 @@ let mentorSchedulerStarted = false;
 function startMentorScheduler(io) {
   if (mentorSchedulerStarted) return;
   mentorSchedulerStarted = true;
+  
   // Note: test bot runs independently per room (see ensureRoomBot)
   setInterval(() => {
     const now = Date.now();
@@ -1431,16 +1467,7 @@ function startMentorScheduler(io) {
         continue;
       }
 
-      // 1) 5분 주기 현재 토픽 교체 + 공지
-      if (!st.topicIntervalMs) st.topicIntervalMs = 1000*60*5; // 5분
-      if (!st.topicNextAt) st.topicNextAt = now + 1000 * 10; // 방 생성 직후 10초 뒤 첫 교체
-      if (now >= st.topicNextAt) {
-        // ensure topics loaded and rotate
-        ensureRoomTopics(roomId).then(() => {
-          setNextTopic(io, roomId);
-        });
-        st.topicNextAt = now + st.topicIntervalMs;
-      }
+      // 자동 토픽 교체 비활성화 (수동 제어)
 
       // 2) 침묵자 체크는 수시(5초마다 스캔): 사용자별 침묵 기준 충족 시 개별 멘트 생성
       generateEncouragesAndBroadcast(io, roomId);

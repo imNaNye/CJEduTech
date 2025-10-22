@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { socket } from "@/api/chat";
 
-const TOTAL_SECONDS_FALLBACK = 24 * 60; // 24분 (서버 미응답시 초기 표기)
+const TOTAL_SECONDS_FALLBACK = 60 * 60; // 60분 (서버 미응답시 초기 표기)
 
 export default function ChatTimer(){
   const [remaining, setRemaining] = useState(TOTAL_SECONDS_FALLBACK);
@@ -47,7 +47,7 @@ export default function ChatTimer(){
     <div className="overview-top">
       <div className="timer-wrap">
         <div className="timer-face" style={{"--p": String(progress)}}>
-          <div className="timer-total-inside">25:00</div>
+          <div className="timer-total-inside">60:00</div>
           <div className="timer-remaining">{mm}:{ss}</div>
         </div>
       </div>

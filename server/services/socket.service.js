@@ -1375,6 +1375,7 @@ export function initChatSocket(io) {
           id: randomUUID(),
           roomId,
           avatarId:String(avatar), // ✅ avatarId로 저장
+          avatar:String(avatar), // ✅ avatarId로 저장
           nickname: nickname || "익명",
           text: trimmed,
           createdAt: new Date().toISOString()

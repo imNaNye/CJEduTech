@@ -13,12 +13,66 @@ const TRAIT_META = [
   { key: 'respect', label: '존중' },
 ];
 
-const CATEGORY_LABELS = {
-  personal: '인성',
-  attitude: '태도',
-  functional: '기능',
-};
-
+// Reference global variables if present, fallback to defaults for local dev
+const CATEGORY_LABELS = (typeof window !== "undefined" && window.CATEGORY_LABELS)
+  ? window.CATEGORY_LABELS
+  : {
+      personal: '인성',
+      attitude: '태도',
+      functional: '기능',
+    };
+const TRAIT_DESCS = (typeof window !== "undefined" && window.TRAIT_DESCS)
+  ? window.TRAIT_DESCS
+  : {
+      integrity: "비효율과 부정을 용납하지 않는다",
+      passion: "최고와 완벽을 추구한다",
+      creativity: "끊임없이 변화하고 혁신한다",
+      respect: "서로 이해하고 배려한다",
+    };
+const CATEGORIES = (typeof window !== "undefined" && window.CATEGORIES)
+  ? window.CATEGORIES
+  : [
+      {
+        key: "personal",
+        label: "인성적 요소",
+        color: "#ffefe4",
+        items: [
+          { id: "이해심", desc: "이런 저런 상황과 사람은 늘 있을 수 있다고 받아들이는 여유" },
+          { id: "유머감각", desc: "분위기를 부드럽게 전환시킬 수 있는 재치있는 표현력" },
+          { id: "끈기", desc: "주어진 과업과 직무를 쉽게 포기하지 않고 끝까지 해내는 힘" },
+          { id: "성실함", desc: "맡은 일을 끝까지 책임지고 완성도 높게 수행하는 자세" },
+          { id: "정직함", desc: "문제를 숨기지 않고 해결을 위해 최선을 다하는 자세" },
+          { id: "배려심", desc: "고객, 동료 등의 입장을 헤아리고 먼저 생각하는 마음" },
+          { id: "책임감", desc: "고객요청에 스스로 책임지고 마무리하는 태도" },
+          { id: "절제력", desc: "스트레스 상황에 감정이나 말, 행동을 자제하는 힘" },
+        ],
+      },
+      {
+        key: "attitude",
+        label: "태도적 요소",
+        color: "#ffe6d5",
+        items: [
+          { id: "단호함", desc: "어느 경우에도 원칙과 규정을 잘 지키며 흔들리지 않는 태도" },
+          { id: "신중함", desc: "실수를 줄이고 일의 완성도를 높이기 위한 세심한 판단과 태도" },
+          { id: "유연함", desc: "고정된 방식에 갇히지 않고 상황 변화에 적응하는 능력" },
+          { id: "부지런함", desc: "맡은 일을 한 발 앞서 준비하는 태도" },
+          { id: "관찰력", desc: "상황 변화나 고객, 팀 동료 특성을 빠르게 파악하는 능력" },
+        ],
+      },
+      {
+        key: "functional",
+        label: "기능적 요소",
+        color: "#ffe0a8",
+        items: [
+          { id: "위기관리능력", desc: "예상치 못한 돌발 상황을 침착하게 수습하는 능력" },
+          { id: "시간관리능력", desc: "제한된 시간 안에 효율적으로 일처리를 조율하는 능력" },
+          { id: "설득력", desc: "상대를 납득시키고 긍정적으로 이끄는 능력" },
+          { id: "팀워크능력", desc: "팀원 간 협업에 본인의 역할을 잘 인지하고 발휘하는 능력" },
+          { id: "창의성", desc: "틀에 얽매이지 않고 새롭고 효과적인 해결책을 제시하는 능력" },
+          { id: "다재다능함", desc: "다양한 업무를 효율적이고 유연하게 처리할 수 있는 능력" },
+        ],
+      },
+    ];
 export default function GameResult() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -65,6 +119,38 @@ export default function GameResult() {
 
   useEffect(() => { load(); }, [load]);
 
+  // ==== Description lookups ====
+  const ITEM_META_MAP = useMemo(() => {
+    const map = {};
+    const cats = Array.isArray(CATEGORIES) ? CATEGORIES : [];
+    cats.forEach((cat) => {
+      const label = cat.label || cat.key;
+      const color = cat.color || '#fff1e5';
+      const items = Array.isArray(cat.items) ? cat.items : [];
+      items.forEach((it) => {
+        const id = typeof it === 'string' ? it : it.id;
+        const desc = typeof it === 'string' ? '' : (it.desc || '');
+        if (id) {
+          map[id] = {
+            desc,
+            category: cat.key,
+            categoryLabel: label,
+            color
+          };
+        }
+      });
+    });
+    return map;
+  }, []);
+
+  function getItemMeta(id) {
+    return ITEM_META_MAP[id] || null;
+  }
+
+  function getTraitDesc(traitKey) {
+    return (TRAIT_DESCS && TRAIT_DESCS[traitKey]) ? TRAIT_DESCS[traitKey] : '';
+  }
+
   const filtered = useMemo(() => {
     let list = items;
     if (categoryFilter !== 'all') list = list.filter(it => it.category === categoryFilter);
@@ -72,26 +158,55 @@ export default function GameResult() {
     return list;
   }, [items, categoryFilter, search]);
 
-  // ===== Test data generator =====
-  const PERSONAL = ['정직함','책임감','성실함','배려심','적극성','유연함','이해심','친절함'];
-  const ATTITUDE = ['단호함','열정','겸손함','자신감','호기심'];
-  const FUNCTIONAL = ['위기관리 능력','소통능력','갈등 해결능력','팀워크 능력','판단력','창의력'];
-  const TRAITS = ['integrity','passion','creativity','respect'];
-  const CATEGORIES = [
-    { key: 'personal', items: PERSONAL },
-    { key: 'attitude', items: ATTITUDE },
-    { key: 'functional', items: FUNCTIONAL },
-  ];
+  // 그룹핑: 인성/태도/기능 순서로 섹션 나누기
+  const groupedByCategory = useMemo(() => {
+    const order = ['personal', 'attitude', 'functional'];
+    const map = { personal: [], attitude: [], functional: [] };
+    filtered.forEach(it => { if (map[it.category]) map[it.category].push(it); });
+    return order.map(key => ({ key, label: CATEGORY_LABELS[key] || key, rows: map[key] }));
+  }, [filtered]);
 
+  // 색상 유틸: 분포(비율)에 따라 셀 배경 농도 조절
+  function traitBaseColor(traitKey) {
+    switch (traitKey) {
+      case 'integrity': return { h: 28, s: 90 }; // 파랑톤
+      case 'passion': return { h: 28, s: 90 };    // 레드톤
+      case 'creativity': return { h: 28, s: 90 }; // 오렌지톤
+      case 'respect': return { h: 28, s: 90 };   // 그린톤
+      default: return { h: 0, s: 0 };
+    }
+  }
+  function heatStyleForCell(traitKey, count, rowCounts) {
+    const total = TRAIT_META.reduce((s,t)=> s + (rowCounts?.[t.key]||0), 0);
+    const ratio = total > 0 ? (count || 0) / total : 0;
+    const { h, s } = traitBaseColor(traitKey);
+    // 최소 가시성 4%, 최대 30% 투명 배경
+    const a = ratio > 0 ? (0.04 + 0.26 * Math.min(1, ratio)) : 0;
+    const bg = `hsla(${h} ${s}% 50% / ${a})`;
+    return {
+      background: bg,
+    };
+  }
+
+  // ===== Test data generator =====
+  // Use global CATEGORIES for test data if possible
+  const TRAITS = ['integrity','passion','creativity','respect'];
   function shuffle(arr){ return arr.slice().sort(()=>Math.random()-0.5); }
   function pickN(arr, n){ return shuffle(arr).slice(0, n); }
   function randInt(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
 
   function buildRandomSelections(){
-    const selections = { personal:{}, attitude:{}, functional:{} };
-    CATEGORIES.forEach(({ key, items }) => {
-      // pick 1~3 items for this category, then assign each to a random trait
-      const picked = pickN(items, randInt(1, Math.min(3, items.length)));
+    // Use the global CATEGORIES for keys/items, fallback to local default keys if missing
+    const cats = Array.isArray(CATEGORIES) ? CATEGORIES : [];
+    const selections = {};
+    cats.forEach(({ key, items }) => {
+      selections[key] = {};
+      // Pick 1~3 items for this category, then assign each to a random trait
+      // Support both [{id,desc}] and [string] style
+      const itemNames = Array.isArray(items)
+        ? items.map(it => typeof it === "string" ? it : it.id)
+        : [];
+      const picked = pickN(itemNames, randInt(1, Math.min(3, itemNames.length)));
       picked.forEach((name) => {
         const trait = TRAITS[randInt(0, TRAITS.length-1)];
         if (!selections[key][trait]) selections[key][trait] = [];
@@ -143,11 +258,24 @@ export default function GameResult() {
     }
   }, [seeding, load]);
 
+  async function resetAllGameData() {
+    if (!confirm('모든 게임 기록을 초기화하시겠습니까?')) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/game/reset-all`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Reset failed');
+      await load();
+      alert('게임 기록이 초기화되었습니다.');
+    } catch (err) {
+      console.error('[resetAllGameData] failed', err);
+      alert('초기화 중 오류 발생');
+    }
+  }
+
   return (
     <div className="cjgame-result-page">
       <div className="cjgame-topbar" style={{ alignItems: 'flex-end', gap: 16 }}>
         <div>
-          <h2 className="cjgame-title">게임 결과 통계 (관리자)</h2>
+          <h2 className="cjgame-title">게임 결과 통계</h2>
           <p className="cjgame-subtitle">제출된 결과를 기준으로 기본 역량 → 인재상 분포를 집계합니다.</p>
         </div>
         <div style={{ display:'flex', gap:12, alignItems:'center' }}>
@@ -158,7 +286,7 @@ export default function GameResult() {
             </>
           )}
           <button className="cjgame-btn cjgame-return" onClick={load}>새로고침</button>
-          <button className="cjgame-btn cjgame-return" disabled={seeding} onClick={seed20}>{seeding ? '생성 중…' : '테스트 데이터 20명 생성'}</button>
+          <button className="cjgame-btn cjgame-return" onClick={resetAllGameData}>기록 초기화</button>
           <button className="cjgame-btn cjgame-primary" onClick={()=> {
             
             
@@ -187,41 +315,51 @@ export default function GameResult() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((it) => (
-                  <tr key={`${it.category}-${it.id}`}>
-                    <Td style={{ color:'#666' }}>{CATEGORY_LABELS[it.category] || it.category}</Td>
-                    <Td
-                      style={{ fontWeight: 700, cursor: 'pointer' }}
-                      title="이 기본 역량을 분류한 모든 사람 보기"
-                      onClick={() => {
-                        const usersByTrait = it.users || {};
-                        const counts = it.counts || {};
-                        setSelectedCell({
-                          type: 'item',
-                          id: it.id,
-                          usersByTrait,
-                          counts,
-                        });
-                      }}
-                    >
-                      {it.id}
-                    </Td>
-                    {TRAIT_META.map(t => (
-                      <Td
-                        key={t.key}
-                        onClick={() => {
-                          const users = Array.isArray(it.users?.[t.key]) ? it.users[t.key] : [];
-                          console.debug('[Admin] cell click', { item: it.id, trait: t.key, count: it.counts?.[t.key] || 0, usersSample: users.slice(0,5) });
-                          setSelectedCell({ id: it.id, traitKey: t.key, traitLabel: t.label, users, type: 'trait' });
-                        }}
-                        className={`cell-count trait-${t.key}`}
-                        style={{ cursor:'pointer', textAlign:'center', fontWeight:600 }}
-                        title={`${t.label} : 분류한 인원 보기`}
-                      >
-                        {Number.isFinite(it.counts?.[t.key]) ? it.counts[t.key] : 0}
+                {groupedByCategory.map(section => (
+                  <>
+                    {/* 섹션 헤더 */}
+                    <tr key={`section-${section.key}`}>
+                      <Td colSpan={2 + TRAIT_META.length} style={{
+                        position:'sticky', top: 44, zIndex: 0,
+                        background:'#fff', borderBottom:'1px solid #eee',
+                        fontWeight: 800, color:'#333', paddingTop:16
+                      }}>
+                        {section.label}
                       </Td>
+                    </tr>
+                    {/* 섹션 내용 */}
+                    {section.rows.map((it) => (
+                      <tr key={`${it.category}-${it.id}`}>
+                        <Td style={{ color:'#999' }}>{CATEGORY_LABELS[it.category] || it.category}</Td>
+                        <Td
+                        className='cell-count'
+                          style={{ fontWeight: 700, cursor: 'pointer' }}
+                          title="이 기본 역량을 분류한 모든 사람 보기"
+                          onClick={() => {
+                            const usersByTrait = it.users || {};
+                            const counts = it.counts || {};
+                            setSelectedCell({ type: 'item', id: it.id, usersByTrait, counts });
+                          }}
+                        >
+                          {it.id}
+                        </Td>
+                        {TRAIT_META.map(t => (
+                          <Td
+                            key={t.key}
+                            onClick={() => {
+                              const users = Array.isArray(it.users?.[t.key]) ? it.users[t.key] : [];
+                              setSelectedCell({ id: it.id, traitKey: t.key, traitLabel: t.label, users, type: 'trait' });
+                            }}
+                            className={`cell-count trait-${t.key}`}
+                            style={{ cursor:'pointer', textAlign:'center', fontWeight:600, ...heatStyleForCell(t.key, it.counts?.[t.key]||0, it.counts||{}) }}
+                            title={`${t.label} : 분류한 인원 보기`}
+                          >
+                            {Number.isFinite(it.counts?.[t.key]) ? it.counts[t.key] : 0}
+                          </Td>
+                        ))}
+                      </tr>
                     ))}
-                  </tr>
+                  </>
                 ))}
                 {filtered.length === 0 && (
                   <tr><Td colSpan={2 + TRAIT_META.length} style={{ textAlign:'center', color:'#888' }}>표시할 항목이 없습니다.</Td></tr>
@@ -255,12 +393,21 @@ export default function GameResult() {
         <div className="cjgame-sidepanel">
           {selectedCell.type === 'item' ? (
             <>
-              <div className="cjgame-sidepanel-header" style={{ display:'flex', alignItems:'center', gap:8 }}>
+              <div className="cjgame-sidepanel-header" style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
                 <span style={{ fontWeight:800 }}>{selectedCell.id}</span>
                 <span className="cjgame-muted" style={{ fontSize:12 }}>
                   전체 분류 인원: {TRAIT_META.reduce((s,t)=> s + ((selectedCell.counts?.[t.key]||0)), 0)}명
                 </span>
               </div>
+              {(() => {
+                const meta = getItemMeta(selectedCell.id);
+                return (
+                  <div className="cjgame-sidepanel-desc" style={{ fontSize:18, color:'black', background:'#fff7ed', border:'1px solid #ffe3c7', borderRadius:8, padding:'8px 10px', margin:'8px 12px' }}>
+                    <div style={{ fontWeight:700, marginBottom:4 }}>{selectedCell.id}</div>
+                    <div>{meta?.desc || '설명 없음'}</div>
+                  </div>
+                );
+              })()}
               <div className="cjgame-sidepanel-body" style={{ display:'grid', gridTemplateColumns:'1fr', gap:12 }}>
                 {TRAIT_META.map(t => {
                   const list = Array.isArray(selectedCell.usersByTrait?.[t.key]) ? selectedCell.usersByTrait[t.key] : [];
@@ -285,6 +432,19 @@ export default function GameResult() {
             <>
               <div className={`cjgame-sidepanel-header trait-${selectedCell.traitKey}`}>
                 {selectedCell.id} · {selectedCell.traitLabel} (총 {selectedCell.users.length}명)
+              </div>
+              {(() => {
+                const meta = getItemMeta(selectedCell.id);
+                return (
+                  <div className="cjgame-sidepanel-desc" style={{ fontSize:18, color:'black', background:'#fff7ed', border:'1px solid #ffe3c7', borderRadius:8, padding:'8px 10px', margin:'8px 12px' }}>
+                    <div style={{ fontWeight:700, marginBottom:4 }}>{selectedCell.id}</div>
+                    <div>{meta?.desc || '설명 없음'}</div>
+                  </div>
+                );
+              })()}
+              <div className="cjgame-sidepanel-desc" style={{ fontSize:18, color:'black', background:'#eef6ff', border:'1px solid #d7e9ff', borderRadius:8, padding:'8px 10px', margin:'8px 12px' }}>
+                <div style={{ fontWeight:700, marginBottom:4 }}>{selectedCell.traitLabel}</div>
+                <div>{getTraitDesc(selectedCell.traitKey) || '설명 없음'}</div>
               </div>
               <div className="cjgame-sidepanel-body">
                 {selectedCell.users.length === 0 ? (

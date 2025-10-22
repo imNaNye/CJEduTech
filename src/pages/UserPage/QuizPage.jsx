@@ -34,11 +34,40 @@ export default function QuizPage() {
   const optionRefs = useRef([]);
   const feedbackTimeoutRef = useRef(null);
   const previewTimeoutRef = useRef(null);
+  const totalTimerRef = useRef(null);
   const feedbackRef = useRef(null);
 
-  const correctAudio = useRef(new Audio(correctSound));
-  const wrongAudio = useRef(new Audio(wrongSound));
-  const selectAudio = useRef(new Audio(selectSound));
+  // --- Safari-friendly audio handling: lazy init after first user gesture, reuse single element per sound
+  const audioUnlockedRef = useRef(false);
+  const audioElsRef = useRef({ correct: null, wrong: null, select: null });
+
+  const ensureAudioUnlocked = () => {
+    if (audioUnlockedRef.current) return;
+    audioUnlockedRef.current = true;
+    // create audio elements lazily
+    ['correct','wrong','select'].forEach((k) => {
+      let src = selectSound;
+      if (k === 'correct') src = correctSound;
+      if (k === 'wrong') src = wrongSound;
+      const a = new Audio(src);
+      a.preload = 'auto';
+      a.load?.();
+      audioElsRef.current[k] = a;
+    });
+  };
+
+  const playSound = (type) => {
+    try {
+      ensureAudioUnlocked();
+      const a = audioElsRef.current[type];
+      if (!a) return;
+      // rewind and play; Safari prefers pause->seek->play
+      try { a.pause(); } catch {}
+      try { a.currentTime = 0; } catch {}
+      const p = a.play();
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    } catch {}
+  };
 
   // helper: option을 객체 형태로 통일 (문자열 -> { label })
   const toOpt = (opt) => (typeof opt === 'string' ? { label: opt } : opt || {});
@@ -71,10 +100,11 @@ export default function QuizPage() {
       }, 0);
     }, PREVIEW_MS);
 
-    const totalTimer = setInterval(() => {
+    // total countdown timer (store ref for robust cleanup)
+    totalTimerRef.current = setInterval(() => {
       setTotalSecondsLeft(prev => {
         if (prev <= 1) {
-          clearInterval(totalTimer);
+          if (totalTimerRef.current) clearInterval(totalTimerRef.current);
           setRunning(false);
           navigate('/user/roundIndicator', { replace: true });
           return 0;
@@ -86,7 +116,7 @@ export default function QuizPage() {
     return () => {
       if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
       if (previewTimeoutRef.current) clearTimeout(previewTimeoutRef.current);
-      clearInterval(totalTimer);
+      if (totalTimerRef.current) { clearInterval(totalTimerRef.current); totalTimerRef.current = null; }
       feedbackTimeoutRef.current = null;
       previewTimeoutRef.current = null;
     };
@@ -108,17 +138,13 @@ export default function QuizPage() {
     if (phase !== 'select' || answered) return;
     setRunning(false);
     setPicked(selectedIdx);
-    selectAudio.current.play();
+    playSound('select');
     setPhase('choices');
 
     setTimeout(() => {
       const ok = judge(selectedIdx);
       setIsCorrect(ok);
-      if (ok) {
-        correctAudio.current.play();
-      } else {
-        wrongAudio.current.play();
-      }
+      if (ok) playSound('correct'); else playSound('wrong');
       if (ok) setCorrectCount((c) => c + 1);
       setAnswered(true);
       setPhase('result');
@@ -176,6 +202,34 @@ export default function QuizPage() {
   };
 
   const current = questions[idx];
+
+  // --- Preload images for current and next question (Safari decoding relief)
+  useEffect(() => {
+    const preload = (url) => {
+      if (!url) return;
+      const img = new Image();
+      img.decoding = 'async';
+      img.loading = 'eager';
+      img.src = url;
+    };
+    if (current && Array.isArray(current.options)) {
+      current.options.forEach(opt => {
+        const item = toOpt(opt);
+        if (item.img) preload(item.img);
+        if (item.backImg) preload(item.backImg);
+      });
+    }
+    const nextQ = questions[idx + 1];
+    if (nextQ && Array.isArray(nextQ.options)) {
+      nextQ.options.forEach(opt => {
+        const item = toOpt(opt);
+        if (item.img) preload(item.img);
+        if (item.backImg) preload(item.backImg);
+      });
+    }
+    return () => {};
+  }, [idx, current, questions]);
+
   // helper: Render text with line breaks as <br />
   const withLineBreaks = (text) => {
     return text.split('\n').map((line, idx) => (
@@ -221,7 +275,7 @@ export default function QuizPage() {
                     disabled
                   >
                     {item.backImg && (
-                      <img className="opt-back-img" src={item.backImg} alt={item.alt || `옵션 ${i+1} 뒷면`} />
+                      <img loading="lazy" decoding="async" className="opt-back-img" src={item.backImg} alt={item.alt || `옵션 ${i+1} 뒷면`} />
                     )}
                   </button>
                 </li>
@@ -245,7 +299,7 @@ export default function QuizPage() {
                     onClick={() => onPickCard(i)}
                   >
                     {item.img && (
-                      <img className="opt-img" src={item.img} alt={item.alt || item.label || `옵션 ${i+1}`} />
+                      <img loading="lazy" decoding="async" className="opt-img" src={item.img} alt={item.alt || item.label || `옵션 ${i+1}`} />
                     )}
                     {item.label && <div className="opt-label">{item.label}</div>}
                   </button>
@@ -266,7 +320,7 @@ export default function QuizPage() {
                   <div className="card-container">
                     <div className={`card-front ${picked === i ? 'picked' : ''}`}>
                       {item.img && (
-                        <img className="opt-img" src={item.img} alt={item.alt || item.label || `옵션 ${i+1}`} />
+                        <img loading="lazy" decoding="async" className="opt-img" src={item.img} alt={item.alt || item.label || `옵션 ${i+1}`} />
                       )}
                       {item.label && <div className="opt-label">{item.label}</div>}
                     </div>
@@ -298,6 +352,8 @@ export default function QuizPage() {
                     <div className="card-front result-card">
                       {correctOpt.img && (
                         <img
+                          loading="lazy"
+                          decoding="async"
                           className="opt-img"
                           src={correctOpt.img}
                           alt={correctOpt.alt || correctOpt.label || '정답 카드'}

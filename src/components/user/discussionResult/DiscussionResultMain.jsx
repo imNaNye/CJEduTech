@@ -161,6 +161,7 @@ export default function DiscussionResultMain() {
     respect: badgeRespect
   };
 
+
   useEffect(() => {
     const rid = sessionStorage.getItem("lastRoomId") || "";
     const nick = sessionStorage.getItem("myNickname") || localStorage.getItem("nickname") || "";

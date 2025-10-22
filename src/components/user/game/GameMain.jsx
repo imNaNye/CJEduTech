@@ -54,10 +54,10 @@ const TRAITS = [
   { key: "respect", label: "존중" },
 ];
 const TRAIT_DESCS = {
-  integrity: "비효율과 부정을 용납하지 않는다.",
-  passion: "최고와 완벽을 추구한다.",
-  creativity: "끊임없이 변화하고 혁신한다.",
-  respect: "서로 이해하고 배려한다.",
+  integrity: "비효율과 부정을 용납하지 않는다",
+  passion: "최고와 완벽을 추구한다",
+  creativity: "끊임없이 변화하고 혁신한다",
+  respect: "서로 이해하고 배려한다",
 };
 
 // 게임 카테고리(인성 → 태도 → 기능)
@@ -330,16 +330,18 @@ export default function GameMain() {
     return (
       <div className="cjgame-wrap cjgame-wait-screen">
         <h2 className="cjgame-title">결과 확인 완료</h2>
-        <p className="cjgame-subtitle">다음 페이지로 이동할 준비가 되셨나요?</p>
+        <p className="cjgame-subtitle">결과 제출 완료! 최종 확인 후 다음으로 넘어가 주세요.</p>
         <button
           className="cjgame-btn cjgame-primary"
           onClick={() => {
+            const ok = window.confirm("정말 다음으로 넘어가 토론을 진행하시겠습니까? 이 페이지는 다시 돌아올 수 없습니다.");
+            if (!ok) return;
             console.log("다음 페이지로 이동 트리거");
             setStep(4);
             if (isAdmin){
               navigate('/admin/roundIndicator');
             } else{
-            navigate("/user/roundIndicator", { replace: true });
+              navigate("/user/roundIndicator", { replace: true });
             }
           }}
         >

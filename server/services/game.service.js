@@ -276,3 +276,20 @@ export async function getProgressStats() {
     conn.release();
   }
 }
+
+export async function resetAllGameData() {
+  await ensureTables();
+  if (usingMemory) {
+    memoryDB.sessions = [];
+    memoryDB.submissions = [];
+    return { ok: true, memory: true };
+  }
+  const conn = await pool.getConnection();
+  try {
+    await conn.query('DELETE FROM game_sessions');
+    await conn.query('DELETE FROM game_submissions');
+  } finally {
+    conn.release();
+  }
+  return { ok: true };
+}

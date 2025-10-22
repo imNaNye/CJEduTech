@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';  
+import { useEffect, useMemo, useState, useRef } from "react";
 import { RoundStepProvider } from './contexts/RoundStepContext.jsx';
 
 import LoginPage from './pages/UserPage/LoginPage.jsx';
@@ -43,6 +44,16 @@ function RoundStepLayout() {
 }
 
 function App() {
+    useEffect(() => {
+    const preventGoBack = () => {
+      window.history.go(1);
+      console.log("prevent go back!");
+    };
+    window.history.pushState(null, "", window.location.pathname);
+    window.addEventListener("popstate", preventGoBack);
+    return () => window.removeEventListener("popstate", preventGoBack);
+  }, []);
+  
   return (
     <RoundStepProvider>
     <UserProvider> {/* 전역 사용자 상태 적용 */}

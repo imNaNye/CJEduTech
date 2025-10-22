@@ -1154,7 +1154,9 @@ export function initChatSocket(io) {
       if (isAdmin) {
         const incomingHas = (videoId !== undefined && videoId !== null);
         const alreadyHas = (typeof stForJoin.videoId !== 'undefined');
-        if (incomingHas) {
+
+        // Only the first admin who provides a videoId initializes the room.
+        if (incomingHas && !alreadyHas) {
           stForJoin.videoId = videoId; // 0~9 숫자/문자 모두 허용
           console.log('[room:join] videoId set (initial)=', videoId);
 
@@ -1164,6 +1166,18 @@ export function initChatSocket(io) {
           stForJoin.topicIndex = -1;
           stForJoin.topicBuckets = new Map();
           stForJoin.topicSummariesGenerated = false; // allow regeneration at expire
+
+          // 🧹 Clear existing messages and AI data for a clean setup
+          recentByRoom.delete(composed);
+          for (const [mid] of reactionsByMsg) {
+            const roomMatch = findRoomIdByMessageId(mid);
+            if (roomMatch === composed) reactionsByMsg.delete(mid);
+          }
+          for (const [mid] of aiByMsg) {
+            const roomMatch = findRoomIdByMessageId(mid);
+            if (roomMatch === composed) aiByMsg.delete(mid);
+          }
+
           // schedule first topic broadcast ~10s later
           const now = Date.now();
           stForJoin.topicNextAt = now + 10000; // 10s
@@ -1177,8 +1191,7 @@ export function initChatSocket(io) {
           // Preload topics for new video (no broadcast yet)
           await ensureRoomTopics(composed);
           // 🔊 Immediately broadcast the first topic after setup
-          setNextTopic(io, composed,0,true);
-          // // Do not broadcast current topic here; scheduler will announce after topicNextAt
+          setNextTopic(io, composed, 0, true);
 
           // Notify clients about refreshed time
           io.of('/chat').to(`room:${composed}`).emit('room:time', {
@@ -1187,6 +1200,9 @@ export function initChatSocket(io) {
             now: Date.now(),
             remainingMs: Math.max(0, (stForJoin.expireAt || Date.now()) - Date.now()),
           });
+        } else if (incomingHas && alreadyHas) {
+          // Ignore subsequent admin attempts to reconfigure; keep the first configuration.
+          console.log('[room:join] admin setup already exists; ignoring new videoId:', videoId, 'current=', stForJoin.videoId);
         } else {
           console.log('[room:join] no incoming videoId; keep existing=', alreadyHas ? stForJoin.videoId : '(unset)');
         }

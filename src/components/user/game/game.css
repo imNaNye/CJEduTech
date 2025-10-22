@@ -9,16 +9,16 @@
 }
 .cjgame-basket-label {
   position: absolute;
-  top: -14px;
+  top: -20px;
   left: 50%;
   transform: translateX(-50%);
   padding: 6px 12px;
-  border: 1px solid #d0d0d0;
+  border: 2px solid #d0d0d0;
   border-radius: 10px;
   background: #fff;
   font-weight: 800;
   font-family: "CJ ONLYONE NEW title";
-  font-size: 14px;
+  font-size: 16px;
   color: #444;
 }
 /* New basket grid: absolute positioning for chips */
@@ -101,7 +101,14 @@ background: var(--grey03, #AFAFAF);
 
 /* ===== 버킷(인재상) ===== */
 .cjgame-buckets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.cjgame-bucket { min-height: 30vh; border-radius: 16px; background: linear-gradient(180deg, #ffe9db, #fff); border: 2px solid rgb(255, 225, 210); min-height: 130px; display: flex; flex-direction: column; }
+.cjgame-bucket {
+  border-radius: 16px;
+  background: #fff;
+  border: 2px solid #eee;
+  min-height: 130px;
+  display: flex;
+  flex-direction: column;
+}
 .cjgame-bucket-title { font-family: "CJ ONLYONE NEW title"; font-weight: 800; text-align: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 2rem;}
 .cjgame-bucket-body { color: black; display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; min-height: 90px; align-content: flex-start; }
 
@@ -110,6 +117,23 @@ background: var(--grey03, #AFAFAF);
 .cjgame-bucket.trait-passion .cjgame-bucket-title, .cjgame-result-card-header.trait-passion { color: #f97316; }
 .cjgame-bucket.trait-creativity .cjgame-bucket-title, .cjgame-result-card-header.trait-creativity { color: #f59e0b; }
 .cjgame-bucket.trait-respect .cjgame-bucket-title, .cjgame-result-card-header.trait-respect { color: #7a3b14; }
+/* Bucket tones matched to title colors */
+.cjgame-bucket.trait-integrity {
+  background: linear-gradient(180deg, rgba(255, 233, 227, 0.55) 0%, #fff 100%);
+  border: 2px solid #ffd4c7;
+}
+.cjgame-bucket.trait-passion {
+  background: linear-gradient(180deg, rgba(255, 233, 218, 0.55) 0%, #fff 100%);
+  border: 2px solid #ffd1b3;
+}
+.cjgame-bucket.trait-creativity {
+  background: linear-gradient(180deg, rgba(255, 240, 214, 0.55) 0%, #fff 100%);
+  border: 2px solid #ffdca8;
+}
+.cjgame-bucket.trait-respect {
+  background: linear-gradient(180deg, rgba(239, 228, 217, 0.55) 0%, #fff 100%);
+  border: 2px solid #e0c9b2;
+}
 
 /* ===== 결과 카드 ===== */
 .cjgame-result-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 16px 0 24px; }
@@ -349,3 +373,29 @@ letter-spacing: 0.769px;}
 
 /* Ensure both directions scroll if needed */
 .cjgame-table-scroll { overflow: auto; }
+
+
+/* ===== Admin table: trait tone hover feedback ===== */
+.cjgame-admin-table td.cell-count {
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+.cjgame-admin-table td.cell-count:hover {
+  filter: brightness(0.4); 
+  transform: scale(1.05);
+}
+.cjgame-admin-table td.trait-integrity:hover {
+  background-color: rgba(255, 226, 221, 0.7);
+  transform: scale(1.05);
+}
+.cjgame-admin-table td.trait-passion:hover {
+  background-color: rgba(255, 236, 226, 0.7);
+  transform: scale(1.05);
+}
+.cjgame-admin-table td.trait-creativity:hover {
+  background-color: rgba(255, 241, 219, 0.7);
+  transform: scale(1.05);
+}
+.cjgame-admin-table td.trait-respect:hover {
+  background-color: rgba(241, 233, 223, 0.7);
+  transform: scale(1.05);
+}

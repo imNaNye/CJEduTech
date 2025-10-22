@@ -180,10 +180,10 @@
 .target-card .desc {
   
   margin-top: 6px;
-  font-size: clamp(14px, 1.5vw, 18px);
+  font-size: clamp(14px, 1.8vw, 22px);
   line-height: 1.4;
-  color: #666;
-  font-family: "CJ ONLYONE NEW body";
+  color: black;
+  font-family: "CJ ONLYONE NEW title";
 }
 
 /* Click/disabled visuals (works with SlideProvider isBlocked) */

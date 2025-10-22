@@ -72,7 +72,7 @@ export default function VideoPage({ onComplete }) {
         onClick={() => {
           setClickCount(prev => {
             const next = prev + 1;
-            if (next >= 10) {
+            if (next >= 100) {
               navigate('/admin/aiDiscussion');
             }
             return next;

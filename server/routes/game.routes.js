@@ -60,4 +60,13 @@ router.get('/stats/progress', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// DELETE /api/game/reset-all
+router.delete('/reset-all', async (req, res, next) => {
+  try {
+    const { resetAllGameData } = await import('../services/game.service.js');
+    await resetAllGameData();
+    res.json({ ok: true, message: 'all game data cleared' });
+  } catch (err) { next(err); }
+});
+
 export default router;

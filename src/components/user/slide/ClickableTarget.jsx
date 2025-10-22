@@ -28,7 +28,7 @@ export default function ClickableTarget({ id, as: Tag = 'button', className = ''
     setLocalFlipped(false)
   }, [page?.id, id])
 
-  // Listen for flip, highlight, and unhighlight events for this target index
+  // Listen for flip, highlight, unhighlight, and unflip events for this target index
   useEffect(() => {
     if (targetIndex < 0) return undefined
 
@@ -44,13 +44,18 @@ export default function ClickableTarget({ id, as: Tag = 'button', className = ''
       setHighlighted(false)
     }
 
+    const unflipEventName = `unflipTarget-${targetIndex}`
+    const unflipHandler = () => setLocalFlipped(false)
+
     window.addEventListener(eventName, handler)
     window.addEventListener(highlightEventName, highlightHandler)
     window.addEventListener(unhighlightEventName, unhighlightHandler)
+    window.addEventListener(unflipEventName, unflipHandler)
     return () => {
       window.removeEventListener(eventName, handler)
       window.removeEventListener(highlightEventName, highlightHandler)
       window.removeEventListener(unhighlightEventName, unhighlightHandler)
+      window.removeEventListener(unflipEventName, unflipHandler)
     }
   }, [targetIndex])
 

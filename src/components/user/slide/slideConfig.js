@@ -3,10 +3,10 @@ import { abilityTargets, attitudeTargets, characterTargets, skillTargets, standa
 export const SlideConfig = [
     {
         id: 'ability',
-        timeoutSec: 47,
+        timeoutSec: 45,
         requiredTargets: ['ability.a', 'ability.b', 'ability.c'],
         targets: abilityTargets,
-        flipTimings: [4,7,10],
+        flipTimings: [19,29,35],
         data: {
             title: '3가지 <span class="highlight">핵심 구성요소</span>',
             text: '<strong>건강한 사회인</strong>으로써 갖추어야 할 <strong>기본 역량</strong>'
@@ -14,11 +14,11 @@ export const SlideConfig = [
     },
     {
         id: 'character',
-        timeoutSec: 81,
+        timeoutSec: 75,
         requiredTargets: ['character.a', 'character.b', 'character.c', 'character.d',
             'character.e', 'character.f', 'character.g', 'character.h'
         ],
-        flipTimings:[4,7,10,11,13,18,23,30],
+        flipTimings:[31,35,41,46,52,57,61,68],
         targets: characterTargets,
         data: {
             title: '8가지 <span class="highlight">주요 구성요소</span>',
@@ -27,7 +27,8 @@ export const SlideConfig = [
     },
     {
         id: 'attitude',
-        timeoutSec: 59,
+        timeoutSec: 56,
+        flipTimings:[27,33,38,43,47],
         requiredTargets: ['attitude.a', 'attitude.b','attitude.c','attitude.d','attitude.e'],
         targets: attitudeTargets,
         data: {
@@ -37,7 +38,8 @@ export const SlideConfig = [
     },
     {
         id: 'skill',
-        timeoutSec: 66,
+        timeoutSec: 61,
+        flipTimings:[28,33,38,43,48,54],
         requiredTargets: ['skill.a', 'skill.b','skill.c','skill.d','skill.e','skill.f'],
         targets: skillTargets,
         data: {
@@ -47,7 +49,8 @@ export const SlideConfig = [
     },
     {
         id: 'standard',
-        timeoutSec: 73,
+        timeoutSec: 65,
+        flipTimings:[44,50,56,60],
         requiredTargets: ['standard.a', 'standard.b', 'standard.c', 'standard.d'],
         targets: standardTargets,
         data: {

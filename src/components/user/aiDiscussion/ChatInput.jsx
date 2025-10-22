@@ -14,10 +14,10 @@ export default function ChatInput() {
     console.log("sendAvatar:",avatar);
     socket.emit("message:send", {
       roomId: "general",
-      avatar,
       text,
       nickname,
       round,
+      avatar,
     });
     setText("");
   };

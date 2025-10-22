@@ -1370,13 +1370,11 @@ export function initChatSocket(io) {
           cb?.({ ok: false, reason: 'room_expired' });
           return;
         }
-        const avatarId = (payload && (payload.avatarId ?? payload.avatar) != null)
-        ? String(payload.avatarId ?? payload.avatar)
-        : undefined;
+        console.log("received avatar :",String(avatar));
         const msg = {
           id: randomUUID(),
           roomId,
-          avatarId, // ✅ avatarId로 저장
+          avatarId:String(avatar), // ✅ avatarId로 저장
           nickname: nickname || "익명",
           text: trimmed,
           createdAt: new Date().toISOString()

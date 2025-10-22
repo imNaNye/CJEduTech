@@ -1226,6 +1226,7 @@ export function initChatSocket(io) {
         return {
           ...m,
           avatarId: m.avatarId || m.avatar,
+          avatar: m.avatarId || m.avatar,
           reactedUsers: Array.from(set),
           reactionsCount: set.size,
           aiLabels: ai.labels,

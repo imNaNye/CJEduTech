@@ -37,6 +37,8 @@ export default function AvatarSelector() {
     }
     setSaving(true);
     setMsg('');
+    console.log('avatar:',String(selected));
+    localStorage.setItem('avatarUrl', String(selected));
     try {
       const res = await fetch(`${API}/api/user/avatar`, {
         method: 'POST',
@@ -50,7 +52,7 @@ export default function AvatarSelector() {
         return;
       }
       setAvatarUrl(String(selected));
-      localStorage.setItem('avatarUrl', String(selected));
+
       setMsg('아바타가 저장되었습니다!');
     } catch (e) {
       setMsg('서버 오류가 발생했습니다.');

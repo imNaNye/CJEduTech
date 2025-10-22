@@ -37,15 +37,11 @@ export default function Chat({ isMine, nickname, text, createdAt, reactionsCount
 
   const labels = Array.isArray(aiLabels) && aiLabels.length ? aiLabels : (aiLabel ? [aiLabel] : []);
   function findAvatarById(id) {
-    // Allow direct URL/path usage as well as mapped ids
-    if (typeof id === 'string') {
-      const looksLikePath = id.startsWith('http') || id.includes('/') || id.endsWith('.png') || id.endsWith('.jpg') || id.endsWith('.jpeg') || id.endsWith('.svg');
-      if (looksLikePath) return id; // use the provided path directly
-    }
     const found = avatars.find(a => a.id === id);
     return found ? found.src : avatar1;
   }
 
+  console.log("Chat: avataUrl : ",avatarUrl);
   const isAIDM = (!isMine) && (avatarUrl === 'ai' || nickname === '아이고라AI');
 
   return (

@@ -66,6 +66,28 @@ export default function VideoPage({ onComplete }) {
 
   return (
     <div className='video-page'>
+      <div
+        style={{
+          position: 'absolute',
+          top: '9vh',
+          left: '5vw',
+          zIndex: 999,
+          backgroundColor: '#FF6B00',
+          padding: 8,
+          borderRadius: 4,
+        }}
+      >
+        <label htmlFor="videoSelect" style={{ color: 'white', marginRight: 8 }}>영상 선택:</label>
+        <select
+          id="videoSelect"
+          value={videoId}
+          onChange={(e) => setVideoId(Number(e.target.value))}
+        >
+          {[...Array(10)].map((_, idx) => (
+            <option key={idx} value={idx}>{idx + 1}</option>
+          ))}
+        </select>
+      </div>
       <PageHeader title={`${content.title} (${videoId + 1} / ${playlist.length})`} />
       <section
         className='video-main'
@@ -108,24 +130,14 @@ export default function VideoPage({ onComplete }) {
             autoPlay
             playsInline
             muted={muted}
-            controls={false}
-            controlsList="nodownload noplaybackrate"
+            controls={true}
+            // controlsList="nodownload noplaybackrate"
             disablePictureInPicture
             onContextMenu={(e) => e.preventDefault()}
             tabIndex={-1}
-            style={{ pointerEvents: 'none' }}
             onRateChange={(e) => {
               const v = e.currentTarget;
               if (v.playbackRate !== 1) v.playbackRate = 1;
-            }}
-            onPause={(e) => {
-              const v = e.currentTarget;
-              if (!videoEnded) {
-                const p = v.play();
-                if (p && typeof p.catch === 'function') {
-                  p.catch(() => {/* ignore */});
-                }
-              }
             }}
             onTimeUpdate={(e) => {
               const v = e.currentTarget;

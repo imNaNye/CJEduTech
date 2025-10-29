@@ -270,6 +270,7 @@ export default function FinalResultPage() {
     }
   }, [data, quiz]);
 
+  const sections = data?.sections;
   // Admin pre-generation: when admin opens FinalResultPage, trigger generation for all users once
   useEffect(() => {
     if (!isAdminEffective) return;
@@ -292,7 +293,6 @@ export default function FinalResultPage() {
     });
   }, [isAdminEffective, roomId, sections?.ranking, effectiveNick]);
 
-  const sections = data?.sections;
 
   // --- Adapt server's video-based arrays to the existing round-based variables (UI text unchanged) ---
   const videoAsRounds = useMemo(() => {

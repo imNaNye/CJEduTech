@@ -72,7 +72,7 @@ export default function AIDiscussionPage(){
         if (current && current.auto) {
             const id = setTimeout(() => {
                 setOverlayQueue((prev) => prev.slice(1));
-            }, 60000); // 60 seconds
+            }, 1800000); // 60 seconds
             setAutoTimerId(id);
         }
         return () => {

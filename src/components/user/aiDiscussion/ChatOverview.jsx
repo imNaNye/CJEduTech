@@ -13,6 +13,8 @@ import badge2 from '@/assets/images/discussion/badge_2_large.png';
 import badge3 from '@/assets/images/discussion/badge_3_large.png';
 import badge4 from '@/assets/images/discussion/badge_4_large.png';
 
+import { useUser } from "@/contexts/UserContext";
+import { useRoundStep } from '@/contexts/RoundStepContext';
 const CAKES = { 1: cake1, 2: cake2, 3: cake3, 4: cake4 };
 const BADGES = { 1: badge1, 2: badge2, 3: badge3, 4: badge4 };
 
@@ -24,6 +26,9 @@ const getMyNick = () => {
 };
 
 export default function ChatOverView(){
+  
+      const {isAdmin, setIsAdmin} = useUser();
+      const { round, setRound, step, setStep,videoId,setVideoId } = useRoundStep();
   const [totals, setTotals] = useState({
     정직: 0,
     창의: 0,
@@ -50,6 +55,7 @@ export default function ChatOverView(){
   const myMessageIdsRef = useRef(new Set());   // mine only
   const myNickRef = useRef(getMyNick());
   const navigate = useNavigate();
+  const delayTimerRef = useRef(null);
 
   useEffect(() => {
     const handleRecent = (payload) => {
@@ -201,19 +207,39 @@ export default function ChatOverView(){
     socket.on("reaction:update", handleReactionUpdate);
     socket.on("message:ai", handleAi);
 
+    // --- Listen for room:video event to sync videoId ---
+    const handleRoomVideo = ({ roomId, videoId }) => {
+      try {
+        if (videoId !== undefined && videoId !== null) {
+          setVideoId(videoId);
+          sessionStorage.setItem('videoId', String(videoId));
+          localStorage.setItem('videoId', String(videoId));
+        }
+      } catch {}
+    };
+    socket.on('room:video', handleRoomVideo);
+
     socket.on('room:closing', ({ roomId }) => {
       // UI에 "결과 준비 중…" 로딩 상태를 띄우기
       //setResultLoading(true);
     });
 
     socket.on('results:ready', ({ roomId }) => {
-      // 이제 안전하게 결과 페이지로 이동
-      //navigate(`/user/discussion/result?roomId=${encodeURIComponent(roomId)}`);
-            try {
+      try {
         sessionStorage.setItem('lastRoomId', roomId || '');
         sessionStorage.setItem('myNickname', myNickRef.current || '');
-      } finally {
+      } catch {}
+
+      const go = () => {
         navigate('/user/discussionResult');
+      };
+
+      // Admin은 즉시 이동, 일반 사용자는 5초 대기 후 이동
+      if (isAdmin) {
+        go();
+      } else {
+        if (delayTimerRef.current) clearTimeout(delayTimerRef.current);
+        delayTimerRef.current = setTimeout(go, 5000);
       }
     });
 
@@ -226,8 +252,14 @@ export default function ChatOverView(){
       socket.off("message:new", handleNew);
       socket.off("reaction:update", handleReactionUpdate);
       socket.off("message:ai", handleAi);
+      socket.off("room:video", handleRoomVideo);
+      socket.off("results:ready");
+      if (delayTimerRef.current) {
+        clearTimeout(delayTimerRef.current);
+        delayTimerRef.current = null;
+      }
     };
-  }, []);
+  }, [isAdmin]);
 
   // cake stacking: 1..4 → cake_1..cake_4, then add another layer for 5..8 (4 per layer)
   const renderCakes = (count, variant) => {

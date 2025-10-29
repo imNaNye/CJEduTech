@@ -224,39 +224,34 @@ export function SlideProvider({ children, config, defaultCooldownMs = 0, blockPo
     }
   }, [paused]);
 
-  // keyboard controls: ArrowLeft/Right for card flip, Space to pause
+  // keyboard & remote controls:
+  //  - Next: ArrowRight, PageDown, Enter, Space, KeyN, MediaTrackNext
+  //  - Prev: ArrowLeft, PageUp, Backspace, KeyP, MediaTrackPrevious
+  //  - Toggle Pause: Space (kept), KeyB to pause/resume (common in presenters to "black out" — here we map to pause)
   useEffect(() => {
+    const NEXT_CODES = new Set(['ArrowRight', 'PageDown', 'Enter', 'Space', 'KeyN', 'MediaTrackNext']);
+    const PREV_CODES = new Set(['ArrowLeft', 'PageUp', 'Backspace', 'KeyP', 'MediaTrackPrevious']);
+    const PAUSE_CODES = new Set(['Space', 'KeyB']); // Space toggles pause as before; B also toggles
+    
     const onKey = (e) => {
       if (!page) return;
       const totalCards = Array.isArray(page.flipTimings)
         ? page.flipTimings.length
         : (Array.isArray(page.requiredTargets) ? page.requiredTargets.length : 0);
-      if (e.code === 'ArrowRight') {
+  
+      const code = e.code || e.key || '';
+      // normalize: some presenters emit lowercase letters via e.key; e.code is preferred
+      const normalized = typeof code === 'string' ? code : String(code);
+  
+      // Pause/resume first (Space should not advance when pausing)
+      if (PAUSE_CODES.has(normalized)) {
         e.preventDefault();
-        // 이미 마지막 카드가 펼쳐진 상태에서 한 번 더 누르면 다음 슬라이드로 이동
-        if (totalCards > 0 && currentCardIdxRef.current >= totalCards - 1) {
-          const isLastPage = pageIndex >= config.length - 1;
-          if (isLastPage) {
-            setStep(2);
-            navigate('/admin/afterSlide');
-          } else {
-            setPageIndex(i => i + 1);
-          }
-          return;
-        }
-        // 다음 카드로 플립
-        const next = Math.min(totalCards - 1, currentCardIdxRef.current + 1);
-        if (next >= 0 && next !== currentCardIdxRef.current) {
-          window.dispatchEvent(new CustomEvent(`flipTarget-${next}`));
-          window.dispatchEvent(new CustomEvent(`highlightTarget-${next}`));
-          if (next > 0) window.dispatchEvent(new CustomEvent(`unhighlightTarget-${next - 1}`));
-          // Unflip all other cards except the one just flipped
-          for (let i = 0; i < totalCards; i++) {
-            if (i !== next) window.dispatchEvent(new CustomEvent(`unflipTarget-${i}`));
-          }
-          currentCardIdxRef.current = next;
-        }
-      } else if (e.code === 'ArrowLeft') {
+        setPaused((p) => !p);
+        return;
+      }
+  
+      // Previous slide/card
+      if (PREV_CODES.has(normalized)) {
         e.preventDefault();
         if (currentCardIdxRef.current <= 0) {
           const isFirstPage = pageIndex <= 0;
@@ -267,7 +262,6 @@ export function SlideProvider({ children, config, defaultCooldownMs = 0, blockPo
         }
         const prev = Math.max(0, currentCardIdxRef.current - 1);
         if (prev !== currentCardIdxRef.current) {
-          // unhighlight current, highlight prev
           if (currentCardIdxRef.current >= 0) {
             window.dispatchEvent(new CustomEvent(`unhighlightTarget-${currentCardIdxRef.current}`));
           }
@@ -279,14 +273,132 @@ export function SlideProvider({ children, config, defaultCooldownMs = 0, blockPo
           }
           currentCardIdxRef.current = prev;
         }
-      } else if (e.code === 'Space') {
+        return;
+      }
+  
+      // Next slide/card
+      if (NEXT_CODES.has(normalized)) {
         e.preventDefault();
-        setPaused((p) => !p);
+        // If last card is already opened, go to next slide
+        if (totalCards > 0 && currentCardIdxRef.current >= totalCards - 1) {
+          const isLastPage = pageIndex >= config.length - 1;
+          if (isLastPage) {
+            setStep(2);
+            navigate('/admin/afterSlide');
+          } else {
+            setPageIndex(i => i + 1);
+          }
+          return;
+        }
+        // Flip to next card
+        const next = Math.min(totalCards - 1, currentCardIdxRef.current + 1);
+        if (next >= 0 && next !== currentCardIdxRef.current) {
+          window.dispatchEvent(new CustomEvent(`flipTarget-${next}`));
+          window.dispatchEvent(new CustomEvent(`highlightTarget-${next}`));
+          if (next > 0) window.dispatchEvent(new CustomEvent(`unhighlightTarget-${next - 1}`));
+          // Unflip all other cards except the one just flipped
+          for (let i = 0; i < totalCards; i++) {
+            if (i !== next) window.dispatchEvent(new CustomEvent(`unflipTarget-${i}`));
+          }
+          currentCardIdxRef.current = next;
+        }
+        return;
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [page]);
+
+  // mouse (presenter-style) controls:
+  //  - Left click: Next (flip next card or next slide)
+  //  - Right click: Prev (flip prev card or prev slide)
+  useEffect(() => {
+    const isInteractive = (el) => {
+      if (!el) return false;
+      const tag = (el.tagName || '').toLowerCase();
+      if (['input','textarea','select','button'].includes(tag)) return true;
+      if (tag === 'a') return true;
+      if (el.isContentEditable) return true;
+      // allow opt-out on any subtree
+      if (el.closest && el.closest('[data-ignore-slide-click]')) return true;
+      return false;
+    };
+  
+    const onPointerDown = (e) => {
+      if (!page) return;
+      if (e.defaultPrevented) return;
+      // ignore if user clicked on interactive UI
+      if (isInteractive(e.target)) return;
+  
+      const totalCards = Array.isArray(page.flipTimings)
+        ? page.flipTimings.length
+        : (Array.isArray(page.requiredTargets) ? page.requiredTargets.length : 0);
+  
+      // Right click -> Prev
+      if (e.button === 2) {
+        e.preventDefault();
+        if (currentCardIdxRef.current <= 0) {
+          const isFirstPage = pageIndex <= 0;
+          if (!isFirstPage) {
+            setPageIndex(i => i - 1);
+          }
+          return;
+        }
+        const prev = Math.max(0, currentCardIdxRef.current - 1);
+        if (prev !== currentCardIdxRef.current) {
+          if (currentCardIdxRef.current >= 0) {
+            window.dispatchEvent(new CustomEvent(`unhighlightTarget-${currentCardIdxRef.current}`));
+          }
+          window.dispatchEvent(new CustomEvent(`flipTarget-${prev}`));
+          window.dispatchEvent(new CustomEvent(`highlightTarget-${prev}`));
+          for (let i = 0; i < totalCards; i++) {
+            if (i !== prev) window.dispatchEvent(new CustomEvent(`unflipTarget-${i}`));
+          }
+          currentCardIdxRef.current = prev;
+        }
+        return;
+      }
+  
+      // Left click (button===0) -> Next
+      if (e.button === 0) {
+        e.preventDefault();
+        if (totalCards > 0 && currentCardIdxRef.current >= totalCards - 1) {
+          const isLastPage = pageIndex >= config.length - 1;
+          if (isLastPage) {
+            setStep(2);
+            navigate('/admin/afterSlide');
+          } else {
+            setPageIndex(i => i + 1);
+          }
+          return;
+        }
+        const next = Math.min(totalCards - 1, currentCardIdxRef.current + 1);
+        if (next >= 0 && next !== currentCardIdxRef.current) {
+          window.dispatchEvent(new CustomEvent(`flipTarget-${next}`));
+          window.dispatchEvent(new CustomEvent(`highlightTarget-${next}`));
+          if (next > 0) window.dispatchEvent(new CustomEvent(`unhighlightTarget-${next - 1}`));
+          for (let i = 0; i < totalCards; i++) {
+            if (i !== next) window.dispatchEvent(new CustomEvent(`unflipTarget-${i}`));
+          }
+          currentCardIdxRef.current = next;
+        }
+      }
+    };
+  
+    // prevent native context menu so right-click can be used for Prev
+    const onContextMenu = (e) => {
+      if (!page) return;
+      if (isInteractive(e.target)) return; // allow context menu on real inputs/links
+      e.preventDefault();
+    };
+  
+    window.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('contextmenu', onContextMenu);
+    return () => {
+      window.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('contextmenu', onContextMenu);
+    };
+  }, [page, pageIndex, config]);
 
   const value = useMemo(
     () => ({

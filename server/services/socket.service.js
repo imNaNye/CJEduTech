@@ -528,95 +528,11 @@ async function expireRoom(io, roomId) {
     });
   }*/
 
-    // === Topic-wise representative statements via per-user AI (/user-summary) ===
-    let topicSummaries = { topics: [], generatedAt: Date.now() };
-    try {
-      const stS = getRoomState(roomId);
-      if (!stS.topicSummariesGenerated) {
-        // Build chat history for AI
-        const chat_history = (recentByRoom.get(roomId) || []).map(m => ({
-          nickname: m.nickname,
-          text: m.text,
-          timestamp: m.createdAt
-        }));
-        // Discussion topics as array of {name, description}
-        const names = Array.isArray(stS.topics) ? stS.topics : [];
-        const discussion_topics = names.map(n => ({ name: String(n || ''), description: '' }));
+    // Defer topic-wise summaries to background for speed
+    let topicSummaries = { topics: [], generatedAt: null };
 
-        // Collect user list (exclude bots)
-        const botNames = Array.isArray(stS.botNicknames) ? new Set(stS.botNicknames) : new Set();
-        const userNicknames = Object.keys(perUser).filter(n => !botNames.has(n));
-
-        // Prepare topic index for aggregation
-        const byTopic = new Map(); // topic -> Array<{ nickname, summary, relevance }>
-        for (const t of names) byTopic.set(String(t), []);
-
-        if (AI_ENDPOINT && userNicknames.length && discussion_topics.length) {
-          for (const nick of userNicknames) {
-            try {
-              const res = await fetch(AI_ENDPOINT + '/user-summary', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', ...(AI_API_KEY ? { 'Authorization': `Bearer ${AI_API_KEY}` } : {}) },
-                body: JSON.stringify({
-                  user_id: nick,
-                  chat_history,
-                  discussion_topics,
-                  max_statements_per_topic: 1 // ignored by new summarizer but kept for clarity
-                })
-              });
-              if (!res.ok) throw new Error('user-summary http ' + res.status);
-              const data = await res.json();
-              // data.topics: [{ topic, relevance_score, related_statements: [], summary }]
-              if (data && Array.isArray(data.topics)) {
-                for (const t of data.topics) {
-                  const topicName = t?.topic || '';
-                  const arr = byTopic.get(topicName) || [];
-                  const relevance = typeof t?.relevance_score === 'number' ? t.relevance_score : 0;
-                  const summaryText = (t?.summary && String(t.summary)) || (Array.isArray(t?.related_statements) && t.related_statements[0]) || '';
-                  if (summaryText) {
-                    arr.push({ nickname: nick, summary: summaryText, relevance });
-                  }
-                  byTopic.set(topicName, arr);
-                }
-              }
-            } catch (e) {
-              // ignore failure for this user to keep others
-            }
-          }
-        } else {
-          // No AI endpoint → simple fallback taking first message per user per topic from buckets
-          const buckets = stS.topicBuckets instanceof Map ? stS.topicBuckets : new Map();
-          for (const [topic, byUser] of buckets.entries()) {
-            const arr = [];
-            for (const [nick, msgsArr] of byUser.entries()) {
-              const m = (msgsArr || [])[0];
-              if (m && m.text) arr.push({ nickname: nick, summary: m.text, relevance: 0 });
-            }
-            byTopic.set(topic, arr);
-          }
-        }
-
-        // Build final structure (sort by relevance desc per topic)
-        const topicsOut = [];
-        for (const name of names) {
-          const items = (byTopic.get(String(name)) || []).sort((a,b) => (b.relevance||0) - (a.relevance||0));
-          topicsOut.push({ topic: String(name), summaries: items });
-        }
-        topicSummaries.topics = topicsOut;
-
-        stS.topicSummariesGenerated = true; // once per room
-      }
-    } catch {}
-
-  // === Generate discussion overall summary BEFORE signaling results ready ===
+  // === Defer overall summary to background for speed ===
   let overallSummaryText = null;
-  try {
-    const mod = await import('./review.service.js');
-    const sum = await mod.generateOverallSummary?.(roomId, { force: true });
-    overallSummaryText = sum?.summaryText || null;
-  } catch (e) {
-    overallSummaryText = null;
-  }
 
   const createdAt = Date.now();
   resultsByRoom.set(roomId, { createdAt, roomId, perUser, ranking: rankingArr, groups, topicSummaries, avatarMap: avatarIdByNick, overallSummary: overallSummaryText });
@@ -671,6 +587,11 @@ async function expireRoom(io, roomId) {
   // 2) 결과 준비 완료 알림 (이 신호를 받은 클라이언트가 결과 페이지로 이동)
   ns.to(roomKey).emit('results:ready', { roomId });
 
+  // 2.5) 토픽/종합 요약 생성 완료까지 대기하여 클라이언트가 topics:ready / overallSummary:ready를 수신할 수 있도록 함
+  try {
+    await buildAndBroadcastSummaries(io, roomId);
+  } catch {}
+
   // 3) 최종 만료 이벤트 브로드캐스트
   ns.to(roomKey).emit('room:expired', { roomId, reason: 'max_age', maxAgeMs: ROOM_MAX_AGE_MS });
 
@@ -685,6 +606,99 @@ async function expireRoom(io, roomId) {
 
   // 정리: 방 비우기
   cleanupRoomIfEmpty(io, roomId);
+}
+
+// ---- Background job for topic and overall summaries ----
+async function buildAndBroadcastSummaries(io, roomId){
+  // Reuse existing in-memory data
+  const stS = getRoomState(roomId);
+  const msgs = recentByRoom.get(roomId) || [];
+  const perUser = (resultsByRoom.get(roomId) || {}).perUser || {};
+
+  // --- Topic-wise representative statements (moved from expireRoom) ---
+  let topicSummaries = { topics: [], generatedAt: Date.now() };
+  try {
+    if (!stS.topicSummariesGenerated) {
+      const chat_history = msgs.map(m => ({ nickname: m.nickname, text: m.text, timestamp: m.createdAt }));
+      const names = Array.isArray(stS.topics) ? stS.topics : [];
+      const discussion_topics = names.map(n => ({ name: String(n || ''), description: '' }));
+
+      const botNames = Array.isArray(stS.botNicknames) ? new Set(stS.botNicknames) : new Set();
+      const userNicknames = Object.keys(perUser).filter(n => !botNames.has(n));
+
+      const byTopic = new Map();
+      for (const n of names) byTopic.set(String(n), []);
+
+      if (AI_ENDPOINT && userNicknames.length && discussion_topics.length) {
+        for (const nick of userNicknames) {
+          try {
+            const res = await fetch(AI_ENDPOINT + '/user-summary', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', ...(AI_API_KEY ? { 'Authorization': `Bearer ${AI_API_KEY}` } : {}) },
+              body: JSON.stringify({ user_id: nick, chat_history, discussion_topics, max_statements_per_topic: 1 })
+            });
+            if (!res.ok) throw new Error('user-summary http ' + res.status);
+            const data = await res.json();
+            if (data && Array.isArray(data.topics)) {
+              for (const t of data.topics) {
+                const topicName = t?.topic || '';
+                const arr = byTopic.get(topicName) || [];
+                const relevance = typeof t?.relevance_score === 'number' ? t.relevance_score : 0;
+                const summaryText = (t?.summary && String(t.summary)) || (Array.isArray(t?.related_statements) && t.related_statements[0]) || '';
+                if (summaryText) arr.push({ nickname: nick, summary: summaryText, relevance });
+                byTopic.set(topicName, arr);
+              }
+            }
+          } catch {}
+        }
+      } else {
+        const buckets = stS.topicBuckets instanceof Map ? stS.topicBuckets : new Map();
+        for (const [topic, byUser] of buckets.entries()) {
+          const arr = [];
+          for (const [nick, msgsArr] of byUser.entries()) {
+            const m = (msgsArr || [])[0];
+            if (m && m.text) arr.push({ nickname: nick, summary: m.text, relevance: 0 });
+          }
+          byTopic.set(topic, arr);
+        }
+      }
+
+      const topicsOut = [];
+      for (const name of (Array.isArray(stS.topics) ? stS.topics : [])) {
+        const items = (byTopic.get(String(name)) || []).sort((a,b) => (b.relevance||0) - (a.relevance||0));
+        topicsOut.push({ topic: String(name), summaries: items });
+      }
+      topicSummaries.topics = topicsOut;
+      stS.topicSummariesGenerated = true;
+    }
+  } catch {}
+
+  // Persist into results map & notify clients (socket)
+  const cur = resultsByRoom.get(roomId) || { roomId };
+  cur.topicSummaries = topicSummaries;
+  resultsByRoom.set(roomId, cur);
+
+  // Optional: archive refresh of latest file
+  try {
+    const { baseId, round } = decomposeRoomId(roomId);
+    const suffix = round !== undefined ? `-r${round}` : '';
+    const latestFile = path.join(ARCHIVE_DIR, `${baseId}${suffix}-latest.json`);
+    const datedFile = path.join(ARCHIVE_DIR, `${baseId}${suffix}-${cur.createdAt || Date.now()}.json`);
+    await writeJSON(latestFile, { ...(await readJSON(latestFile)), topicSummaries });
+  } catch {}
+
+  io.of('/chat').to(`room:${roomId}`).emit('topics:ready', { roomId });
+
+  // --- Overall summary in background ---
+  try {
+    const mod = await import('./review.service.js');
+    const sum = await mod.generateOverallSummary?.(roomId, { force: true });
+    const overallSummaryText = sum?.summaryText || null;
+    const cur2 = resultsByRoom.get(roomId) || { roomId };
+    cur2.overallSummary = overallSummaryText;
+    resultsByRoom.set(roomId, cur2);
+    io.of('/chat').to(`room:${roomId}`).emit('overallSummary:ready', { roomId });
+  } catch {}
 }
 
 function ensureRoomExpiry(io, roomId) {
@@ -1193,6 +1207,12 @@ export function initChatSocket(io) {
           // 🔊 Immediately broadcast the first topic after setup
           setNextTopic(io, composed, 0, true);
 
+          // --- Broadcast synced videoId to all clients in the room ---
+          io.of('/chat').to(`room:${composed}`).emit('room:video', {
+            roomId: composed,
+            videoId: stForJoin.videoId
+          });
+
           // Notify clients about refreshed time
           io.of('/chat').to(`room:${composed}`).emit('room:time', {
             roomId: composed,
@@ -1213,6 +1233,12 @@ export function initChatSocket(io) {
       // Preload topics only (first topic will be announced by scheduler ~10s after creation)
       ensureRoomTopics(composed);
       broadcastCurrentTopic(io, composed);
+
+      // --- Send current videoId to the newly joined client for sync ---
+      if (typeof stForJoin.videoId !== 'undefined') {
+        socket.emit('room:video', { roomId: composed, videoId: stForJoin.videoId });
+      }
+
       // start per-room test bot
       ensureRoomBot(io, composed);
 

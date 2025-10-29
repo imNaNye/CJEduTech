@@ -398,3 +398,13 @@ box-sizing: border-box;
   border-color: #e5e7eb;      /* subtle border */
   color: #111;                /* high contrast text */
 }
+
+/* Admin mode: enlarge chat text for better readability */
+.chat-bubble.admin-view .chat-text{
+  font-size: 22px;
+  line-height: 1.6;
+}
+.chat-bubble.admin-view .chat-nickname{
+  font-size: 16px;
+  line-height: 1.4;
+}

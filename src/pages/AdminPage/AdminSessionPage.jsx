@@ -12,6 +12,7 @@ export default function AdminSessionPage(){
     useEffect(() => {
         setIsAdmin(true);
         localStorage.setItem('isAdmin',"true");
+        localStorage.setItem("videoId","3");
         let start = Date.now();
         const interval = setInterval(() => {
             const elapsed = Date.now() - start;

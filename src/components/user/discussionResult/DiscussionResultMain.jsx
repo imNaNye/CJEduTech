@@ -3,6 +3,7 @@ import SavePDFButton from "./SavePDFButton";
 import NextSessionButton from "./NextSessionButton";
 import "./discussionResult.css";
 import { http } from '@/lib/http' ;
+import { socket } from '@/api/chat';
 import { useUser } from '@/contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { useRoundStep } from '@/contexts/RoundStepContext';
@@ -131,7 +132,7 @@ export default function DiscussionResultMain() {
     const found = avatars.find(a => a.id === id);
     return found ? found.src : avatar1;
   }
-  const { nickname, avatarUrl } = useUser();
+  const { nickname, avatarUrl,isAdmin } = useUser();
   const navigate = useNavigate();
   const [roomId, setRoomId] = useState("");
   const [myNickname, setMyNickname] = useState("");
@@ -141,6 +142,8 @@ export default function DiscussionResultMain() {
   const [error, setError] = useState("");
   const [overallSummary, setOverallSummary] = useState("");
   const [avatarMap, setAvatarMap] = useState({}); // { nickname: avatarId }
+  const [topicSummaries, setTopicSummaries] = useState([]);
+  const [topicLoading, setTopicLoading] = useState(true);
   function hashNicknameToAvatarId(nick=''){
     let h = 0; for (let i=0;i<nick.length;i++){ h=((h<<5)-h)+nick.charCodeAt(i); h|=0; }
     return String((Math.abs(h)%12)+1);
@@ -161,7 +164,21 @@ export default function DiscussionResultMain() {
     respect: badgeRespect
   };
 
-
+  // Listen for background topic summaries completion and refetch
+  useEffect(() => {
+    function onTopicsReady({ roomId: ridEvt }){
+      const want = sessionStorage.getItem('lastRoomId') || roomId;
+      if (!ridEvt || ridEvt !== want) return;
+      http.get(`/api/chat/result/${encodeURIComponent(want)}`).then((res)=>{
+        if (Array.isArray(res?.topicSummaries?.topics)) {
+          setTopicSummaries(res.topicSummaries.topics);
+          setTopicLoading(false);
+        }
+      }).catch(()=>{});
+    }
+    socket.on('topics:ready', onTopicsReady);
+    return () => socket.off('topics:ready', onTopicsReady);
+  }, []);
   useEffect(() => {
     const rid = sessionStorage.getItem("lastRoomId") || "";
     const nick = sessionStorage.getItem("myNickname") || localStorage.getItem("nickname") || "";
@@ -185,7 +202,11 @@ export default function DiscussionResultMain() {
         if (roomData && roomData.avatarMap && typeof roomData.avatarMap === 'object') {
           setAvatarMap(roomData.avatarMap);
         }
-                // --- Overall summary (once per room) ---
+        // --- Topic summaries: seed from server if present
+        const firstTopics = Array.isArray(roomData?.topicSummaries?.topics) ? roomData.topicSummaries.topics : [];
+        setTopicSummaries(firstTopics);
+        setTopicLoading(!(firstTopics && firstTopics.length));
+        // --- Overall summary (once per room) ---
         try {
           // 1) 조회
           const getRes = await http.get(`/api/review/${encodeURIComponent(rid)}/overall-summary`);
@@ -199,6 +220,15 @@ export default function DiscussionResultMain() {
             setOverallSummary("");
           }
         }
+        // --- If topic summaries are empty, refetch after a short delay to check for background completion ---
+        try {
+          if (!roomData?.topicSummaries?.topics?.length) {
+            // refetch fresh result to see if background job filled it in
+            const r2 = await http.get(`/api/chat/result/${encodeURIComponent(rid)}`);
+            if (Array.isArray(r2?.topicSummaries?.topics)) setTopicSummaries(r2.topicSummaries.topics);
+            setTopicLoading(!(r2?.topicSummaries?.topics && r2.topicSummaries.topics.length));
+          }
+        } catch {}
 
         if (myOutcome.status === 'fulfilled' && myOutcome.value) {
           setMyResult(myOutcome.value);
@@ -230,12 +260,14 @@ export default function DiscussionResultMain() {
         console.log("[DiscussionResultMain] mockMe", mockMe);
         setOverallSummary('토론 전반에 걸쳐 활발한 참여가 이루어졌습니다. 특히 정직과 열정 관련 메시지가 두드러졌으며, 팀 내 의사결정에 긍정적 영향을 주었습니다.');
         setError('');
+        setTopicLoading(false);
       } finally {
         setLoading(false);
       }
     }
 
     load();
+
   }, []);
 
   // Aggregate totals for hero copy (전체)
@@ -530,7 +562,7 @@ function koreanOrdinal(n){
   }
 
   return (
-    <div className="discussion-result-main">
+    <div className={`discussion-result-main ${isAdmin ? 'is-admin' : ''}`}>
       {/* 좌측 히어로 섹션 (고정, 비스크롤) */}
       <section className="dr-hero">
         <div className="dr-hero-body">
@@ -577,11 +609,15 @@ function koreanOrdinal(n){
         {/* 전체 랭킹 */}
         <OverallRankingCard ranking={roomResult?.ranking || []} perUser={roomResult?.perUser || {}} avatarMap={avatarMap} />
         {/* 토론 주제별 주요 발언 요약 (TalentGroupCard 레이아웃 재사용) */}
-        {(roomResult?.topicSummaries?.topics || []).map((t, idx) => (
+        {(!topicSummaries || topicSummaries.length === 0) && topicLoading && (
+          <TalentGroupCard trait="주제별 발언 요약" hideLikes={true} loading={true} placeholderCount={3} />
+        )}
+        {(topicSummaries || []).map((t, idx) => (
           <TalentGroupCard
             key={idx}
             trait={t.topic || `토론 주제 ${idx+1}`}
             hideLikes={true}
+            loading={false}
             members={(t.summaries || []).map(s => ({
               nickname: s.nickname,
               avatar: getAvatarForNickname(s.nickname),

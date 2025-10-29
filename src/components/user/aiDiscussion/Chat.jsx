@@ -11,7 +11,7 @@ import avatar10 from "@/assets/images/avatar/avatar10.png";
 import avatar11 from "@/assets/images/avatar/avatar11.png";
 import avatar12 from "@/assets/images/avatar/avatar12.png";
 import AIicon from "@/assets/images/discussion/AI_icon.png";
-
+import { useUser } from '@/contexts/UserContext';
 export default function Chat({ isMine, nickname, text, createdAt, reactionsCount = 0, didReact = false, aiLabel, aiScore, aiLabels, aiScores ,avatarUrl}) {
   
       const avatars = [
@@ -34,7 +34,7 @@ export default function Chat({ isMine, nickname, text, createdAt, reactionsCount
   const hh = time.getHours().toString().padStart(2, '0');
   const mm = time.getMinutes().toString().padStart(2, '0');
   const ts = `${hh}:${mm}`;
-
+  const {isAdmin} = useUser();
   const labels = Array.isArray(aiLabels) && aiLabels.length ? aiLabels : (aiLabel ? [aiLabel] : []);
   function findAvatarById(id) {
     const found = avatars.find(a => a.id === id);
@@ -49,7 +49,7 @@ export default function Chat({ isMine, nickname, text, createdAt, reactionsCount
             {!isMine && (
         <img src={findAvatarById(avatarUrl)} alt="avatar" className="chat-profile-image" />
       )}
-      <div className={`chat-bubble ${isMine ? 'mine' : 'others'} ${isAIDM ? 'ai-dm' : ''}`}>
+      <div className={`chat-bubble ${isMine ? 'mine' : 'others'} ${isAIDM ? 'ai-dm' : ''} ${isAdmin ? 'admin-view' : ''}`}>
         {!isMine && <div className="chat-nickname">{nickname || '익명'}</div>}
         <div className="chat-text">{text}</div>
         {labels.length > 0 && (

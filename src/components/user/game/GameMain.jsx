@@ -103,7 +103,11 @@ const CATEGORIES = [
     ],
   },
 ];
-
+// Build a global id -> description map for tooltip lookups
+const ALL_DESC_MAP = CATEGORIES.reduce((acc, cat) => {
+  for (const it of cat.items) acc[it.id] = it.desc;
+  return acc;
+}, {});
 // selections 구조: { personal: {integrity: [], passion: [], ...}, attitude: {...}, functional: {...} }
 const makeEmptySelections = () =>
   CATEGORIES.reduce((acc, c) => {
@@ -407,7 +411,8 @@ export default function GameMain() {
                         onDragStart={(e) => onDragStart(e, item.id)}
                         onDragEnd={() => { if (dragGhostRef.current) { document.body.removeChild(dragGhostRef.current); dragGhostRef.current = null; } }}
                         onClick={() => setHovered((v) => (v === item.id ? null : item.id))}
-                        title="드래그하거나 클릭해서 설명 보기"
+                        title={item.desc}
+                        aria-label={`${item.id}: ${item.desc}`}
                       >
                         <span className="cjgame-chip-face cjgame-chip-front">{item.id}</span>
                         <span className="cjgame-chip-face cjgame-chip-back">{item.desc}</span>

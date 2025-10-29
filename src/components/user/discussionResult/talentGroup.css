@@ -112,3 +112,21 @@
   border-width:10px; border-style:solid;
   border-color:transparent transparent transparent #FFEED8; /* right-pointing tail (inner) */
 }
+.discussion-result-main.is-admin .tg-title{
+  font-size: 26px;           /* was 24px */
+}
+.discussion-result-main.is-admin .tg-name{
+  font-size: 22px;           /* was 20px */
+}
+.discussion-result-main.is-admin .tg-bubble{
+  font-size: 18px;           /* was 15px */
+  line-height: 1.7;          /* improve readability at larger size */
+  max-height: 84px;          /* allow a bit more before expand */
+}
+
+/* Keep sizes reasonable on narrower screens */
+@media (max-width: 960px){
+  .discussion-result-main.is-admin .tg-title{ font-size: 24px; }
+  .discussion-result-main.is-admin .tg-name{ font-size: 21px; }
+  .discussion-result-main.is-admin .tg-bubble{ font-size: 17px; max-height: 78px; }
+}

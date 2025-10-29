@@ -36,7 +36,7 @@ function rankSuffix(n){
  *    ※ members는 topReacted.reactionsCount 내림차순으로 정렬해 1..N 순위 부여
  *  - maxRows?: number  // (옵션) 시각적 제한. 스크롤은 기본 활성화
  */
-export default function TalentGroupCard({ trait='정직', members=[], hideLikes=false  }) {
+export default function TalentGroupCard({ trait='정직', members=[], hideLikes=false, maxRows, loading=false, placeholderCount=3 }) {
   const icon = BADGE_BY_TRAIT[trait];
 
   const list = useMemo(() => {
@@ -51,6 +51,14 @@ export default function TalentGroupCard({ trait='정직', members=[], hideLikes=
   }, [members]);
 
   const rows = typeof maxRows === 'number' ? list.slice(0, maxRows) : list;
+
+  const skeletonRows = Array.from({ length: Math.max(1, placeholderCount) }).map((_, i) => ({
+    rank: i + 1,
+    nickname: '로딩중…',
+    avatar: AVATARS[i % AVATARS.length],
+    topReacted: { text: '발언 요약 생성중…', reactionsCount: 0 },
+    __skeleton: true,
+  }));
 
   const [openMap, setOpenMap] = useState(() => new Map());
   const toggleOpen = (key) => {
@@ -70,23 +78,27 @@ export default function TalentGroupCard({ trait='정직', members=[], hideLikes=
       <div className="tg-divider" />
 
       <ol className="tg-list" role="list">
-        {rows.map((m) => (
-          <li className="tg-item" key={`${trait}-${m.nickname}`}>
+        {(loading ? skeletonRows : rows).map((m) => (
+          <li className={`tg-item ${m.__skeleton ? 'tg-item--skeleton' : ''}`} key={`${trait}-${m.nickname}-${m.rank}`}>
             {/* 순위 + 아바타 */}
             <div className="tg-left">
               <div className={`tg-rank tg-rank--${m.rank <= 3 ? 'gold' : 'plain'}`}>
                 <span className="n">{m.rank}</span>
                 <small className="suf">{rankSuffix(m.rank)}</small>
               </div>
-              <img className="tg-avatar" src={m.avatar} alt={m.nickname} />
+              <img className="tg-avatar" src={m.avatar} alt={m.nickname} style={m.__skeleton ? { filter:'grayscale(1)', opacity:0.4 } : undefined} />
             </div>
 
             {/* 닉네임 + 공감 수 + 베스트 발언 */}
             <div className="tg-right">
               <div className="tg-name-row">
-                <span className="tg-name">{m.nickname}</span>
+                {m.__skeleton ? (
+                  <span className="tg-name" style={{ display:'inline-block', width:120, height:16, background:'#eee', borderRadius:6 }} />
+                ) : (
+                  <span className="tg-name">{m.nickname}</span>
+                )}
                 {(!hideLikes) && (
-                <span className="tg-like-pill">
+                <span className="tg-like-pill" style={m.__skeleton ? { opacity:0.3 } : undefined}>
                   <img src={likeIcon} alt="likes" />
                   {m.topReacted?.reactionsCount ?? 0}
                 </span>
@@ -95,15 +107,17 @@ export default function TalentGroupCard({ trait='정직', members=[], hideLikes=
                 {(() => {
                   const stableKey = `${trait}-${m.nickname}-${m.rank}`;
                   const expanded = !!openMap.get(stableKey);
+                  const bubbleStyle = m.__skeleton ? { background:'#f4f4f4', color:'#aaa', cursor:'default' } : undefined;
                   return (
                     <div
                       className={`tg-bubble ${expanded ? 'expanded' : ''}`}
                       role="button"
                       aria-expanded={expanded}
                       title={expanded ? '' : (m.topReacted?.text || '')}
-                      onClick={() => toggleOpen(stableKey)}
+                      onClick={() => { if (!m.__skeleton) toggleOpen(stableKey); }}
+                      style={bubbleStyle}
                     >
-                      {m.topReacted?.text || '베스트 메시지가 없습니다.'}
+                      {m.__skeleton ? '발언 요약 생성중…' : (m.topReacted?.text || '베스트 메시지가 없습니다.')}
                     </div>
                   );
                 })()}

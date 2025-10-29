@@ -24,7 +24,8 @@ async function ensureTables() {
           user_agent VARCHAR(255) NULL,
           ip VARCHAR(64) NULL,
           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          UNIQUE KEY uniq_session (session_id)
+          UNIQUE KEY uniq_session (session_id),
+          KEY idx_nickname (nickname)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
       `);
 
@@ -41,6 +42,11 @@ async function ensureTables() {
           KEY idx_nickname (nickname)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
       `);
+      try {
+        await conn.query(`CREATE INDEX idx_nickname ON game_sessions (nickname)`);
+      } catch (e) {
+        // ignore if exists
+      }
     } finally {
       conn.release();
     }
@@ -54,39 +60,59 @@ export async function saveGameStart({ nickname, sessionId, startedAt, userAgent,
   if (!sessionId) throw new Error("sessionId required");
   await ensureTables();
 
+  const safeNick = nickname || "게스트";
+  const started = Number(startedAt) || Date.now();
+
+  // In-memory mode: de-duplicate by nickname
   if (usingMemory) {
-    const existing = memoryDB.sessions.find(s => s.session_id === sessionId);
-    if (existing) {
-      Object.assign(existing, { nickname, started_at: startedAt, user_agent: userAgent, ip });
-    } else {
-      memoryDB.sessions.push({
+    const existingByNick = memoryDB.sessions.find(s => (s.nickname || "게스트") === safeNick);
+    if (existingByNick) {
+      Object.assign(existingByNick, {
         session_id: sessionId,
-        nickname: nickname || "게스트",
-        started_at: Number(startedAt) || Date.now(),
+        started_at: started,
         user_agent: userAgent || null,
         ip: ip || null,
-        created_at: new Date().toISOString(),
       });
+      return { ok: true, memory: true, dedup: true };
     }
+    memoryDB.sessions.push({
+      session_id: sessionId,
+      nickname: safeNick,
+      started_at: started,
+      user_agent: userAgent || null,
+      ip: ip || null,
+      created_at: new Date().toISOString(),
+    });
     return { ok: true, memory: true };
   }
 
+  // MySQL mode: try update by nickname first to avoid duplicates
   const conn = await pool.getConnection();
   try {
+    const [rows] = await conn.query(
+      `SELECT id FROM game_sessions WHERE nickname = ? LIMIT 1`,
+      [safeNick]
+    );
+    if (Array.isArray(rows) && rows.length > 0) {
+      const id = rows[0].id;
+      await conn.query(
+        `UPDATE game_sessions
+           SET session_id = ?, started_at = ?, user_agent = ?, ip = ?
+         WHERE id = ?`,
+        [sessionId, started, userAgent || null, ip || null, id]
+      );
+      return { ok: true, dedup: true };
+    }
+    // No existing nickname -> insert fresh row
     await conn.query(
       `INSERT INTO game_sessions (session_id, nickname, started_at, user_agent, ip)
-       VALUES (?, ?, ?, ?, ?)
-       ON DUPLICATE KEY UPDATE
-         nickname = VALUES(nickname),
-         started_at = VALUES(started_at),
-         user_agent = VALUES(user_agent),
-         ip = VALUES(ip)`,
-      [sessionId, nickname || "게스트", Number(startedAt) || Date.now(), userAgent || null, ip || null]
+       VALUES (?, ?, ?, ?, ?)`,
+      [sessionId, safeNick, started, userAgent || null, ip || null]
     );
+    return { ok: true };
   } finally {
     conn.release();
   }
-  return { ok: true };
 }
 
 export async function saveGameSubmit({ nickname, sessionId, selectionsByCategory, mergedByTrait, submittedAt }) {

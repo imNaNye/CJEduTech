@@ -51,7 +51,7 @@ export default function FinalResultPage() {
   const roomId = useMemo(() => search.get('roomId') || location.state?.roomId || localStorage.getItem('roomId') || 'general', [location.search, location.state]);
   const nickname = useMemo(() => search.get('nickname') || location.state?.nickname || localStorage.getItem('nickname') || '', [location.search, location.state]);
   const learnedAtStr = useMemo(() => new Date().toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' }), []);
-  const { avatarUrl,isAdmin } = useUser();
+  const { avatarUrl,isAdmin,setIsAdmin } = useUser();
   // admin override via URL param: ?admin or ?admin=1
   const isAdminEffective = isAdmin || search.has('admin');
 
@@ -67,7 +67,7 @@ export default function FinalResultPage() {
   // 하드코딩된 비디오 세트 선택 (A세트: 0~2, B세트: 3~9)
   const VIDEO_SET_A = [0, 1, 2];
   const VIDEO_SET_B = [3, 4, 5, 6, 7, 8, 9];
-  const selectedVideoSet = VIDEO_SET_A; // ⚙️ 여기서 A/B 전환 가능
+  const selectedVideoSet = VIDEO_SET_B; // ⚙️ 여기서 A/B 전환 가능
 
   const donutRef = useRef(null);
   const lineRef = useRef(null);
@@ -76,6 +76,8 @@ export default function FinalResultPage() {
   // ADD
   const barsRef = useRef(null);
   const barsChartRef = useRef(null);
+  // Track which nicknames have already had pre-generation fired
+  const pregenFiredRef = useRef(new Set());
 
   async function ensureChartJS(){
     if (window.Chart) return window.Chart;
@@ -267,6 +269,28 @@ export default function FinalResultPage() {
       try { console.log('[FinalResultPage] quiz (state):', quiz.rounds); } catch {}
     }
   }, [data, quiz]);
+
+  // Admin pre-generation: when admin opens FinalResultPage, trigger generation for all users once
+  useEffect(() => {
+    if (!isAdminEffective) return;
+    if (!roomId) return;
+    const ranking = Array.isArray(sections?.ranking) ? sections.ranking : [];
+    if (!ranking.length) return;
+    const uniqNicks = Array.from(new Set(ranking.map((r) => r?.nickname).filter(Boolean)));
+    // stagger to avoid burst
+    uniqNicks.forEach((nick, idx) => {
+      if (nick === effectiveNick) return; // skip the one we're currently viewing
+      const key = `${roomId}::${nick}`;
+      if (pregenFiredRef.current.has(key)) return;
+      pregenFiredRef.current.add(key);
+      setTimeout(() => {
+        http.post(`/api/review/${encodeURIComponent(roomId)}/multi-final-result`, {
+          nickname: nick,
+          videoIds: selectedVideoSet,
+        }).catch(() => {/* swallow errors; this is best-effort pregen */});
+      }, idx * 300);
+    });
+  }, [isAdminEffective, roomId, sections?.ranking, effectiveNick]);
 
   const sections = data?.sections;
 
@@ -562,7 +586,7 @@ export default function FinalResultPage() {
               ctx.drawImage(img, bx - size/2, by - size/2, size, size);
 
               // label under badge (one line)
-              ctx.font = '14px sans-serif';
+              ctx.font = '18px sans-serif';
               ctx.textBaseline = 'top';
               const labelText = `${label} `;
               const percentText = `${value}%`;
@@ -713,7 +737,7 @@ export default function FinalResultPage() {
   }
 
   return (
-    <div className="final-result-page">
+    <div className={`final-result-page ${isAdminEffective ? 'is-admin' : ''}`}>
       <PageHeader title={"전체 결과 대시보드"} />
       <div className="frp-topbar">
         {isAdminEffective && (

@@ -249,10 +249,47 @@ export async function generateOverallSummary(roomId, opts = {}) {
 
   const snap = getRoomSnapshot(roomId);
 
-  const messages = Array.isArray(snap?.messages) ? snap.messages : [];
-  const topic = snap?.context?.topic || '';
-  const duration = snap?.context?.duration;
-  const round_number = snap?.context?.round_number;
+  // Prefer in-memory snapshot; if empty (e.g., room already cleaned up), fall back to latest archive
+  let messages = Array.isArray(snap?.messages) ? snap.messages : [];
+  let topic = snap?.context?.topic || '';
+  let duration = snap?.context?.duration;
+  let round_number = snap?.context?.round_number;
+
+  if (!messages.length) {
+    try {
+      const baseId = toBaseRoomId(roomId);
+      const archives = await listRoomArchives(baseId);
+      const timeOf = (a) => {
+        const t = a?.archivedAt || a?.createdAt || a?.updatedAt || a?.endedAt || a?.timestamp;
+        const n = t ? Date.parse(t) : NaN;
+        return Number.isFinite(n) ? n : (typeof t === 'number' ? t : 0);
+      };
+      const latest = (archives || []).sort((x, y) => timeOf(y) - timeOf(x))[0];
+      if (latest) {
+        // Build messages in the same shape as getRoomSnapshot
+        const msgs = Array.isArray(latest.messages) ? latest.messages : [];
+        messages = msgs.map(m => ({
+          nickname: m.nickname || m.user_id || '익명',
+          text: (m.text || m.message || '').toString(),
+          createdAt: m.createdAt || m.timestamp || null
+        })).filter(m => (m.text || '').trim().length > 0);
+
+        // Fill discussion context from archive if missing
+        if (!topic && latest.topic) topic = latest.topic;
+        if (typeof duration === 'undefined') {
+          const cAt = typeof latest.createdAt === 'number' ? latest.createdAt : (latest.createdAt ? Date.parse(latest.createdAt) : NaN);
+          const eAt = typeof latest.expireAt === 'number' ? latest.expireAt : (latest.expireAt ? Date.parse(latest.expireAt) : NaN);
+          const minutes = (Number.isFinite(cAt) && Number.isFinite(eAt)) ? Math.round((eAt - cAt) / 60000) : undefined;
+          if (Number.isFinite(minutes)) duration = minutes;
+        }
+        if (typeof round_number === 'undefined' && typeof latest.round_number !== 'undefined') {
+          round_number = latest.round_number;
+        }
+      }
+    } catch {
+      // ignore archive fallback errors and proceed with empty payload
+    }
+  }
 
 
   const all_user_messages = messages.map(m => ({ user_id: m.nickname || m.userId || '익명', text: m.text || m.message || '' }));
@@ -262,7 +299,7 @@ export async function generateOverallSummary(roomId, opts = {}) {
   if (typeof round_number !== 'undefined') discussion_context.round_number = round_number;
 
   const payload = { user_id: 'system', all_user_messages, discussion_context };
-
+  console.log(payload);
   const url = `${AI_BASE.replace(/\/$/, '')}/discussion-overall`;
   const res = await fetch(url, {
     method: 'POST',

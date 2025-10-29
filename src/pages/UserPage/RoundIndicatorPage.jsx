@@ -17,7 +17,7 @@ export default function RoundIndicatorPage(){
         audio.play();
         localStorage.setItem("step",step);
 
-        localStorage.setItem("isAdmin",false);
+        localStorage.removeItem("isAdmin");
         const timeout = setTimeout(() => {
             if(step === 1){
                 setIsAdmin(false);

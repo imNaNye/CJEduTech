@@ -270,3 +270,17 @@ letter-spacing: 0.354px;
 /* Make section 3 cards equal height and charts fill available space */
 .frp-section--3 .frp-card{ height:100%; display:flex; flex-direction:column; }
 .frp-bars__chart{ flex:1; min-height:420px; }
+
+/* Admin view: enlarge key texts on Final Result page */
+.final-result-page.is-admin .frp-topbar__title { font-size: 28px; }
+.final-result-page.is-admin .frp-ai-summary__body { font-size: 28px; line-height: 175%; }
+.final-result-page.is-admin .frp-ai-summary__text { font-size: 28px; line-height: 175%; }
+.final-result-page.is-admin .frp-top3__content { font-size: 28px; line-height: 165%; }
+
+/* Keep sizes reasonable on narrower screens */
+@media (max-width: 1000px){
+  .final-result-page.is-admin .frp-topbar__title { font-size: 26px; }
+  .final-result-page.is-admin .frp-ai-summary__body,
+  .final-result-page.is-admin .frp-ai-summary__text { font-size: 24px; }
+  .final-result-page.is-admin .frp-top3__content { font-size: 20px; }
+}

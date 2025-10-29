@@ -33,7 +33,6 @@ export default function VideoPage({ onComplete }) {
   };
   const playlist = videoByRound[round] || [];
   const content = playlist[videoId];
-  localStorage.setItem("videoId",videoId);
   const videoSrc = content?.src?.startsWith('http') ? content.src : `${VIDEO_BASE}${content?.src || ''}`;
 
   useEffect(() => {
@@ -81,7 +80,12 @@ export default function VideoPage({ onComplete }) {
         <select
           id="videoSelect"
           value={videoId}
-          onChange={(e) => setVideoId(Number(e.target.value))}
+          onChange={(e) => {
+            setVideoId(Number(e.target.value));
+            localStorage.setItem("videoId",e.target.value);
+            console.log(e.target.value);
+            ;
+          }}
         >
           {[...Array(10)].map((_, idx) => (
             <option key={idx} value={idx}>{idx + 1}</option>

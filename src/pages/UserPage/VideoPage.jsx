@@ -135,7 +135,7 @@ export default function VideoPage({ onComplete }) {
             playsInline
             muted={muted}
             controls={true}
-            // controlsList="nodownload noplaybackrate"
+            controlsList="nodownload"
             disablePictureInPicture
             onContextMenu={(e) => e.preventDefault()}
             tabIndex={-1}

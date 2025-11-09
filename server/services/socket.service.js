@@ -234,6 +234,7 @@ function getRoomState(roomId) {
     roomStates.set(roomId, st);
   }
   st.expireAt = Date.now() + ROOM_MAX_AGE_MS;
+  st.createdAt = Date.now();
   roomStates.set(roomId,st);
   return st;
 }

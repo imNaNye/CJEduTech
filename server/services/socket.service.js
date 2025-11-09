@@ -1266,6 +1266,7 @@ export function initChatSocket(io) {
       });
       socket.emit("room:recent", { messages: recent });
       const st0 = getRoomState(composed);
+      st0.expireAt = Date.now() + ROOM_MAX_AGE_MS;
       socket.emit('room:time', {
         roomId: composed,
         expireAt: st0.expireAt,

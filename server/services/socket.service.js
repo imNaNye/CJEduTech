@@ -144,7 +144,7 @@ async function writeJSON(file, obj){ await ensureDir(path.dirname(file)); await 
 async function readJSON(file){ const buf = await fs.readFile(file, 'utf-8'); return JSON.parse(buf); }
 
 // ===== Room lifetime =====
-const ROOM_MAX_AGE_MS = Number(process.env.ROOM_MAX_AGE_MS || 60 * 60 * 1000); // 기본 60분
+const ROOM_MAX_AGE_MS = Number(process.env.ROOM_MAX_AGE_MS || 1000);//60 * 60 * 1000); // 기본 60분
 
 // ===== Test Bot (per-room, optional, multi-bot) =====
 const BOT_ENABLED = false;
@@ -1200,7 +1200,7 @@ export function initChatSocket(io) {
           stForJoin.createdAt = now;
           stForJoin.expireAt = now + ROOM_MAX_AGE_MS;
           if (stForJoin.expireTimer) { clearTimeout(stForJoin.expireTimer); stForJoin.expireTimer = null; }
-          ensureRoomExpiry(io, composed);
+          //ensureRoomExpiry(io, composed);
 
           // Preload topics for new video (no broadcast yet)
           await ensureRoomTopics(composed);
@@ -1271,7 +1271,7 @@ export function initChatSocket(io) {
         roomId: composed,
         expireAt: st0.expireAt,
         now: Date.now(),
-        remainingMs: Math.max(0, (st0.expireAt || Date.now()) - Date.now()),
+        remainingMs: ROOM_MAX_AGE_MS,//Math.max(0, (st0.expireAt || Date.now()) - Date.now()),
       });
     });
 

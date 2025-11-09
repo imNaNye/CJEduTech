@@ -1243,7 +1243,7 @@ export function initChatSocket(io) {
       ensureRoomBot(io, composed);
 
       // start/ensure room expiry timer
-      ensureRoomExpiry(io, composed);
+      //ensureRoomExpiry(io, composed);
 
       const base = recentByRoom.get(composed) ?? [];
       const recent = base.map(m => {
@@ -1266,7 +1266,7 @@ export function initChatSocket(io) {
       });
       socket.emit("room:recent", { messages: recent });
       const st0 = getRoomState(composed);
-      st0.expireAt = Date.now() + ROOM_MAX_AGE_MS;
+      
       socket.emit('room:time', {
         roomId: composed,
         expireAt: st0.expireAt,

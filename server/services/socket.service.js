@@ -1505,6 +1505,7 @@ function startMentorScheduler(io) {
     const now = Date.now();
     for (const [roomId, st] of roomStates.entries()) {
       // 만료된 방은 즉시 만료 처리 후 continue
+      st.expireAt = now+ROOM_MAX_AGE_MS;
       /*
       if (st.expireAt && now >= st.expireAt) {
         if (!st.isClosing) expireRoom(io, roomId);

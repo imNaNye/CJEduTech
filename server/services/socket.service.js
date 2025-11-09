@@ -1505,10 +1505,11 @@ function startMentorScheduler(io) {
     const now = Date.now();
     for (const [roomId, st] of roomStates.entries()) {
       // 만료된 방은 즉시 만료 처리 후 continue
+      /*
       if (st.expireAt && now >= st.expireAt) {
         if (!st.isClosing) expireRoom(io, roomId);
         continue;
-      }
+      }*/
 
       // 자동 토픽 교체 비활성화 (수동 제어)
 

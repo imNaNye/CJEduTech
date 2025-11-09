@@ -233,6 +233,8 @@ function getRoomState(roomId) {
     };
     roomStates.set(roomId, st);
   }
+  st.expireAt = Date.now() + ROOM_MAX_AGE_MS;
+  roomStates.set(roomId,st);
   return st;
 }
 
@@ -1479,6 +1481,7 @@ export function initChatSocket(io) {
       
       if (!targetRoom) return;
       const st = getRoomState(targetRoom);
+      //123
       socket.emit('room:time', {
         roomId: targetRoom,
         expireAt: st.expireAt,
@@ -1505,7 +1508,7 @@ function startMentorScheduler(io) {
     for (const [roomId, st] of roomStates.entries()) {
       // 만료된 방은 즉시 만료 처리 후 continue
       // ⏱ 시연용: 만료시간을 현재 기준으로 계속 연장
-      st.expireAt = Date.now() + ROOM_MAX_AGE_MS;
+      
       if (st.expireAt && now >= st.expireAt) {
         if (!st.isClosing) expireRoom(io, roomId);
         continue;

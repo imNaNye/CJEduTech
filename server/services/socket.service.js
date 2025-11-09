@@ -144,7 +144,7 @@ async function writeJSON(file, obj){ await ensureDir(path.dirname(file)); await 
 async function readJSON(file){ const buf = await fs.readFile(file, 'utf-8'); return JSON.parse(buf); }
 
 // ===== Room lifetime =====
-const ROOM_MAX_AGE_MS = Number(process.env.ROOM_MAX_AGE_MS || 1000);//60 * 60 * 1000); // 기본 60분
+const ROOM_MAX_AGE_MS = Number(process.env.ROOM_MAX_AGE_MS || 10 * 1000); // 데모용  60초
 
 // ===== Test Bot (per-room, optional, multi-bot) =====
 const BOT_ENABLED = false;
@@ -1200,7 +1200,7 @@ export function initChatSocket(io) {
           stForJoin.createdAt = now;
           stForJoin.expireAt = now + ROOM_MAX_AGE_MS;
           if (stForJoin.expireTimer) { clearTimeout(stForJoin.expireTimer); stForJoin.expireTimer = null; }
-          //ensureRoomExpiry(io, composed);
+          ensureRoomExpiry(io, composed);
 
           // Preload topics for new video (no broadcast yet)
           await ensureRoomTopics(composed);
@@ -1243,7 +1243,7 @@ export function initChatSocket(io) {
       ensureRoomBot(io, composed);
 
       // start/ensure room expiry timer
-      //ensureRoomExpiry(io, composed);
+      ensureRoomExpiry(io, composed);
 
       const base = recentByRoom.get(composed) ?? [];
       const recent = base.map(m => {
@@ -1266,12 +1266,11 @@ export function initChatSocket(io) {
       });
       socket.emit("room:recent", { messages: recent });
       const st0 = getRoomState(composed);
-      
       socket.emit('room:time', {
         roomId: composed,
         expireAt: st0.expireAt,
         now: Date.now(),
-        remainingMs: ROOM_MAX_AGE_MS,//Math.max(0, (st0.expireAt || Date.now()) - Date.now()),
+        remainingMs: Math.max(0, (st0.expireAt || Date.now()) - Date.now()),
       });
     });
 
@@ -1505,12 +1504,12 @@ function startMentorScheduler(io) {
     const now = Date.now();
     for (const [roomId, st] of roomStates.entries()) {
       // 만료된 방은 즉시 만료 처리 후 continue
-      st.expireAt = now+ROOM_MAX_AGE_MS;
-      /*
+      // ⏱ 시연용: 만료시간을 현재 기준으로 계속 연장
+      st.expireAt = Date.now() + ROOM_MAX_AGE_MS;
       if (st.expireAt && now >= st.expireAt) {
         if (!st.isClosing) expireRoom(io, roomId);
         continue;
-      }*/
+      }
 
       // 자동 토픽 교체 비활성화 (수동 제어)
 

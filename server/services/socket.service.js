@@ -710,7 +710,7 @@ function ensureRoomExpiry(io, roomId) {
   const now = Date.now();
   const delay = Math.max(0, (st.expireAt ?? (now + ROOM_MAX_AGE_MS)) - now);
   st.expireTimer = setTimeout(() => {
-    expireRoom(io, roomId);
+    //expireRoom(io, roomId);
   }, delay);
 }
 
@@ -1511,7 +1511,7 @@ function startMentorScheduler(io) {
       // ⏱ 시연용: 만료시간을 현재 기준으로 계속 연장
       
       if (st.expireAt && now >= st.expireAt) {
-        if (!st.isClosing) expireRoom(io, roomId);
+        //if (!st.isClosing) expireRoom(io, roomId);
         continue;
       }
 
